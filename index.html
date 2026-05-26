@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FitLog">
-  <title>FitLog</title>
+  <meta name="apple-mobile-web-app-title" content="Fitness Tracker">
+  <title>Fitness Tracker</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -825,6 +825,46 @@
             Import
             <input type="file" accept=".json" onchange="importData(event)" style="display:none">
           </label>
+        </div>
+      </div>
+
+      <!-- GitHub Sync -->
+      <h3>GitHub sync</h3>
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Device folder</div>
+            <div style="font-size:13px; color:var(--muted)">On My iPhone/Fitness Tracker</div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Load config</div>
+            <div style="font-size:13px; color:var(--muted)">Select github_config.txt</div>
+          </div>
+          <label class="btn" style="cursor:pointer;">
+            Load
+            <input type="file" accept=".txt" onchange="loadGithubConfig(event)" style="display:none">
+          </label>
+        </div>
+        <div class="card-row">
+          <div style="font-size:13px; color:var(--muted)" id="github-config-status">Config: not loaded</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Export to GitHub</div>
+            <div style="font-size:13px; color:var(--muted)" id="github-export-status">Never exported</div>
+          </div>
+          <button class="btn btn-primary" onclick="githubExport()">Export</button>
+        </div>
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Import from GitHub</div>
+            <div style="font-size:13px; color:var(--muted)" id="github-import-status">Never imported</div>
+          </div>
+          <button class="btn" onclick="githubImport()">Import</button>
         </div>
       </div>
 
@@ -1656,6 +1696,9 @@ function showScreen(name, btn) {
     if (db.settings.proteinTarget) document.getElementById('prot-target').value   = db.settings.proteinTarget;
     if (db.settings.riseTarget)    document.getElementById('rise-target').value    = db.settings.riseTarget;
   }
+  updateGithubConfigStatus();
+  updateGithubExportStatus();
+  updateGithubImportStatus();
 }
 
 
@@ -4097,6 +4140,189 @@ function renderActivityChart() {
       }
     }
   });
+}
+
+
+
+/* ════════════════════════════════════════════════════════════════════
+   GITHUB SYNC
+   ════════════════════════════════════════════════════════════════════ */
+
+function getGithubConfig() {
+  const repo  = localStorage.getItem('gh_repo');
+  const token = localStorage.getItem('gh_token');
+  return (repo && token) ? { repo, token } : null;
+}
+
+function updateGithubConfigStatus() {
+  const el = document.getElementById('github-config-status');
+  if (!el) return;
+  const cfg = getGithubConfig();
+  el.textContent = cfg ? 'Config: loaded (' + cfg.repo + ')' : 'Config: not loaded';
+}
+
+function updateGithubExportStatus() {
+  const el = document.getElementById('github-export-status');
+  if (!el) return;
+  const last = localStorage.getItem('gh_last_export');
+  const count = getUnsyncedCount();
+  if (last) {
+    const d = new Date(last);
+    el.textContent = 'Last: ' + d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) +
+      ' · ' + count + ' unsynced';
+  } else {
+    el.textContent = count + ' unsynced entries';
+  }
+}
+
+function updateGithubImportStatus() {
+  const el = document.getElementById('github-import-status');
+  if (!el) return;
+  const last = localStorage.getItem('gh_last_import');
+  if (last) {
+    const d = new Date(last);
+    el.textContent = 'Last: ' + d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+  } else {
+    el.textContent = 'Never imported';
+  }
+}
+
+function getUnsyncedCount() {
+  const lastExport = localStorage.getItem('gh_last_export');
+  if (!lastExport) return db.logs.length;
+  const lastExportTime = new Date(lastExport).getTime();
+  return db.logs.filter(e => e.id > lastExportTime).length;
+}
+
+function loadGithubConfig(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const lines = e.target.result.split('\n');
+      let repo = '', token = '';
+      lines.forEach(line => {
+        const [key, ...rest] = line.split(':');
+        const val = rest.join(':').trim();
+        if (key.trim() === 'repo')  repo  = val;
+        if (key.trim() === 'token') token = val;
+      });
+      if (!repo || !token) { showToast('Invalid config file'); return; }
+      localStorage.setItem('gh_repo',  repo);
+      localStorage.setItem('gh_token', token);
+      updateGithubConfigStatus();
+      updateGithubExportStatus();
+      showToast('Config loaded \u2713');
+    } catch(err) {
+      showToast('Error reading config: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+async function ghGet(path) {
+  const cfg = getGithubConfig();
+  if (!cfg) throw new Error('No GitHub config');
+  const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
+    headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+  return res.json();
+}
+
+async function ghPut(path, content, sha) {
+  const cfg = getGithubConfig();
+  const body = { message: 'Fitness Tracker sync', content: btoa(unescape(encodeURIComponent(content))) };
+  if (sha) body.sha = sha;
+  const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json',
+               'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('GitHub write error: ' + res.status);
+  return res.json();
+}
+
+async function ghGetJSON(path) {
+  const data = await ghGet(path);
+  if (!data) return { content: null, sha: null };
+  const content = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,'')))));
+  return { content, sha: data.sha };
+}
+
+async function ghPutJSON(path, obj, sha) {
+  return ghPut(path, JSON.stringify(obj, null, 2), sha);
+}
+
+async function githubExport() {
+  const cfg = getGithubConfig();
+  if (!cfg) { showToast('Load GitHub config first'); return; }
+  showToast('Exporting...');
+  try {
+    const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
+    const existingIds = new Set((ghLogs || []).map(e => e.id));
+    const newLogs = db.logs.filter(e => !existingIds.has(e.id));
+    const mergedLogs = [...(ghLogs || []), ...newLogs].sort((a, b) => a.id - b.id);
+    await ghPutJSON('fitlog_backup.json', mergedLogs, logsSha);
+
+    const libEx   = await ghGet('library_exercises.json');
+    const libCard = await ghGet('library_cardio.json');
+    const libMeal = await ghGet('library_meals.json');
+    await ghPutJSON('library_exercises.json', db.exerciseLibrary, libEx   ? libEx.sha   : null);
+    await ghPutJSON('library_cardio.json',    db.cardioLibrary,   libCard ? libCard.sha : null);
+    await ghPutJSON('library_meals.json',     db.mealItemLibrary, libMeal ? libMeal.sha : null);
+
+    const { sha: settingsSha } = await ghGetJSON('settings.json');
+    await ghPutJSON('settings.json', db.settings, settingsSha);
+
+    const now = new Date().toISOString();
+    localStorage.setItem('gh_last_export', now);
+    updateGithubExportStatus();
+    showToast(newLogs.length + ' new entries exported \u2713');
+  } catch(err) {
+    showToast('Export failed: ' + err.message);
+    console.error(err);
+  }
+}
+
+async function githubImport() {
+  const cfg = getGithubConfig();
+  if (!cfg) { showToast('Load GitHub config first'); return; }
+  if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
+  showToast('Importing...');
+  try {
+    const { content: ghLogs } = await ghGetJSON('fitlog_backup.json');
+    if (ghLogs) {
+      const existingIds = new Set(db.logs.map(e => e.id));
+      const newLogs = ghLogs.filter(e => !existingIds.has(e.id));
+      db.logs = [...db.logs, ...newLogs].sort((a, b) => a.id - b.id);
+    }
+
+    const { content: ghEx }   = await ghGetJSON('library_exercises.json');
+    const { content: ghCard } = await ghGetJSON('library_cardio.json');
+    const { content: ghMeal } = await ghGetJSON('library_meals.json');
+    if (ghEx)   db.exerciseLibrary  = ghEx;
+    if (ghCard) db.cardioLibrary    = ghCard;
+    if (ghMeal) db.mealItemLibrary  = ghMeal;
+
+    const { content: ghSettings } = await ghGetJSON('settings.json');
+    if (ghSettings) db.settings = { ...db.settings, ...ghSettings };
+
+    saveDB();
+    renderAll();
+
+    const now = new Date().toISOString();
+    localStorage.setItem('gh_last_import', now);
+    updateGithubImportStatus();
+    showToast('Import complete \u2713');
+  } catch(err) {
+    showToast('Import failed: ' + err.message);
+    console.error(err);
+  }
 }
 
 </script>
