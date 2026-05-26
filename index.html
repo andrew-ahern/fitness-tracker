@@ -1,0 +1,4104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FitLog">
+  <title>FitLog</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #f7f6f3;
+      --surface:    #ffffff;
+      --border:     #e2e0d8;
+      --text:       #1a1917;
+      --muted:      #7a7870;
+      --accent:     #2d6a4f;        /* deep green — calm, health-oriented */
+      --accent-lt:  #d8ede3;
+      --danger:     #c0392b;
+      --warn:       #e67e22;
+      --radius:     10px;
+      --nav-h:      56px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html.dark {
+        --bg:        #141412;
+        --surface:   #1e1e1b;
+        --border:    #2e2d29;
+        --text:      #f0ede6;
+        --muted:     #8a8880;
+        --accent:    #52b788;
+        --accent-lt: #1a3328;
+        --danger:    #e05c4b;
+        --warn:      #f0932b;
+    }
+
+    body {
+      font-family: -apple-system, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.5;
+      /* prevent overscroll bounce revealing white behind nav */
+      overscroll-behavior: none;
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────── */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Main content area — scrollable, sits above bottom nav */
+    #main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 1rem;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 1rem);
+    }
+
+    /* ── Bottom navigation ────────────────────────────────────────── */
+    #nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: calc(var(--nav-h) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: inherit;
+      padding-top: 6px;
+      transition: color 0.15s;
+    }
+
+    .nav-btn svg { width: 24px; height: 24px; stroke-width: 1.75; }
+    .nav-btn.active { color: var(--accent); }
+    .nav-btn:active { opacity: 0.6; }
+
+    /* ── Screens ──────────────────────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Typography ───────────────────────────────────────────────── */
+    h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+    h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.2px; margin-bottom: 0.75rem; }
+    h3 { font-size: 14px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+
+    /* ── Cards ────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-row:last-child { border-bottom: none; }
+
+    /* ── Buttons ──────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { opacity: 0.7; }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: none;
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── Forms ────────────────────────────────────────────────────── */
+    .field { margin-bottom: 0.85rem; }
+    .field label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;  /* 16px prevents iOS zoom on focus */
+      color: var(--text);
+    }
+    .field textarea { min-height: 0; height: 42px; resize: vertical; }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+
+    /* ── Toast notification ───────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--text);
+      color: var(--surface);
+      padding: 10px 20px;
+      border-radius: 99px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+      z-index: 400;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Export status banner ─────────────────────────────────────── */
+    #export-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--accent-lt);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 14px;
+      gap: 10px;
+    }
+    #export-banner.hidden { display: none; }
+    #export-banner .warn-text { color: var(--accent); font-weight: 500; }
+
+    /* ── Empty state ──────────────────────────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .empty svg { width: 40px; height: 40px; margin-bottom: 0.75rem; opacity: 0.35; }
+
+    /* ── Screen header ────────────────────────────────────────────── */
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Collapsible library sections ────────────────────────────── */
+    .lib-details {
+      margin-bottom: 1rem;
+    }
+    .lib-summary {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lib-summary::-webkit-details-marker { display: none; }
+    .lib-summary::before {
+      content: '›';
+      font-size: 22px;
+      transition: transform 0.2s;
+      display: inline-block;
+      color: var(--muted);
+    }
+    .lib-details[open] .lib-summary::before {
+      transform: rotate(90deg);
+    }
+
+    /* ── Draft indicator dot on log tabs ─────────────────────────── */
+    .log-tab { position: relative; }
+    .log-tab .draft-dot {
+      display: none;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 1.5px solid var(--surface);
+    }
+    .log-tab.active .draft-dot { border-color: #fff; }
+    .log-tab.has-draft .draft-dot { display: block; }
+
+    /* ── Log type selector tabs ───────────────────────────────────── */
+    .log-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1.25rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .log-tabs::-webkit-scrollbar { display: none; }
+
+    .log-tab {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .log-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Form panels (one per log type) ──────────────────────────── */
+    .log-form { display: none; }
+    .log-form.active { display: block; }
+
+    /* ── Two-column field grid ────────────────────────────────────── */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ── Checkbox row ─────────────────────────────────────────────── */
+    .field-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.85rem;
+      cursor: pointer;
+    }
+    .field-check input[type=checkbox] {
+      width: 20px; height: 20px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .field-check span { font-size: 15px; color: var(--text); }
+
+    /* ── Workout: timer display ───────────────────────────────────── */
+    #gym-timer {
+      font-size: 36px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-align: center;
+      padding: 0.5rem 0 0.25rem;
+      font-variant-numeric: tabular-nums;
+    }
+    #timer-status {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .timer-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Workout: exercise blocks ────────────────────────────────── */
+    .exercise-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.6rem;
+    }
+    .exercise-header select,
+    .exercise-header input[type=text] {
+      flex: 1;
+      padding: 8px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .exercise-header select:focus,
+    .exercise-header input[type=text]:focus { outline: none; border-color: var(--accent); }
+
+    /* Set rows within an exercise */
+    .set-row {
+      display: grid;
+      grid-template-columns: 28px 2fr 2fr 28px;
+      gap: 6px;
+      align-items: end;
+      margin-bottom: 6px;
+    }
+    .set-row .set-num {
+      font-size: 12px;
+      color: var(--muted);
+      padding-bottom: 12px;
+      text-align: center;
+      align-self: end;
+    }
+    .set-row .set-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+      line-height: 1;
+      align-self: end;
+      padding-bottom: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .set-row input {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .set-row input:focus { outline: none; border-color: var(--accent); }
+
+    .set-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .add-set-btn, .add-exercise-btn {
+      width: 100%;
+      padding: 8px;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-set-btn:active, .add-exercise-btn:active { opacity: 0.6; }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 20px;
+      padding: 4px;
+      line-height: 1;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+
+    /* ── Chart toggle buttons ─────────────────────────────────────── */
+    .chart-toggle {
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.15s;
+    }
+    .chart-toggle.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+  </style>
+</head>
+
+<body>
+<div id="app">
+
+  <!-- ── Main content ─────────────────────────────────────────────── -->
+  <div id="main">
+
+    <!-- ══ LOG SCREEN ══════════════════════════════════════════════ -->
+    <div id="screen-log" class="screen active">
+      <div class="screen-header">
+        <h1>Log</h1>
+        <span id="log-date" style="font-size:14px; color:var(--muted)"></span>
+      </div>
+
+      <!-- Log type selector -->
+      <div class="log-tabs">
+        <button class="log-tab active" id="tab-gym" onclick="showLogForm('gym', this)">Gym<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-cardio" onclick="showLogForm('cardio', this)">Cardio<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-meal" onclick="showLogForm('meal', this)">Meal<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-weight" onclick="showLogForm('weight', this)">Weight<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-rise" onclick="showLogForm('rise', this)">Rise<span class="draft-dot"></span></button>
+      </div>
+
+      <!-- ── WEIGHT FORM ─────────────────────────────────────────── -->
+      <div id="form-weight" class="log-form">
+        <div class="card">
+          <div class="field">
+            <label>Weight (kg)</label>
+            <input type="number" id="w-value" step="0.1" min="0" inputmode="decimal">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="w-date">
+            </div>
+            <div class="field">
+              <label>Time</label>
+              <input type="time" id="w-time">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="saveWeight()">Save</button>
+          <div id="draft-status-weight" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-weight"></span><button id="draft-clear-weight" onclick="clearDraftAndForm('weight')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+        </div>
+      </div>
+
+      <!-- ── MEAL FORM ───────────────────────────────────────────── -->
+      <div id="form-meal" class="log-form">
+        <!-- Date + time -->
+        <div class="card" style="margin-bottom:0.75rem;">
+          <div class="field-row">
+            <div class="field"><label>Date</label><input type="date" id="m-date"></div>
+            <div class="field"><label>Time</label><input type="time" id="m-time"></div>
+          </div>
+        </div>
+        <!-- Meal items -->
+        <div id="meal-items-container"></div>
+        <button class="add-exercise-btn" onclick="addMealItemBlock(null, true)">+ Add item</button>
+        <!-- Running totals -->
+        <div class="card" style="margin-top:0.75rem; margin-bottom:0.75rem;">
+          <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">Totals</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; text-align:center;">
+            <div><div style="font-size:11px;color:var(--muted)">kcal</div><div id="m-total-cal" style="font-size:16px;font-weight:500">—</div></div>
+            <div><div style="font-size:11px;color:var(--muted)">Protein</div><div id="m-total-pro" style="font-size:16px;font-weight:500">—</div></div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="saveMeal()">Save</button>
+        <div id="draft-status-meal" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-meal"></span><button id="draft-clear-meal" onclick="clearDraftAndForm('meal')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+      </div>
+
+            <!-- ── WORKOUT FORM ────────────────────────────────────────── -->
+      <div id="form-gym" class="log-form active">
+        <div class="card" style="margin-bottom:0.75rem;">
+          <div class="field-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="wo-date">
+            </div>
+            <div class="field">
+              <label>Start time</label>
+              <input type="time" id="wo-starttime">
+            </div>
+          </div>
+          <div class="field">
+            <label>Duration (min)</label>
+            <input type="number" id="wo-duration" min="0" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Note (optional)</label>
+            <textarea id="wo-note"></textarea>
+          </div>
+        </div>
+
+        <!-- Exercises -->
+        <div id="exercises-container"></div>
+        <button class="add-exercise-btn" onclick="addExerciseBlock()">+ Add exercise</button>
+        <div style="height:0.75rem"></div>
+        <button class="btn btn-primary btn-full" onclick="saveWorkout()">Save</button>
+        <div id="draft-status-gym" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-gym"></span><button id="draft-clear-gym" onclick="clearDraftAndForm('gym')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+      </div>
+
+      <!-- ── CARDIO FORM ─────────────────────────────────────────── -->
+      <div id="form-cardio" class="log-form">
+        <div class="card">
+          <div class="field">
+            <label>Activity</label>
+            <select id="c-type"></select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="c-date">
+            </div>
+            <div class="field">
+              <label>Start time</label>
+              <input type="time" id="c-starttime">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Distance (km)</label>
+              <input type="number" id="c-dist" step="0.1" min="0" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label>Duration (min)</label>
+              <input type="number" id="c-dur" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Avg HR (bpm)</label>
+              <input type="number" id="c-hravg" min="0" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label>Max HR (bpm)</label>
+              <input type="number" id="c-hrmax" min="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="field">
+            <label>Elevation gain (m)</label>
+            <input type="number" id="c-elev" min="0" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Note (optional)</label>
+            <textarea id="c-note"></textarea>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="saveCardio()">Save</button>
+          <div id="draft-status-cardio" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-cardio"></span><button id="draft-clear-cardio" onclick="clearDraftAndForm('cardio')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+        </div>
+      </div>
+
+      <!-- ── WAKE FORM ───────────────────────────────────────────── -->
+      <div id="form-rise" class="log-form">
+        <div class="card">
+          <div class="field-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="wk-date">
+            </div>
+            <div class="field">
+              <label>Rise time</label>
+              <input type="time" id="wk-time">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="saveWake()">Save</button>
+          <div id="draft-status-rise" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-rise"></span><button id="draft-clear-rise" onclick="clearDraftAndForm('rise')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+        </div>
+      </div>
+
+    </div><!-- /#screen-log -->
+
+    <!-- ══ HISTORY SCREEN ══════════════════════════════════════════ -->
+    <div id="screen-history" class="screen">
+      <div class="screen-header">
+        <h1>History</h1>
+        <select id="history-filter" onchange="renderHistory()" style="font-size:14px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
+          <option value="all">All</option>
+          <option value="meal">Meals</option>
+          <option value="weight">Weight</option>
+          <option value="gym">Gym</option>
+          <option value="cardio">Cardio</option>
+          <option value="rise">Rise</option>
+        </select>
+      </div>
+      <div id="history-list">
+        <div class="empty">No entries yet — start logging!</div>
+      </div>
+    </div>
+
+    <!-- ══ CHARTS SCREEN ═══════════════════════════════════════════ -->
+    <div id="screen-charts" class="screen">
+      <div class="screen-header"><h1>Charts</h1></div>
+
+      <!-- Activity chart -->
+      <div class="card" id="chart-activity-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+          <div style="font-size:15px; font-weight:500">Activity</div>
+          <div style="display:flex; gap:10px; font-size:12px; color:var(--muted); align-items:center;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span>Gym</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#74c69d"></span>Cycle</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#adb5bd"></span>Run</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+          <button class="chart-toggle active" id="activity-range-1w"  onclick="setActivityRange('1w')">This week</button>
+          <button class="chart-toggle"        id="activity-range-30d" onclick="setActivityRange('30d')">30 days</button>
+        </div>
+        <div style="position:relative; height:240px;"><canvas id="chart-activity"></canvas></div>
+        <div id="chart-activity-empty" class="empty" style="display:none; padding:2rem 0;">No activity this week</div>
+      </div>
+
+      <!-- Calories chart -->
+      <div class="card" id="chart-cal-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+          <div style="font-size:15px; font-weight:500">Calories</div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+          <button class="chart-toggle active" id="cal-range-1w"  onclick="setCalRange(0.25)">This week</button>
+          <button class="chart-toggle" id="cal-range-1m"  onclick="setCalRange(1)">30 days</button>
+          <button class="chart-toggle" id="cal-range-3m"  onclick="setCalRange(3)">90 days</button>
+          <button class="chart-toggle" id="cal-range-all" onclick="setCalRange(0)">All</button>
+        </div>
+        <div style="position:relative; height:240px;"><canvas id="chart-cal"></canvas></div>
+        <div id="chart-cal-empty" class="empty" style="display:none; padding:2rem 0;">No calorie entries yet</div>
+      </div>
+
+      <!-- Protein chart -->
+      <div class="card" id="chart-protein-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+          <div style="font-size:15px; font-weight:500">Protein</div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+          <button class="chart-toggle active" id="protein-range-1w"  onclick="setProteinRange(0.25)">This week</button>
+          <button class="chart-toggle" id="protein-range-1m"  onclick="setProteinRange(1)">30 days</button>
+          <button class="chart-toggle" id="protein-range-3m"  onclick="setProteinRange(3)">90 days</button>
+          <button class="chart-toggle" id="protein-range-all" onclick="setProteinRange(0)">All</button>
+        </div>
+        <div style="position:relative; height:240px;"><canvas id="chart-protein"></canvas></div>
+        <div id="chart-protein-empty" class="empty" style="display:none; padding:2rem 0;">No protein entries yet</div>
+      </div>
+
+      <!-- Rising time chart -->
+      <div class="card" id="chart-rise-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+          <div style="font-size:15px; font-weight:500">Rising time</div>
+          <div style="display:flex; gap:4px;">
+            <button class="chart-toggle active" id="rise-toggle-raw"     onclick="setRiseView('raw')">Raw</button>
+            <button class="chart-toggle"        id="rise-toggle-avg7"    onclick="setRiseView('avg7')">7-day avg</button>
+            <button class="chart-toggle"        id="rise-toggle-median7" onclick="setRiseView('median7')">7-day median</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+          <button class="chart-toggle active" id="rise-range-1w"  onclick="setRiseRange(0.25)">This week</button>
+          <button class="chart-toggle" id="rise-range-1m"  onclick="setRiseRange(1)">30 days</button>
+          <button class="chart-toggle" id="rise-range-3m"  onclick="setRiseRange(3)">90 days</button>
+          <button class="chart-toggle" id="rise-range-all" onclick="setRiseRange(0)">All</button>
+        </div>
+        <div style="position:relative; height:240px;"><canvas id="chart-rise"></canvas></div>
+        <div id="chart-rise-empty" class="empty" style="display:none; padding:2rem 0;">No rise time entries yet</div>
+      </div>
+
+      <!-- Weight chart -->
+      <div class="card" id="chart-weight-card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+          <div style="font-size:15px; font-weight:500">Body weight</div>
+          <div style="display:flex; gap:4px;">
+            <button class="chart-toggle active" id="toggle-raw"     onclick="setWeightView('raw')">Raw</button>
+            <button class="chart-toggle"        id="toggle-avg7"    onclick="setWeightView('avg7')">7-day avg</button>
+            <button class="chart-toggle"        id="toggle-median7" onclick="setWeightView('median7')">7-day median</button>
+          </div>
+        </div>
+        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+          <button class="chart-toggle" id="range-1w"  onclick="setWeightRange(0.25)">This week</button>
+          <button class="chart-toggle active" id="range-1m"  onclick="setWeightRange(1)">30 days</button>
+          <button class="chart-toggle" id="range-3m"  onclick="setWeightRange(3)">90 days</button>
+          <button class="chart-toggle" id="range-all" onclick="setWeightRange(0)">All</button>
+        </div>
+        <div style="position:relative; height:240px;">
+          <canvas id="chart-weight"></canvas>
+        </div>
+        <div id="chart-weight-empty" class="empty" style="display:none; padding:2rem 0;">
+          No weight entries yet
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ SETTINGS SCREEN ═════════════════════════════════════════ -->
+    <div id="screen-settings" class="screen">
+      <div class="screen-header"><h1>Settings</h1></div>
+
+      <!-- Export reminder banner (shown if overdue) -->
+      <div id="export-banner" class="hidden">
+        <span class="warn-text">Back up your data</span>
+        <button class="btn btn-primary" onclick="exportData()" style="padding:7px 14px; font-size:14px;">Export now</button>
+      </div>
+
+      <!-- Export section -->
+      <h3>Data</h3>
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Export all data</div>
+            <div style="font-size:13px; color:var(--muted)" id="last-export-label">Never</div>
+          </div>
+          <button class="btn btn-primary" onclick="exportData()">Export</button>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Export reminder every</div>
+          <select id="reminder-days" onchange="saveSettings()" style="font-size:15px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
+            <option value="3" selected>3 days</option>
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30">30 days</option>
+            <option value="0">Never</option>
+          </select>
+        </div>
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Import backup</div>
+            <div style="font-size:13px; color:var(--muted)">Restore from a JSON backup</div>
+          </div>
+          <label class="btn" style="cursor:pointer;">
+            Import
+            <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+          </label>
+        </div>
+      </div>
+
+      <!-- Appearance -->
+      <h3>Appearance</h3>
+      <div class="card">
+        <div class="card-row">
+          <div style="font-weight:500">Dark mode</div>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <span id="dark-mode-label" style="font-size:14px; color:var(--muted)">Off</span>
+            <div id="dark-toggle" onclick="toggleDarkMode()" style="width:44px; height:26px; border-radius:13px; background:var(--border); position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0;">
+              <div id="dark-knob" style="position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:white; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <h3>Targets</h3>
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card-row">
+          <div style="font-weight:500">Calories (kcal)</div>
+          <input type="number" id="cal-target" min="0" inputmode="numeric" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Protein (g)</div>
+          <input type="number" id="prot-target" min="0" inputmode="decimal" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Rising time</div>
+          <input type="time" id="rise-target" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+      </div>
+
+      <!-- Gym exercises -->
+      <details class="lib-details">
+        <summary class="lib-summary">Gym exercises</summary>
+        <div class="card" style="margin-top:0.5rem;">
+          <div id="exercise-library-list"></div>
+          <div style="display:flex; gap:8px; margin-top:0.75rem;">
+            <input type="text" id="new-exercise" placeholder="New exercise name"
+              style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text);">
+            <button class="btn btn-primary" onclick="addExercise()">Add</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Cardio library -->
+      <details class="lib-details">
+        <summary class="lib-summary">Cardio activities</summary>
+        <div class="card" style="margin-top:0.5rem;">
+          <div id="cardio-library-list"></div>
+          <div style="display:flex; gap:8px; margin-top:0.75rem;">
+            <input type="text" id="new-cardio-activity" placeholder="New activity name"
+              style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text);">
+            <button class="btn btn-primary" onclick="addCardioActivity()">Add</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Meal item library -->
+      <details class="lib-details">
+        <summary class="lib-summary">Meal items</summary>
+        <div class="card" style="margin-top:0.5rem;">
+          <div id="meal-item-library-list"></div>
+          <div style="display:flex; gap:8px; margin-top:0.75rem;">
+            <input type="text" id="new-meal-item-name" placeholder="New item name"
+              style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text);">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+            <input type="number" id="new-meal-item-cal"  placeholder="kcal" min="0" inputmode="numeric"
+              style="padding:9px 6px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text); width:100%; min-width:0;">
+            <input type="number" id="new-meal-item-pro"  placeholder="P(g)" min="0" inputmode="decimal"
+              style="padding:9px 6px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text); width:100%; min-width:0;">
+          </div>
+          <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="addMealItem()">Add</button>
+        </div>
+      </details>
+
+      <!-- Danger zone -->
+      <h3>Danger zone</h3>
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Clear all data</div>
+            <div style="font-size:13px; color:var(--muted)">Permanently deletes everything</div>
+          </div>
+          <button class="btn btn-danger" onclick="clearAllData()">Clear</button>
+        </div>
+      </div>
+
+      <!-- App info -->
+      <div style="text-align:center; font-size:12px; color:var(--muted); margin-top:1.5rem;">
+        FitLog
+      </div>
+    </div>
+
+  </div><!-- /#main -->
+
+  <!-- ── Bottom navigation ───────────────────────────────────────── -->
+  <nav id="nav">
+    <button class="nav-btn active" onclick="showScreen('log', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+      Log
+    </button>
+    <button class="nav-btn" onclick="showScreen('history', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      History
+    </button>
+    <button class="nav-btn" onclick="showScreen('charts', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Charts
+    </button>
+    <button class="nav-btn" onclick="showScreen('settings', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </button>
+  </nav>
+
+  <!-- ══ EDIT BOTTOM SHEET ════════════════════════════════════════ -->
+  <div id="sheet-overlay" onclick="closeSheet()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:300;"></div>
+  <div id="edit-sheet" style="display:none; position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:var(--surface); border-radius:16px 16px 0 0; z-index:301; max-height:90dvh; overflow-y:auto; padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px));">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+      <h2 id="sheet-title" style="margin:0"></h2>
+      <button onclick="closeSheet()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);padding:0;">&times;</button>
+    </div>
+    <div id="sheet-body"></div>
+    <!-- View mode footer -->
+    <div id="sheet-footer-view" style="display:flex; gap:8px; margin-top:1rem;">
+      <button class="btn btn-primary" style="flex:1" onclick="switchToEditMode()">Edit</button>
+      <button class="btn btn-danger" style="flex:1" onclick="deleteCurrentEntry()">Delete</button>
+    </div>
+    <!-- Edit mode footer -->
+    <div id="sheet-footer-edit" style="display:none; gap:8px; margin-top:1rem;">
+      <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">Save changes</button>
+      <button class="btn" style="flex:1" onclick="switchToViewMode()">Cancel</button>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- ── JSZip library (for bundling CSVs into a ZIP) ──────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   DATA MODEL
+   All data lives in one object: `db`.
+   It is loaded from localStorage on startup and saved back on every change.
+
+   Structure:
+   {
+     meta: {
+       version: 1,            // schema version — increment if structure changes
+       lastExport: null,      // ISO timestamp of last export
+       created: "2025-01-12"  // when the db was first created
+     },
+     settings: {
+       reminderDays: 3,       // how many days before export reminder fires
+       calTarget: null,        // daily calorie target (kcal)
+       proteinTarget: null,    // daily protein target (g)
+       darkMode: false       // explicit dark mode toggle
+     },
+     exerciseLibrary: [       // user's list of known exercise names
+       "Pull-ups", "Bench press", ...
+     ],
+     logs: [                  // all log entries, any type, in creation order
+       {
+         id: 1734012345678,   // unique ID = timestamp of creation (ms)
+         type: "meal",        // "meal" | "weight" | "gym" | "cardio" | "rise"
+         ...fields            // type-specific fields (see SCHEMA below)
+       },
+       ...
+     ],
+     draft: null              // in-progress gym session (saved automatically)
+   }
+
+   SCHEMA per log type:
+   ─────────────────────────────────────────────────────────────────
+   meal:    { date, time, name, calories?, protein?, carbs?, fat?,
+              approximate, note? }
+
+   weight:  { date, time, value }
+
+   gym:     { date, startTime, duration?, note?,
+              exercises: [{ name, sets: [{ reps, weight?, note? }] }] }
+
+   cardio:  { date, startTime, activityType, distance?, duration?,
+              hrAvg?, hrMax?, elevationGain?, perceivedEffort?, note? }
+
+   rise:    { date, time }
+   ════════════════════════════════════════════════════════════════════ */
+
+const STORAGE_KEY = 'fitlog_v1';
+let exerciseCount = 0; // unique IDs for exercise blocks
+let mealItemCount = 0;  // unique IDs for meal item blocks
+const SCHEMA_VERSION = 1;
+
+// The live database object — loaded once, mutated in place, saved on change
+let db = {
+  meta: {
+    version: SCHEMA_VERSION,
+    lastExport: null,
+    created: today()
+  },
+  settings: {
+    reminderDays: 3,
+    darkMode: false,
+    calTarget: null,
+    proteinTarget: null,
+    riseTarget: null
+  },
+  exerciseLibrary: [
+    'Pull-ups', 'Push-ups', 'Bench press', 'Squat', 'Deadlift', 'Overhead press'
+  ],
+  mealItemLibrary: [],
+  cardioLibrary: ['Cycle', 'Run'],
+  logs: [],
+  draft: null,
+  drafts: {}
+};
+
+
+/* ── Storage: load & save ──────────────────────────────────────── */
+
+function loadDB() {
+  /* Read db from localStorage. If nothing exists, start fresh.
+     If the schema version is newer in future, migration logic goes here. */
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Basic migration hook: if stored version < current, handle upgrades
+      if (parsed.meta && parsed.meta.version === SCHEMA_VERSION) {
+        db = parsed;
+        // Patch in any fields added in later versions that may be missing
+        // from data saved before those fields existed
+        if (!db.cardioLibrary)          db.cardioLibrary = ['Cycle', 'Run'];
+        if (!db.drafts)                  db.drafts = {};
+        if (!db.settings.darkMode)      db.settings.darkMode = false;
+        if ('draft' in db)               delete db.draft;
+        if (!db.mealItemLibrary)         db.mealItemLibrary = [];
+        // Migrate flat meal entries to multi-item format
+        db.logs.forEach(e => {
+          if (e.type === 'meal' && !e.items) {
+            const qty = 1;
+            e.items = [{
+              name:     e.name     || '',
+              quantity: qty,
+              calories: e.calories != null ? e.calories : null,
+              protein:  e.protein  != null ? e.protein  : null,
+              carbs:    e.carbs    != null ? e.carbs    : null,
+              fat:      e.fat      != null ? e.fat      : null,
+              note:     e.note     || null
+            }];
+            e.totals = { calories: e.calories || null, protein: e.protein || null,
+                         carbs: e.carbs || null, fat: e.fat || null };
+            delete e.name; delete e.calories; delete e.protein;
+            delete e.carbs; delete e.fat; delete e.note; delete e.approximate;
+          }
+        });
+      } else {
+        // Future: migrate(parsed) — for now just use defaults
+        console.warn('FitLog: schema version mismatch, using defaults');
+      }
+    }
+  } catch (e) {
+    console.error('FitLog: failed to load db', e);
+  }
+}
+
+function saveDB() {
+  /* Write the entire db object to localStorage as a JSON string.
+     Called after every mutation. */
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  } catch (e) {
+    showToast('Storage error — please export your data');
+    console.error('FitLog: failed to save db', e);
+  }
+}
+
+
+/* ── Export ────────────────────────────────────────────────────── */
+
+function exportData() {
+  /* Produces a ZIP file containing:
+     1. fitlog_backup.json  — the full db object (importable)
+     2. meals.csv           — all meal entries, one row each
+     3. weight.csv          — all weight entries
+     4. gym.csv              — gym entries flattened to one row per set
+     5. cardio.csv          — all cardio entries
+     6. rise.csv             — all rise entries
+
+     The ZIP filename includes a timestamp so each export is distinct. */
+
+  const zip = new JSZip();
+  const timestamp = new Date().toISOString().slice(0,16).replace('T','_').replace(':','h') + 'm';
+  const folder = zip.folder('fitlog_' + timestamp);
+
+  // 1. Full JSON backup
+  folder.file('fitlog_backup.json', JSON.stringify(db, null, 2));
+
+  // 2. Meals CSV — one row per item, meal-level fields repeated on each row
+  const mealHeaders = ['meal_id','date','time','item_name','quantity','calories','protein_g','note'];
+  const mealRows = db.logs
+    .filter(e => e.type === 'meal')
+    .flatMap(e => (e.items || []).map(item => [
+      e.id, e.date, e.time ?? '',
+      item.name ?? '', item.quantity ?? 1,
+      item.calories ?? '', item.protein ?? '',
+      item.note ?? ''
+    ]));
+  folder.file('meals.csv', toCSV(mealHeaders, mealRows));
+
+  // 3. Weight CSV
+  const weightHeaders = ['id','date','time','weight_kg'];
+  const weightRows = db.logs
+    .filter(e => e.type === 'weight')
+    .map(e => [e.id, e.date, e.time ?? '', e.value]);
+  folder.file('weight.csv', toCSV(weightHeaders, weightRows));
+
+  // 4. Workouts CSV — flattened to one row per set
+  //    Workout-level fields repeat on each set row for easy filtering in Excel/Python
+  const gymHeaders = [
+    'gym_id','date','start_time','duration_min','gym_note',
+    'exercise','set_number','reps','weight_kg','set_note'
+  ];
+  const gymRows = [];
+  db.logs.filter(e => e.type === 'gym').forEach(w => {
+    if (!w.exercises || w.exercises.length === 0) {
+      // Workout with no exercises — still record the session
+      gymRows.push([w.id, w.date, w.startTime ?? '', w.duration ?? '', w.note ?? '',
+                        '', '', '', '', '']);
+    } else {
+      w.exercises.forEach(ex => {
+        (ex.sets || []).forEach((s, i) => {
+          gymRows.push([
+            w.id, w.date, w.startTime ?? '', w.duration ?? '', w.note ?? '',
+            ex.name, i + 1, s.reps ?? '', s.weight != null ? fmtWeight(s.weight) : '', s.note ?? ''
+          ]);
+        });
+      });
+    }
+  });
+  folder.file('gym.csv', toCSV(gymHeaders, gymRows));
+
+  // 5. Cardio CSV
+  const cardioHeaders = [
+    'id','date','start_time','activity_type',
+    'distance_km','duration_min','hr_avg_bpm','hr_max_bpm',
+    'elevation_gain_m','perceived_effort','note'
+  ];
+  const cardioRows = db.logs
+    .filter(e => e.type === 'cardio')
+    .map(e => [
+      e.id, e.date, e.startTime ?? '', e.activityType,
+      e.distance ?? '', e.duration ?? '', e.hrAvg ?? '', e.hrMax ?? '',
+      e.elevationGain ?? '', e.perceivedEffort ?? '',
+      e.note ?? ''
+    ]);
+  folder.file('cardio.csv', toCSV(cardioHeaders, cardioRows));
+
+  // 6. Wake CSV
+  const riseHeaders = ['id','date','time'];
+  const riseRows = db.logs
+    .filter(e => e.type === 'rise')
+    .map(e => [e.id, e.date, e.time]);
+  folder.file('rise.csv', toCSV(riseHeaders, riseRows));
+
+  // Generate and download
+  zip.generateAsync({ type: 'blob' }).then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fitlog_' + timestamp + '.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Record export time
+    db.meta.lastExport = new Date().toISOString();
+    saveDB();
+    updateExportStatus();
+    showToast('Exported ✓');
+  });
+}
+
+function toCSV(headers, rows) {
+  /* Convert headers + array of row arrays to a CSV string.
+     Wraps values containing commas or quotes in double-quotes. */
+  const escape = v => {
+    const s = String(v ?? '');
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? '"' + s.replace(/"/g, '""') + '"'
+      : s;
+  };
+  const lines = [headers.map(escape).join(',')];
+  rows.forEach(row => lines.push(row.map(escape).join(',')));
+  return lines.join('\r\n');
+}
+
+
+/* ── Import ────────────────────────────────────────────────────── */
+
+function importData(event) {
+  /* Read a fitlog_backup.json file and restore the database.
+     Warns the user before overwriting existing data. */
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (db.logs.length > 0) {
+    const ok = confirm(
+      'This will replace ALL your current data with the imported backup.\n\nAre you sure?'
+    );
+    if (!ok) { event.target.value = ''; return; }
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      // Basic validation — check it looks like a FitLog backup
+      if (!imported.meta || !Array.isArray(imported.logs)) {
+        throw new Error('Not a valid FitLog backup file');
+      }
+      db = imported;
+      saveDB();
+      loadDB();
+      renderAll();
+      showToast('Import successful ✓');
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+    }
+    event.target.value = ''; // reset file input
+  };
+  reader.readAsText(file);
+}
+
+
+/* ── Settings ──────────────────────────────────────────────────── */
+
+function applyTheme() {
+  /* Apply or remove the .dark class on <html> based on db.settings.darkMode. */
+  const dark = db.settings && db.settings.darkMode;
+  document.documentElement.classList.toggle('dark', !!dark);
+  const toggle = document.getElementById('dark-toggle');
+  const knob   = document.getElementById('dark-knob');
+  const label  = document.getElementById('dark-mode-label');
+  if (toggle) toggle.style.background = dark ? 'var(--accent)' : 'var(--border)';
+  if (knob)   knob.style.transform    = dark ? 'translateX(18px)' : 'translateX(0)';
+  if (label)  label.textContent       = dark ? 'On' : 'Off';
+}
+
+function toggleDarkMode() {
+  db.settings.darkMode = !db.settings.darkMode;
+  saveDB();
+  applyTheme();
+}
+
+function saveSettings() {
+  db.settings.reminderDays  = parseInt(document.getElementById('reminder-days').value);
+  const calT  = parseFloat(document.getElementById('cal-target').value);
+  const protT = parseFloat(document.getElementById('prot-target').value);
+  db.settings.calTarget     = isNaN(calT)  ? null : calT;
+  db.settings.proteinTarget = isNaN(protT) ? null : protT;
+  const riseT = document.getElementById('rise-target').value;
+  db.settings.riseTarget = riseT || null;
+  saveDB();
+  updateExportStatus();
+}
+
+function updateExportStatus() {
+  /* Show/hide the export reminder banner based on days since last export. */
+  const label = document.getElementById('last-export-label');
+  const banner = document.getElementById('export-banner');
+  const reminderDays = db.settings.reminderDays;
+
+  if (!db.meta.lastExport) {
+    label.textContent = 'Never';
+    banner.classList.toggle('hidden', db.logs.length === 0 || reminderDays === 0);
+    return;
+  }
+
+  const daysSince = Math.floor(
+    (Date.now() - new Date(db.meta.lastExport).getTime()) / 86400000
+  );
+  const daysLabel = daysSince === 0 ? 'Today' : daysSince + ' day' + (daysSince !== 1 ? 's' : '') + ' ago';
+  label.textContent = 'Last export: ' + daysLabel;
+
+  const overdue = reminderDays > 0 && daysSince >= reminderDays;
+  banner.classList.toggle('hidden', !overdue);
+}
+
+
+/* ── Libraries (exercises and cardio activities) ───────────────── */
+/*
+   Each library is a named array in db (e.g. db.exerciseLibrary).
+   renderLibrary()  — renders the list with up/down/delete controls
+   addToLibrary()   — adds a new item
+   moveInLibrary()  — swaps two items (called by up/down buttons)
+   deleteFromLibrary() — removes an item with optional in-use check
+
+   onUpdate is a callback fired after any mutation (e.g. to refresh
+   a dropdown that depends on the library).
+*/
+
+function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
+  /* Generic library renderer. key = db property name (string).
+     moveFn and deleteFn are global function name strings for inline onclick. */
+  const list = document.getElementById(listId);
+  const arr = db[key];
+  const n = arr.length;
+  if (n === 0) {
+    list.innerHTML = `<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">${emptyMsg}</div>`;
+    return;
+  }
+  list.innerHTML = arr.map((name, i) => `
+    <div class="card-row">
+      <span style="font-size:15px; flex:1">${name}</span>
+      <div style="display:flex; align-items:center; gap:2px;">
+        <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
+          style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === 0 ? '0.2' : '1'}">↑</button>
+        <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
+          style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
+        <button onclick="${deleteFn}(${i})"
+          style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:0 4px; line-height:1;">&times;</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addToLibrary(key, inputId, onUpdate) {
+  const input = document.getElementById(inputId);
+  const name = input.value.trim();
+  if (!name) return;
+  if (db[key].includes(name)) { showToast('Already in library'); return; }
+  db[key].push(name);
+  saveDB();
+  onUpdate();
+  input.value = '';
+  showToast('Added: ' + name);
+}
+
+function moveInLibrary(key, index, direction, onUpdate) {
+  const arr = db[key];
+  const target = index + direction;
+  if (target < 0 || target >= arr.length) return;
+  [arr[index], arr[target]] = [arr[target], arr[index]];
+  saveDB();
+  onUpdate();
+}
+
+function deleteFromLibrary(key, index, inUseFn, onUpdate) {
+  const name = db[key][index];
+  if (inUseFn && inUseFn(name)) {
+    if (!confirm(`"${name}" is used in existing entries. Delete anyway?`)) return;
+  }
+  db[key].splice(index, 1);
+  saveDB();
+  onUpdate();
+}
+
+/* ── Exercise library wrappers ─────────────────────────────────── */
+
+function renderExerciseLibrary() {
+  renderLibrary('exerciseLibrary', 'exercise-library-list',
+    'No exercises yet', 'moveExercise', 'deleteExercise');
+}
+
+function addExercise() {
+  addToLibrary('exerciseLibrary', 'new-exercise', () => {
+    renderExerciseLibrary();
+    refreshExerciseDropdowns();
+  });
+}
+
+function moveExercise(index, direction) {
+  moveInLibrary('exerciseLibrary', index, direction, () => {
+    renderExerciseLibrary();
+    refreshExerciseDropdowns();
+  });
+}
+
+function deleteExercise(index) {
+  deleteFromLibrary('exerciseLibrary', index,
+    name => db.logs.some(e =>
+      e.type === 'gym' && e.exercises && e.exercises.some(ex => ex.name === name)
+    ),
+    () => renderExerciseLibrary()
+  );
+}
+
+function refreshExerciseDropdowns() {
+  /* Update all open exercise dropdowns to reflect current library order. */
+  document.querySelectorAll('#exercises-container .ex-name, #sheet-exercises-container .ex-name')
+    .forEach(sel => { sel.innerHTML = buildExerciseOptions(sel.value); });
+}
+
+/* ── Cardio library wrappers ───────────────────────────────────── */
+
+function renderMealItemLibrary() {
+  const list = document.getElementById('meal-item-library-list');
+  if (!list) return;
+  const arr = db.mealItemLibrary || [];
+  const n = arr.length;
+  if (n === 0) {
+    list.innerHTML = '<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">No items yet</div>';
+    return;
+  }
+  list.innerHTML = arr.map((item, i) => {
+    const parts = [];
+    if (item.calories != null) parts.push(item.calories + ' kcal');
+    if (item.protein  != null) parts.push('P ' + item.protein + 'g');
+
+    return `<div class="card-row">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:15px">${item.name}</div>
+        ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
+        <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
+        <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addMealItem() {
+  const name = document.getElementById('new-meal-item-name').value.trim();
+  if (!name) { showToast('Please enter a name'); return; }
+  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+  if ((db.mealItemLibrary || []).some(i => i.name === name)) { showToast('Already in library'); return; }
+  if (!db.mealItemLibrary) db.mealItemLibrary = [];
+  db.mealItemLibrary.push({
+    name,
+    calories: num('new-meal-item-cal'),
+    protein:  num('new-meal-item-pro')
+  });
+  saveDB();
+  renderMealItemLibrary();
+  ['new-meal-item-name','new-meal-item-cal','new-meal-item-pro']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  showToast('Added: ' + name);
+}
+
+function moveMealItem(index, direction) {
+  moveInLibrary('mealItemLibrary', index, direction, () => renderMealItemLibrary());
+}
+
+function deleteMealItem(index) {
+  deleteFromLibrary('mealItemLibrary', index, null, () => renderMealItemLibrary());
+}
+
+function renderCardioLibrary() {
+  renderLibrary('cardioLibrary', 'cardio-library-list',
+    'No activities yet', 'moveCardioActivity', 'deleteCardioActivity');
+}
+
+function addCardioActivity() {
+  addToLibrary('cardioLibrary', 'new-cardio-activity', () => {
+    renderCardioLibrary();
+    populateCardioActivityDropdown();
+  });
+}
+
+function moveCardioActivity(index, direction) {
+  moveInLibrary('cardioLibrary', index, direction, () => {
+    renderCardioLibrary();
+    populateCardioActivityDropdown();
+  });
+}
+
+function deleteCardioActivity(index) {
+  deleteFromLibrary('cardioLibrary', index,
+    name => db.logs.some(e => e.type === 'cardio' && e.activityType === name),
+    () => {
+      renderCardioLibrary();
+      populateCardioActivityDropdown();
+    }
+  );
+}
+
+function populateCardioActivityDropdown(selectedVal) {
+  const sel = document.getElementById('c-type');
+  if (!sel) return;
+  sel.innerHTML = db.cardioLibrary.map(n =>
+    `<option value="${n}" ${n === selectedVal ? 'selected' : ''}>${n}</option>`
+  ).join('');
+}
+
+
+/* ── History ───────────────────────────────────────────────────── */
+
+function renderHistory() {
+  const filter = document.getElementById('history-filter').value;
+  const list = document.getElementById('history-list');
+
+  // Show entries newest first
+  const entries = [...db.logs]
+    .reverse()
+    .filter(e => filter === 'all' || e.type === filter);
+
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="empty">No entries yet — start logging!</div>';
+    return;
+  }
+
+  // Group by date for a cleaner display
+  const byDate = {};
+  entries.forEach(e => {
+    if (!byDate[e.date]) byDate[e.date] = [];
+    byDate[e.date].push(e);
+  });
+
+  list.innerHTML = Object.keys(byDate).sort().reverse().map(date => `
+    <div style="margin-bottom:1rem;">
+      <h3 style="margin-bottom:0.5rem">${formatDate(date)}</h3>
+      <div class="card" style="padding:0 1rem;">
+        ${byDate[date].map(e => renderHistoryEntry(e)).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderHistoryEntry(e) {
+  /* Returns an HTML string for one history entry row. */
+  const typeLabel = {
+    meal: 'Meal', weight: 'Weight', gym: 'Gym', cardio: 'Cardio', rise: 'Rise'
+  }[e.type] || '•';
+
+  // Date + time line (always shown at top)
+  const timeStr = e.time || e.startTime || '';
+  const dateTime = e.date + (timeStr ? '  ' + timeStr : '');
+
+  let detail = '';
+  if (e.type === 'meal') {
+    const t = e.totals || {};
+    const parts = [];
+    const itemNames = (e.items || []).map(i => {
+      if (!i.name) return null;
+      const qty = i.quantity && i.quantity !== 1 ? ' ×' + i.quantity : '';
+      return i.name + qty;
+    }).filter(Boolean).join(', ');
+    if (itemNames)  parts.push(itemNames);
+    if (t.calories) parts.push(t.calories + ' kcal');
+    if (t.protein)  parts.push('P ' + t.protein + 'g');
+    detail = parts.join(' · ') || '—';
+  } else if (e.type === 'weight') {
+    detail = e.value + ' kg';
+  } else if (e.type === 'gym') {
+    const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
+    const parts = [];
+    if (e.duration) parts.push(e.duration + ' min');
+    if (exNames)    parts.push(exNames);
+    detail = parts.join(' · ');
+  } else if (e.type === 'cardio') {
+    const parts = [e.activityType];
+    if (e.distance) parts.push(e.distance + ' km');
+    if (e.duration) parts.push(e.duration + ' min');
+    if (e.hrAvg)    parts.push('HR ' + e.hrAvg + ' bpm');
+    detail = parts.join(' · ');
+  } else if (e.type === 'rise') {
+    detail = e.time;
+  }
+
+  return `
+    <div class="card-row" onclick="openEntry(${e.id})" style="cursor:pointer;">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:2px;">${dateTime}</div>
+        <div style="font-size:15px;"><strong>${typeLabel}:</strong> ${detail}</div>
+        ${e.note ? `<div style="font-size:13px; color:var(--muted); margin-top:2px">${e.note}</div>` : ''}
+      </div>
+      <span style="color:var(--muted); font-size:18px; padding-left:12px; flex-shrink:0;">›</span>
+    </div>
+  `;
+}
+
+function deleteEntry(id) {
+  const ok = confirm('Delete this entry?');
+  if (!ok) return;
+  db.logs = db.logs.filter(e => e.id !== id);
+  saveDB();
+  renderHistory();
+  showToast('Deleted');
+}
+
+
+/* ── Clear all data ────────────────────────────────────────────── */
+
+function clearAllData() {
+  const ok = confirm(
+    'This will permanently delete ALL your data including all logs and settings.\n\nThis cannot be undone. Are you sure?'
+  );
+  if (!ok) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+
+/* ── Navigation ────────────────────────────────────────────────── */
+
+function showScreen(name, btn) {
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // Deactivate all nav buttons
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  // Show the target screen and activate its nav button
+  document.getElementById('screen-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  // Refresh content when switching to certain screens
+  if (name === 'history') renderHistory();
+  if (name === 'charts') setTimeout(renderCharts, 0);
+  if (name === 'settings') {
+    renderExerciseLibrary();
+    renderCardioLibrary();
+    renderMealItemLibrary();
+    updateExportStatus();
+    document.getElementById('reminder-days').value = db.settings.reminderDays;
+    if (db.settings.calTarget)     document.getElementById('cal-target').value    = db.settings.calTarget;
+    if (db.settings.proteinTarget) document.getElementById('prot-target').value   = db.settings.proteinTarget;
+    if (db.settings.riseTarget)    document.getElementById('rise-target').value    = db.settings.riseTarget;
+  }
+}
+
+
+/* ── Utilities ─────────────────────────────────────────────────── */
+
+function today() {
+  // Returns today's date as YYYY-MM-DD in local time
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function nowTime() {
+  // Returns current time as HH:MM
+  const d = new Date();
+  return String(d.getHours()).padStart(2, '0') + ':' +
+    String(d.getMinutes()).padStart(2, '0');
+}
+
+function formatDate(dateStr) {
+  // "2025-01-12" → "Sun 12 Jan 2025"
+  const d = new Date(dateStr + 'T12:00:00'); // noon avoids timezone edge cases
+  return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+
+/* ── Draft save / restore ──────────────────────────────────────
+   db.drafts holds one draft per form type: meal, gym, cardio.
+   Each draft is the complete serialised form state.
+   Drafts are saved on every input event and restored on page load.
+   A draft is cleared when the entry is successfully saved.
+   ──────────────────────────────────────────────────────────────── */
+
+function saveDraft(type) {
+  /* Serialise the current form state and write to db.drafts[type]. */
+  if (!db.drafts) db.drafts = {};
+  const d = { savedAt: new Date().toISOString() };
+
+  if (type === 'weight') {
+    d.value = getVal('w-value');
+    d.date  = getVal('w-date');
+    d.time  = getVal('w-time');
+  } else if (type === 'rise') {
+    d.time = getVal('wk-time');
+    d.date = getVal('wk-date');
+  } else if (type === 'meal') {
+    d.date  = getVal('m-date');
+    d.time  = getVal('m-time');
+    d.items = [];
+    document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
+      d.items.push({
+        name:        block.querySelector('.mi-name')?.value  || '',
+        quantity:    block.querySelector('.mi-qty')?.value   || '1',
+        calories:    block.querySelector('.mi-cal')?.value   || '',
+        protein:     block.querySelector('.mi-pro')?.value   || '',
+
+        note:        block.querySelector('.mi-note')?.value  || '',
+        _unitMacros: block._unitMacros || null
+      });
+    });
+  } else if (type === 'gym') {
+    d.date      = getVal('wo-date');
+    d.startTime = getVal('wo-starttime');
+    d.duration  = getVal('wo-duration');
+    d.note      = getVal('wo-note');
+    d.exercises = [];
+    document.querySelectorAll('#exercises-container .exercise-block').forEach(block => {
+      const name = block.querySelector('.ex-name').value;
+      const sets = [];
+      block.querySelectorAll('.set-row').forEach(row => {
+        sets.push({
+          weight: row.querySelector('.s-weight').value,
+          reps:   row.querySelector('.s-reps').value
+        });
+      });
+      d.exercises.push({ name, sets });
+    });
+  } else if (type === 'cardio') {
+    d.activityType = getVal('c-type');
+    d.date         = getVal('c-date');
+    d.startTime    = getVal('c-starttime');
+    d.distance     = getVal('c-dist');
+    d.duration     = getVal('c-dur');
+    d.hrAvg        = getVal('c-hravg');
+    d.hrMax        = getVal('c-hrmax');
+    d.elevation    = getVal('c-elev');
+    d.note         = getVal('c-note');
+  }
+
+  db.drafts[type] = d;
+  // Clean up stale keys from old type names
+  delete db.drafts['workout'];
+  delete db.drafts['wake'];
+  saveDB();
+  showDraftStatus(type);
+  updateDraftDots();
+}
+
+function updateDraftDots() {
+  /* Show/hide the draft indicator dot on each log tab. */
+  ['meal', 'gym', 'cardio', 'weight', 'rise'].forEach(type => {
+    const tab = document.getElementById('tab-' + type);
+    if (!tab) return;
+    const hasDraft = !!(db.drafts && db.drafts[type]);
+    tab.classList.toggle('has-draft', hasDraft);
+  });
+}
+
+function showDraftStatus(type) {
+  const textEl  = document.getElementById('draft-text-'  + type);
+  const clearEl = document.getElementById('draft-clear-' + type);
+  if (!textEl) return;
+  const d = db.drafts && db.drafts[type];
+  if (!d) {
+    textEl.textContent = '';
+    if (clearEl) clearEl.style.display = 'none';
+    return;
+  }
+  const saved = new Date(d.savedAt);
+  const t = String(saved.getHours()).padStart(2,'0') + ':' + String(saved.getMinutes()).padStart(2,'0');
+  textEl.textContent = 'Draft saved: ' + t;
+  if (clearEl) clearEl.style.display = 'inline';
+}
+
+function restoreDraft(type) {
+  /* Re-fill the form from db.drafts[type] if a draft exists. */
+  const d = db.drafts && db.drafts[type];
+  if (!d) return;
+
+  if (type === 'weight') {
+    setVal('w-value', d.value);
+    setVal('w-date',  d.date);
+    setVal('w-time',  d.time);
+  } else if (type === 'rise') {
+    setVal('wk-time', d.time);
+    setVal('wk-date', d.date);
+  } else if (type === 'meal') {
+    setVal('m-date', d.date); setVal('m-time', d.time);
+    document.getElementById('meal-items-container').innerHTML = '';
+    mealItemCount = 0;
+    if (d.items && d.items.length > 0) {
+      d.items.forEach(item => addMealItemBlock({
+        name:        item.name,
+        quantity:    item.quantity ? parseFloat(item.quantity) : 1,
+        calories:    item.calories ? parseFloat(item.calories) : null,
+        protein:     item.protein  ? parseFloat(item.protein)  : null,
+        carbs:       item.carbs    ? parseFloat(item.carbs)    : null,
+        fat:         item.fat      ? parseFloat(item.fat)      : null,
+        note:        item.note,
+        _unitMacros: item._unitMacros || null
+      }));
+    } else { addMealItemBlock(); }
+    updateMealTotals();
+  } else if (type === 'gym') {
+    setVal('wo-date', d.date); setVal('wo-starttime', d.startTime);
+    setVal('wo-duration', d.duration); setVal('wo-note', d.note);
+    if (d.exercises && d.exercises.length > 0) {
+      document.getElementById('exercises-container').innerHTML = '';
+      exerciseCount = 0;
+      d.exercises.forEach(ex => addExerciseBlock(ex));
+    }
+  } else if (type === 'cardio') {
+    populateCardioActivityDropdown(d.activityType);
+    setVal('c-date', d.date);      setVal('c-starttime', d.startTime);
+    setVal('c-dist', d.distance);  setVal('c-dur', d.duration);
+    setVal('c-hravg', d.hrAvg);    setVal('c-hrmax', d.hrMax);
+    setVal('c-elev', d.elevation); setVal('c-note', d.note);
+  }
+
+  showDraftStatus(type);
+}
+
+function clearDraftAndForm(type) {
+  /* Clear the draft and reset the form fields to defaults. */
+  clearDraft(type);
+  // Reset form fields
+  if (type === 'weight') {
+    setVal('w-value', '');
+    refreshDateTime('weight');
+  } else if (type === 'meal') {
+    resetMealForm();
+    refreshDateTime('meal');
+  } else if (type === 'gym') {
+    resetGymForm();
+  } else if (type === 'cardio') {
+    ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note'].forEach(id => setVal(id, ''));
+    refreshDateTime('cardio');
+  } else if (type === 'rise') {
+    refreshDateTime('rise');
+  }
+}
+
+function clearDraft(type) {
+  if (db.drafts) {
+    delete db.drafts[type];
+    // Clean up any stale keys from old type names
+    delete db.drafts['workout'];
+    delete db.drafts['wake'];
+  }
+  saveDB();
+  updateDraftDots();
+  showDraftStatus(type);
+}
+
+function wireFormDrafts() {
+  /* Attach input listeners to all forms so every change saves a draft.
+     Weight: drafts on any input.
+     Wake: only drafts if the time differs from the current default
+           (so the dot doesn't appear just from opening the tab). */
+  const formIds = {
+    meal:    'form-meal',
+    gym:     'form-gym',
+    cardio:  'form-cardio',
+    weight:  'form-weight',
+  };
+  Object.entries(formIds).forEach(([type, formId]) => {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener('input',  () => saveDraft(type));
+    form.addEventListener('change', () => saveDraft(type));
+  });
+
+  // Wake: only save a draft if the user actually changed the time from its default
+  const riseForm = document.getElementById('form-rise');
+  if (riseForm) {
+    riseForm.addEventListener('change', () => {
+      const currentTime = getVal('wk-time');
+      const defaultTime = nowTime();
+      // Only create a draft if the time has been changed from now
+      // (allow 1 minute tolerance since the default updates on tab open)
+      if (currentTime !== defaultTime) {
+        saveDraft('rise');
+      }
+    });
+    riseForm.addEventListener('input', () => {
+      const currentTime = getVal('wk-time');
+      const defaultTime = nowTime();
+      if (currentTime !== defaultTime) {
+        saveDraft('rise');
+      }
+    });
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function fmtWeight(w) {
+  /* Format a weight value to always show 2 decimal places. */
+  return parseFloat(w).toFixed(2);
+}
+
+function nextId() {
+  // Unique ID = current timestamp in milliseconds
+  return Date.now();
+}
+
+
+/* ── Render all dynamic content ────────────────────────────────── */
+
+function renderAll() {
+  applyTheme();
+  // Update the date shown on the Log screen
+  document.getElementById('log-date').textContent = formatDate(today());
+  setFormDefaults();
+  renderHistory();
+  renderExerciseLibrary();
+  renderCardioLibrary();
+  renderMealItemLibrary();
+  populateCardioActivityDropdown();
+  updateExportStatus();
+  if (db.settings) {
+    document.getElementById('reminder-days').value = db.settings.reminderDays;
+    if (db.settings.calTarget)     document.getElementById('cal-target').value    = db.settings.calTarget;
+    if (db.settings.proteinTarget) document.getElementById('prot-target').value   = db.settings.proteinTarget;
+    if (db.settings.riseTarget)    document.getElementById('rise-target').value    = db.settings.riseTarget;
+  }
+  // Initialise gym and meal forms then restore any drafts
+  resetGymForm();
+  resetMealForm();
+  wireFormDrafts();
+  restoreDraft('weight');
+  restoreDraft('rise');
+  restoreDraft('meal');
+  restoreDraft('gym');
+  restoreDraft('cardio');
+  updateDraftDots();
+}
+
+
+/* ── Initialise ────────────────────────────────────────────────── */
+
+loadDB();
+renderAll();
+
+
+/* ════════════════════════════════════════════════════════════════════
+   STEP 2 — LOGGING FORMS
+   ════════════════════════════════════════════════════════════════════ */
+
+
+/* ── Log form navigation ───────────────────────────────────────── */
+
+function showLogForm(name, btn) {
+  /* Switch between the five log type forms.
+     If the form has no draft in progress, refresh date/time to now.
+     If there is a draft, leave everything as-is. */
+  document.querySelectorAll('.log-form').forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.log-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('form-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  const hasDraft = db.drafts && db.drafts[name];
+
+  if (!hasDraft) {
+    // No draft in progress — refresh date/time to now
+    refreshDateTime(name);
+  }
+  // If there is a draft, leave everything exactly as restored
+
+  // Workout: ensure exercises container is initialised
+  if (name === 'gym' && document.getElementById('exercises-container').children.length === 0) {
+    resetGymForm();
+  }
+}
+
+function refreshDateTime(formName) {
+  /* Update the date and time fields of one form to the current moment. */
+  const d = today();
+  const t = nowTime();
+  const map = {
+    weight:  [['w-date', d],  ['w-time', t]],
+    meal:    [['m-date', d],  ['m-time', t]],
+    gym: [['wo-date', d], ['wo-starttime', t]],
+    cardio:  [['c-date', d],  ['c-starttime', t]],
+    rise:   [['wk-date', d], ['wk-time', t]],
+  };
+  (map[formName] || []).forEach(([id, val]) => setVal(id, val));
+}
+
+
+/* ── Default form values (called on init and after each save) ──── */
+
+function setFormDefaults() {
+  /* Pre-fill date and time fields with current values.
+     This means the user rarely needs to touch date/time — it's
+     already correct for a log entry made right now. */
+  const d = today();
+  const t = nowTime();
+
+  // Weight
+  setVal('w-date', d); setVal('w-time', t);
+  // Meal
+  setVal('m-date', d); setVal('m-time', t);
+  // Workout
+  setVal('wo-date', d); setVal('wo-starttime', t);
+  // Cardio
+  setVal('c-date', d); setVal('c-starttime', t);
+  // Rise
+  setVal('wk-date', d); setVal('wk-time', t);
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+
+/* ── SAVE: Weight ──────────────────────────────────────────────── */
+
+function saveWeight() {
+  const value = parseFloat(getVal('w-value'));
+  if (isNaN(value) || value <= 0) { showToast('Please enter a weight'); return; }
+
+  db.logs.push({
+    id: nextId(),
+    type: 'weight',
+    date: getVal('w-date') || today(),
+    time: getVal('w-time') || nowTime(),
+    value: value
+  });
+
+  saveDB();
+  clearDraft('weight');
+  showToast('Weight saved ✓');
+  setVal('w-value', '');
+}
+
+
+/* ── SAVE: Meal ────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════════════════════
+   MEAL FORM — multi-item with quantity
+   Each item: name, quantity (×unit), kcal/P/C/F per unit, note.
+   Displayed macros = quantity × unit macros.
+   Totals = sum of all items' displayed macros.
+   ════════════════════════════════════════════════════════════════════ */
+
+
+function addMealItemBlock(itemData, interactive) {
+  mealItemCount++;
+  const blockId = 'mi-' + mealItemCount;
+  const block = document.createElement('div');
+  block.className = 'exercise-block';
+  block.id = blockId;
+
+  const listId = 'mi-list-' + mealItemCount;
+  const libraryOptions = (db.mealItemLibrary || []).map(i => `<option value="${i.name}">`).join('');
+
+  block.innerHTML =
+    `<datalist id="${listId}">${libraryOptions}</datalist>` +
+    '<div class="exercise-header">' +
+      `<input type="text" class="mi-name" list="${listId}" placeholder="Item name">` +
+      '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
+      '<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">' +
+      '<button class="del-btn" title="Remove item">&times;</button>' +
+    '</div>' +
+    '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px;">' +
+      '<div class="set-label">kcal</div><div class="set-label">P (g)</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
+      `<input type="number" class="mi-cal"  min="0" inputmode="numeric" style="width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
+      `<input type="number" class="mi-pro"  min="0" inputmode="decimal" style="width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
+    '</div>' +
+    '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
+      '<textarea class="mi-note" style="height:42px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
+    '</div>';
+
+  // Delete button
+  block.querySelector('.del-btn').addEventListener('click', () => {
+    block.remove(); updateMealTotals(); saveDraft('meal');
+  });
+
+  // Any input change: update totals + save draft
+  block.querySelectorAll('input, textarea').forEach(el => {
+    el.addEventListener('input', () => { updateMealTotals(); saveDraft('meal'); });
+  });
+
+  // Auto-fill from library when name matches — fills per-unit values, then scales by qty
+  const nameInput = block.querySelector('.mi-name');
+  nameInput.addEventListener('change', () => {
+    const match = (db.mealItemLibrary || []).find(i => i.name === nameInput.value);
+    if (match) {
+      const qty = parseFloat(block.querySelector('.mi-qty').value) || 1;
+      const fill = (cls, val) => {
+        const el = block.querySelector(cls);
+        if (el && val != null) el.value = parseFloat((val * qty).toFixed(2));
+      };
+      fill('.mi-cal', match.calories); fill('.mi-pro', match.protein);
+      // Store unit values on the block for qty scaling later
+      block._unitMacros = { cal: match.calories, pro: match.protein };
+      updateMealTotals(); saveDraft('meal');
+    }
+  });
+
+  // Quantity change: rescale macros if unit values are known
+  const qtyInput = block.querySelector('.mi-qty');
+  qtyInput.addEventListener('input', () => {
+    if (block._unitMacros) {
+      const qty = parseFloat(qtyInput.value) || 1;
+      const scale = (cls, val) => {
+        const el = block.querySelector(cls);
+        if (el && val != null) el.value = parseFloat((val * qty).toFixed(2));
+      };
+      scale('.mi-cal', block._unitMacros.cal); scale('.mi-pro', block._unitMacros.pro);
+    }
+    updateMealTotals(); saveDraft('meal');
+  });
+
+  // Populate from existing data if provided (macros are already effective values)
+  if (itemData) {
+    if (itemData.name)             nameInput.value = itemData.name;
+    if (itemData.quantity != null) qtyInput.value  = itemData.quantity;
+    if (itemData.calories != null) block.querySelector('.mi-cal').value  = itemData.calories;
+    if (itemData.protein  != null) block.querySelector('.mi-pro').value  = itemData.protein;
+
+    if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
+    // If unit macros stored, attach them
+    if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
+  }
+
+  document.getElementById('meal-items-container').appendChild(block);
+  updateMealTotals();
+  if (interactive) saveDraft('meal');
+}
+
+function updateMealTotals() {
+  let cal = 0, pro = 0, hasAny = false;
+  document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
+    const v = cls => { const n = parseFloat(block.querySelector(cls)?.value); return isNaN(n) ? 0 : n; };
+    const c = v('.mi-cal'), p = v('.mi-pro');
+    if (c || p) hasAny = true;
+    cal += c; pro += p;
+  });
+  const fmt = v => v > 0 ? (v % 1 === 0 ? String(v) : v.toFixed(1)) + 'g' : '—';
+  document.getElementById('m-total-cal').textContent = hasAny ? Math.round(cal) : '—';
+  document.getElementById('m-total-pro').textContent = hasAny ? fmt(pro) : '—';
+}
+
+function resetMealForm() {
+  document.getElementById('meal-items-container').innerHTML = '';
+  mealItemCount = 0;
+  addMealItemBlock();
+  updateMealTotals();
+}
+
+function saveMeal() {
+  const items = [];
+  document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
+    const num = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
+    const name = block.querySelector('.mi-name')?.value.trim() || '';
+    const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
+    const cal  = num('.mi-cal'), pro = num('.mi-pro');
+    const note = block.querySelector('.mi-note')?.value.trim() || null;
+    if (qty <= 0) { showToast('Quantity must be greater than 0'); return; }
+    if (name || cal || pro)
+      items.push({ name, quantity: qty, calories: cal, protein: pro, note });
+  });
+
+  if (!items.length) { showToast('Please add at least one item'); return; }
+
+  const sum = field => {
+    const vals = items.map(i => i[field]).filter(v => v != null);
+    return vals.length ? parseFloat(vals.reduce((a,b) => a+b, 0).toFixed(1)) : null;
+  };
+
+  db.logs.push({
+    id: nextId(), type: 'meal',
+    date: getVal('m-date') || today(),
+    time: getVal('m-time') || nowTime(),
+    items,
+    totals: { calories: sum('calories'), protein: sum('protein') }
+  });
+
+  saveDB(); clearDraft('meal'); showToast('Meal saved ✓');
+  resetMealForm();
+  setVal('m-date', today()); setVal('m-time', nowTime());
+  // Re-render nutrition charts so today's bar updates immediately
+  if (document.getElementById('screen-charts').classList.contains('active')) {
+    renderCalChart(); renderProteinChart();
+  }
+}
+
+
+/* ── SAVE: Cardio ──────────────────────────────────────────────── */
+
+function saveCardio() {
+  const dist = parseFloat(getVal('c-dist'));
+  const dur  = parseInt(getVal('c-dur'));
+
+  if (isNaN(dist) && isNaN(dur)) {
+    showToast('Please enter distance or duration');
+    return;
+  }
+
+  const num = id => { const v = parseFloat(getVal(id)); return isNaN(v) ? null : v; };
+
+  db.logs.push({
+    id: nextId(),
+    type: 'cardio',
+    date: getVal('c-date') || today(),
+    startTime: getVal('c-starttime') || nowTime(),
+    activityType: getVal('c-type') || 'Cycle',
+    distance: isNaN(dist) ? null : dist,
+    duration: isNaN(dur)  ? null : dur,
+    hrAvg: num('c-hravg'),
+    hrMax: num('c-hrmax'),
+    elevationGain: num('c-elev'),
+
+    note: getVal('c-note') || null
+  });
+
+  saveDB();
+  clearDraft('cardio');
+  showToast('Activity saved ✓');
+
+  // Clear numeric fields; leave activity type and date
+  ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note'].forEach(id => setVal(id, ''));
+  setVal('c-date', today()); setVal('c-starttime', nowTime());
+}
+
+
+/* ── SAVE: Wake ────────────────────────────────────────────────── */
+
+function saveWake() {
+  const time = getVal('wk-time');
+  if (!time) { showToast('Please enter a rise time'); return; }
+
+  db.logs.push({
+    id: nextId(),
+    type: 'rise',
+    date: getVal('wk-date') || today(),
+    time: time
+  });
+
+  saveDB();
+  clearDraft('rise');
+  showToast('Rise time saved ✓');
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   WORKOUT — timer, exercises, draft auto-save
+   ════════════════════════════════════════════════════════════════════ */
+
+
+
+/* ── Exercise blocks ───────────────────────────────────────────── */
+
+
+function buildExerciseOptions(selectedName) {
+  /* Build the <option> list fresh from the current library each time,
+     so exercises added in Settings are immediately available here. */
+  if (db.exerciseLibrary.length === 0) {
+    return '<option value="">— add exercises in Settings first —</option>';
+  }
+  const opts = db.exerciseLibrary.map(name =>
+    `<option value="${name}" ${name === selectedName ? 'selected' : ''}>${name}</option>`
+  ).join('');
+  return `<option value="">— select exercise —</option>${opts}`;
+}
+
+function addExerciseBlock(exerciseData, containerId) {
+  /* Add one exercise block to a gym form.
+     containerId defaults to 'exercises-container' (log form);
+     pass 'sheet-exercises-container' for the edit sheet.
+     exerciseData is optional — used when restoring a draft or saved entry. */
+  exerciseCount++;
+  const blockId = (containerId === 'sheet-exercises-container' ? 'sex-' : 'ex-') + exerciseCount;
+  const targetId = containerId || 'exercises-container';
+
+  const block = document.createElement('div');
+  block.className = 'exercise-block';
+  block.id = blockId;
+
+  block.innerHTML =
+    '<div class="exercise-header">' +
+      '<select class="ex-name">' +
+        buildExerciseOptions(exerciseData ? exerciseData.name : '') +
+      '</select>' +
+      '<button class="del-btn" title="Remove exercise">&times;</button>' +
+    '</div>' +
+    '<div class="set-labels" style="display:grid;grid-template-columns:28px 2fr 2fr 28px;gap:6px;margin-bottom:2px;">' +
+      '<div class="set-label" style="text-align:center">#</div>' +
+      '<div class="set-label" style="padding-left:2px">Weight (kg)</div>' +
+      '<div class="set-label" style="padding-left:2px">Reps</div>' +
+      '<div></div>' +
+    '</div>' +
+    '<div class="sets-container"></div>' +
+    '<button class="add-set-btn">+ Add set</button>';
+
+  block.querySelector('.del-btn').addEventListener('click', () => block.remove());
+  block.querySelector('.add-set-btn').addEventListener('click', () => addSetRow(blockId));
+
+  document.getElementById(targetId).appendChild(block);
+
+  if (exerciseData && exerciseData.sets && exerciseData.sets.length > 0) {
+    exerciseData.sets.forEach(s => addSetRow(blockId, s));
+  } else {
+    addSetRow(blockId);
+  }
+}
+
+function addSetRow(blockId, setData) {
+  /* Add a set row (# | weight | reps | delete) to an exercise block.
+     Works for both the log form and the edit sheet. */
+  const container = document.getElementById(blockId).querySelector('.sets-container');
+  const setNum = container.children.length + 1;
+
+  const row = document.createElement('div');
+  row.className = 'set-row';
+
+  const nDiv = document.createElement('div');
+  nDiv.className = 'set-num';
+  nDiv.textContent = setNum;
+
+  const wInput = document.createElement('input');
+  wInput.type = 'number'; wInput.className = 's-weight';
+  wInput.step = '0.01'; wInput.inputMode = 'decimal';
+  wInput.value = (setData && setData.weight != null) ? setData.weight : '';
+  const wDiv = document.createElement('div'); wDiv.appendChild(wInput);
+
+  const rInput = document.createElement('input');
+  rInput.type = 'number'; rInput.className = 's-reps';
+  rInput.min = '1'; rInput.step = '1'; rInput.inputMode = 'numeric';
+  rInput.value = (setData && setData.reps != null) ? setData.reps : '';
+  const rDiv = document.createElement('div'); rDiv.appendChild(rInput);
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'set-del'; delBtn.textContent = '×'; delBtn.title = 'Remove set';
+  delBtn.addEventListener('click', function() {
+    row.remove();
+    container.querySelectorAll('.set-num').forEach((el, i) => { el.textContent = i + 1; });
+  });
+
+  row.appendChild(nDiv); row.appendChild(wDiv); row.appendChild(rDiv); row.appendChild(delBtn);
+  container.appendChild(row);
+}
+
+
+/* ── Draft auto-save ───────────────────────────────────────────── */
+
+
+function resetGymForm() {
+  /* Clear the gym form for a fresh entry. */
+  setVal('wo-date', today());
+  setVal('wo-starttime', nowTime());
+  setVal('wo-duration', '');
+  setVal('wo-note', '');
+  document.getElementById('exercises-container').innerHTML = '';
+  exerciseCount = 0;
+  addExerciseBlock();
+}
+
+
+/* ── SAVE: Workout ─────────────────────────────────────────────── */
+
+function saveWorkout() {
+  /* Collect gym form data and save as a log entry.
+     Requires at least one exercise with at least one set. */
+
+  // Collect and validate exercises in a single pass
+  const exercises = [];
+  let hasIncomplete = false;
+
+  document.querySelectorAll('#exercises-container .exercise-block').forEach(block => {
+    const name = block.querySelector('.ex-name').value;
+    if (!name) return; // skip blocks with no exercise selected
+
+    const sets = [];
+    block.querySelectorAll('.set-row').forEach(row => {
+      const weight = parseFloat(row.querySelector('.s-weight').value);
+      const reps   = parseInt(row.querySelector('.s-reps').value);
+      if (isNaN(weight) && isNaN(reps)) return; // skip entirely empty rows
+      if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
+      sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
+    });
+
+    if (sets.length > 0) exercises.push({ name, sets });
+  });
+
+  if (hasIncomplete) {
+    showToast('Each set needs both weight and whole-number reps (≥1)');
+    return;
+  }
+  if (exercises.length === 0) {
+    showToast('Please add at least one exercise with sets');
+    return;
+  }
+
+  const dur = parseInt(getVal('wo-duration'));
+
+  db.logs.push({
+    id: nextId(),
+    type: 'gym',
+    date:      getVal('wo-date') || today(),
+    startTime: getVal('wo-starttime') || nowTime(),
+    duration:  isNaN(dur) ? null : dur,
+    note:      getVal('wo-note') || null,
+    exercises: exercises
+  });
+
+  // Clear the draft
+
+  saveDB();
+
+  resetGymForm();
+
+  clearDraft('gym');
+  showToast('Gym session saved ✓');
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   EDIT BOTTOM SHEET
+   openEntry(id)  — opens the sheet for any log entry
+   closeSheet()   — closes it
+   saveEdit()     — writes changes back to db.logs
+   deleteCurrentEntry() — deletes from db.logs
+   ════════════════════════════════════════════════════════════════════ */
+
+let currentEditId = null; // ID of the entry currently open in the sheet
+
+function openEntry(id) {
+  const entry = db.logs.find(e => e.id === id);
+  if (!entry) return;
+  currentEditId = id;
+
+  const titles = { meal:'Meal', weight:'Weight', gym:'Gym', cardio:'Cardio', rise:'Rise' };
+  document.getElementById('sheet-title').textContent = titles[entry.type] || 'Entry';
+  document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
+  document.getElementById('sheet-footer-view').style.display = 'flex';
+  document.getElementById('sheet-footer-edit').style.display = 'none';
+
+  document.getElementById('sheet-overlay').style.display = 'block';
+  document.getElementById('edit-sheet').style.display = 'block';
+}
+
+function switchToEditMode() {
+  const entry = db.logs.find(e => e.id === currentEditId);
+  if (!entry) return;
+  document.getElementById('sheet-body').innerHTML = buildEditForm(entry);
+  if (entry.type === 'gym')  buildSheetExercises(entry.exercises || []);
+  if (entry.type === 'meal') buildSheetMealItems(entry.items || []);
+  document.getElementById('sheet-footer-view').style.display = 'none';
+  document.getElementById('sheet-footer-edit').style.display = 'flex';
+}
+
+function switchToViewMode() {
+  const entry = db.logs.find(e => e.id === currentEditId);
+  if (!entry) return;
+  document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
+  document.getElementById('sheet-footer-view').style.display = 'flex';
+  document.getElementById('sheet-footer-edit').style.display = 'none';
+}
+
+function buildViewBody(e) {
+  /* Renders a clean read-only summary of any log entry. */
+  const row = (label, value) => value != null && value !== ''
+    ? `<div class="card-row"><span style="color:var(--muted);font-size:14px">${label}</span><span style="font-size:15px;text-align:right">${value}</span></div>`
+    : '';
+
+  if (e.type === 'weight') {
+    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}${row('Weight', e.value + ' kg')}</div>`;
+  }
+
+  if (e.type === 'rise') {
+    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}</div>`;
+  }
+
+  if (e.type === 'meal') {
+    const t = e.totals || {};
+    const itemsHTML = (e.items || []).map((item, i) => {
+      const parts = [];
+      if (item.calories != null) parts.push(item.calories + ' kcal');
+      if (item.protein  != null) parts.push('P ' + item.protein + 'g');
+
+      const qtyStr = (item.quantity && item.quantity !== 1) ? ' ×' + item.quantity : '';
+      return `<div class="card-row">
+        <div>
+          <div style="font-size:15px;font-weight:500">${item.name || 'Item ' + (i+1)}${qtyStr}</div>
+          <div style="font-size:13px;color:var(--muted)">${parts.join(' · ')}</div>
+          ${item.note ? `<div style="font-size:12px;color:var(--muted)">Note: ${item.note}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}</div>
+    ${itemsHTML ? `<div class="card">${itemsHTML}</div>` : ''}
+    <div class="card">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Totals</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;text-align:center;">
+        <div><div style="font-size:11px;color:var(--muted)">kcal</div><div style="font-size:15px;font-weight:500">${t.calories ?? '—'}</div></div>
+        <div><div style="font-size:11px;color:var(--muted)">Protein</div><div style="font-size:15px;font-weight:500">${t.protein != null ? t.protein + 'g' : '—'}</div></div>
+      </div>
+    </div>`;
+  }
+
+  if (e.type === 'cardio') {
+    return `<div class="card">
+      ${row('Date', e.date)}
+      ${row('Start', e.startTime)}
+      ${row('Activity', e.activityType)}
+      ${row('Distance', e.distance  != null ? e.distance  + ' km'  : null)}
+      ${row('Duration', e.duration  != null ? e.duration  + ' min' : null)}
+      ${row('Avg HR',   e.hrAvg     != null ? e.hrAvg     + ' bpm' : null)}
+      ${row('Max HR',   e.hrMax     != null ? e.hrMax     + ' bpm' : null)}
+      ${row('Elevation',e.elevationGain != null ? e.elevationGain + ' m' : null)}
+      ${row('Note', e.note)}
+    </div>`;
+  }
+
+  if (e.type === 'gym') {
+    const exHTML = (e.exercises || []).map(ex => {
+      const setsHTML = ex.sets.map((s, i) =>
+        `<div style="display:flex;gap:12px;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--muted);min-width:24px">${i + 1}</span>
+          <span>${s.weight != null ? fmtWeight(s.weight) + ' kg' : '—'}</span>
+          <span>${s.reps != null ? s.reps + ' reps' : '—'}</span>
+        </div>`
+      ).join('');
+      return `<div style="margin-bottom:0.75rem;">
+        <div style="font-weight:500;margin-bottom:4px;">${ex.name}</div>
+        ${setsHTML}
+      </div>`;
+    }).join('');
+
+    return `<div class="card">
+      ${row('Date', e.date)}
+      ${row('Start', e.startTime)}
+      ${row('Duration', e.duration != null ? e.duration + ' min' : null)}
+      ${row('Note', e.note)}
+    </div>
+    ${exHTML ? `<div class="card">${exHTML}</div>` : ''}`;
+  }
+
+  return '';
+}
+
+function closeSheet() {
+  document.getElementById('sheet-overlay').style.display = 'none';
+  document.getElementById('edit-sheet').style.display = 'none';
+  currentEditId = null;
+}
+
+function buildEditForm(e) {
+  /* Returns HTML string for the edit form body, pre-filled with entry data. */
+  const dateField = (id, val) =>
+    `<div class="field"><label>Date</label><input type="date" id="${id}" value="${val || ''}"></div>`;
+  const timeField = (id, label, val) =>
+    `<div class="field"><label>${label}</label><input type="time" id="${id}" value="${val || ''}"></div>`;
+  const numField = (id, label, val, step) =>
+    `<div class="field"><label>${label}</label><input type="number" id="${id}" value="${val ?? ''}" step="${step||1}" min="0" inputmode="decimal"></div>`;
+  const textField = (id, label, val) =>
+    `<div class="field"><label>${label}</label><textarea id="${id}">${val || ''}</textarea></div>`;
+  const row2 = (...fields) => `<div class="field-row">${fields.join('')}</div>`;
+
+  if (e.type === 'weight') {
+    return row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
+           numField('e-value', 'Weight (kg)', e.value, '0.1');
+  }
+
+  if (e.type === 'rise') {
+    return row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time));
+  }
+
+  if (e.type === 'meal') {
+    return row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
+      `<div id="sheet-meal-items-container" style="margin-top:0.5rem;"></div>
+       <button class="add-exercise-btn" onclick="addSheetMealItemBlock(null, true)">+ Add item</button>
+       <div class="card" style="margin-top:0.75rem;">
+         <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">Totals</div>
+         <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; text-align:center;">
+           <div><div style="font-size:11px;color:var(--muted)">kcal</div><div id="e-total-cal" style="font-size:15px;font-weight:500">—</div></div>
+           <div><div style="font-size:11px;color:var(--muted)">Protein</div><div id="e-total-pro" style="font-size:15px;font-weight:500">—</div></div>
+
+         </div>
+       </div>`;
+  }
+
+  if (e.type === 'cardio') {
+    const actOpts = (db.cardioLibrary || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
+    return `<div class="field"><label>Activity</label><select id="e-acttype">${actOpts}</select></div>` +
+      row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
+      row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
+           numField('e-dur',  'Duration (min)', e.duration, '1')) +
+      row2(numField('e-hravg', 'Avg HR (bpm)', e.hrAvg, '1'),
+           numField('e-hrmax', 'Max HR (bpm)', e.hrMax, '1')) +
+      numField('e-elev', 'Elevation (m)', e.elevationGain, '1') +
+      textField('e-note', 'Note', e.note);
+  }
+
+  if (e.type === 'gym') {
+    return row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
+      numField('e-dur', 'Duration (min)', e.duration, '1') +
+      textField('e-note', 'Note', e.note) +
+      `<div id="sheet-exercises-container" style="margin-top:0.5rem;"></div>
+       <button class="add-exercise-btn" onclick="addExerciseBlock(null, 'sheet-exercises-container')">+ Add exercise</button>`;
+  }
+
+  return '';
+}
+
+/* ── Sheet exercise blocks ─────────────────────────────────────── */
+/* Uses the unified addExerciseBlock(exerciseData, containerId) and
+   addSetRow(blockId, setData) functions defined above. */
+
+/* ── Sheet meal item blocks ────────────────────────────────────── */
+
+let sheetMealItemCount = 0;
+
+function buildSheetMealItems(items) {
+  const container = document.getElementById('sheet-meal-items-container');
+  if (!container) return;
+  container.innerHTML = '';
+  sheetMealItemCount = 0;
+  if (items && items.length > 0) {
+    items.forEach(item => addSheetMealItemBlock(item));
+  } else {
+    addSheetMealItemBlock();
+  }
+  updateSheetMealTotals();
+}
+
+function addSheetMealItemBlock(itemData, interactive) {
+  sheetMealItemCount++;
+  const blockId = 'smi-' + sheetMealItemCount;
+  const block = document.createElement('div');
+  block.className = 'exercise-block';
+  block.id = blockId;
+
+  const listId = 'smi-list-' + sheetMealItemCount;
+  const libraryOptions = (db.mealItemLibrary || []).map(i => `<option value="${i.name}">`).join('');
+  const iStyle = "width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;";
+
+  block.innerHTML =
+    `<datalist id="${listId}">${libraryOptions}</datalist>` +
+    '<div class="exercise-header">' +
+      `<input type="text" class="mi-name" list="${listId}" placeholder="Item name">` +
+      '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
+      `<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
+      '<button class="del-btn" title="Remove item">&times;</button>' +
+    '</div>' +
+    '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px;">' +
+      '<div class="set-label">kcal</div><div class="set-label">P (g)</div>' +
+    '</div>' +
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">` +
+      `<input type="number" class="mi-cal"  min="0" inputmode="numeric" style="${iStyle}">` +
+      `<input type="number" class="mi-pro"  min="0" inputmode="decimal" style="${iStyle}">` +
+
+    '</div>' +
+    '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
+      '<textarea class="mi-note" style="height:42px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
+    '</div>';
+
+  block.querySelector('.del-btn').addEventListener('click', () => {
+    block.remove(); updateSheetMealTotals();
+  });
+  block.querySelectorAll('input, textarea').forEach(el => {
+    el.addEventListener('input', () => updateSheetMealTotals());
+  });
+
+  const nameInput = block.querySelector('.mi-name');
+  nameInput.addEventListener('change', () => {
+    const match = (db.mealItemLibrary || []).find(i => i.name === nameInput.value);
+    if (match) {
+      const qty = parseFloat(block.querySelector('.mi-qty').value) || 1;
+      const fill = (cls, val) => { const el = block.querySelector(cls); if (el && val != null) el.value = parseFloat((val * qty).toFixed(2)); };
+      fill('.mi-cal', match.calories); fill('.mi-pro', match.protein);
+      block._unitMacros = { cal: match.calories, pro: match.protein };
+      updateSheetMealTotals();
+    }
+  });
+
+  const qtyInput = block.querySelector('.mi-qty');
+  qtyInput.addEventListener('input', () => {
+    if (block._unitMacros) {
+      const qty = parseFloat(qtyInput.value) || 1;
+      const scale = (cls, val) => { const el = block.querySelector(cls); if (el && val != null) el.value = parseFloat((val * qty).toFixed(2)); };
+      scale('.mi-cal', block._unitMacros.cal); scale('.mi-pro', block._unitMacros.pro);
+    }
+    updateSheetMealTotals();
+  });
+
+  if (itemData) {
+    if (itemData.name)             nameInput.value = itemData.name;
+    if (itemData.quantity != null) qtyInput.value  = itemData.quantity;
+    if (itemData.calories != null) block.querySelector('.mi-cal').value  = itemData.calories;
+    if (itemData.protein  != null) block.querySelector('.mi-pro').value  = itemData.protein;
+
+    if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
+    if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
+  }
+
+  document.getElementById('sheet-meal-items-container').appendChild(block);
+  updateSheetMealTotals();
+}
+
+function updateSheetMealTotals() {
+  let cal = 0, pro = 0, hasAny = false;
+  document.querySelectorAll('#sheet-meal-items-container .exercise-block').forEach(block => {
+    const v = cls => { const n = parseFloat(block.querySelector(cls)?.value); return isNaN(n) ? 0 : n; };
+    const c = v('.mi-cal'), p = v('.mi-pro');
+    if (c || p) hasAny = true;
+    cal += c; pro += p;
+  });
+  const fmt = v => v > 0 ? (v % 1 === 0 ? String(v) : v.toFixed(1)) + 'g' : '—';
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setEl('e-total-cal', hasAny ? Math.round(cal) : '—');
+  setEl('e-total-pro', hasAny ? fmt(pro) : '—');
+}
+
+function buildSheetExercises(exercises) {
+  const container = document.getElementById('sheet-exercises-container');
+  container.innerHTML = '';
+  if (exercises.length > 0) {
+    exercises.forEach(ex => addExerciseBlock(ex, 'sheet-exercises-container'));
+  } else {
+    addExerciseBlock(null, 'sheet-exercises-container');
+  }
+}
+
+/* ── Save edits back to db ─────────────────────────────────────── */
+
+function saveEdit() {
+  const entry = db.logs.find(e => e.id === currentEditId);
+  if (!entry) return;
+
+  const num = id => { const v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? null : v; };
+  const str = id => document.getElementById(id)?.value?.trim() || null;
+
+  if (entry.type === 'weight') {
+    const val = num('e-value');
+    if (!val) { showToast('Please enter a weight'); return; }
+    entry.value = val;
+    entry.date  = str('e-date') || entry.date;
+    entry.time  = str('e-time') || entry.time;
+  }
+
+  else if (entry.type === 'rise') {
+    entry.date = str('e-date') || entry.date;
+    entry.time = str('e-time') || entry.time;
+  }
+
+  else if (entry.type === 'meal') {
+    entry.date = str('e-date') || entry.date;
+    entry.time = str('e-time') || entry.time;
+
+    const items = [];
+    document.querySelectorAll('#sheet-meal-items-container .exercise-block').forEach(block => {
+      const numB = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
+      const name = block.querySelector('.mi-name')?.value.trim() || '';
+      const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
+      const cal  = numB('.mi-cal'), pro = numB('.mi-pro');
+      const note = block.querySelector('.mi-note')?.value.trim() || null;
+      if (name || cal || pro)
+        items.push({ name, quantity: qty, calories: cal, protein: pro, note });
+    });
+
+    if (!items.length) { showToast('Please add at least one item'); return; }
+
+    const sumF = field => {
+      const vals = items.map(i => i[field]).filter(v => v != null);
+      return vals.length ? parseFloat(vals.reduce((a,b) => a+b, 0).toFixed(1)) : null;
+    };
+    entry.items  = items;
+    entry.totals = { calories: sumF('calories'), protein: sumF('protein') };
+  }
+
+  else if (entry.type === 'cardio') {
+    entry.date           = str('e-date') || entry.date;
+    entry.startTime      = str('e-time') || entry.startTime;
+    entry.activityType   = document.getElementById('e-acttype')?.value || entry.activityType;
+    entry.distance       = num('e-dist');
+    entry.duration       = num('e-dur');
+    entry.hrAvg          = num('e-hravg');
+    entry.hrMax          = num('e-hrmax');
+    entry.elevationGain  = num('e-elev');
+
+    entry.note           = str('e-note');
+  }
+
+  else if (entry.type === 'gym') {
+    entry.date      = str('e-date') || entry.date;
+    entry.startTime = str('e-time') || entry.startTime;
+    entry.duration  = num('e-dur');
+    entry.note      = str('e-note');
+
+    // Collect exercises from sheet blocks
+    const exercises = [];
+    let hasIncomplete = false;
+    document.querySelectorAll('#sheet-exercises-container .exercise-block').forEach(block => {
+      const name = block.querySelector('.ex-name').value;
+      if (!name) return;
+      const sets = [];
+      block.querySelectorAll('.set-row').forEach(row => {
+        const weight = parseFloat(row.querySelector('.s-weight').value);
+        const reps   = parseInt(row.querySelector('.s-reps').value);
+        if (isNaN(weight) && isNaN(reps)) return; // skip empty rows
+        if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
+        sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
+      });
+      if (sets.length > 0) exercises.push({ name, sets });
+    });
+
+    if (hasIncomplete) {
+      showToast('Each set needs both weight and whole-number reps (≥1)');
+      return;
+    }
+    if (exercises.length === 0) {
+      showToast('Please add at least one exercise with sets');
+      return;
+    }
+    entry.exercises = exercises;
+  }
+
+  saveDB();
+  renderHistory();
+  switchToViewMode();
+  showToast('Saved ✓');
+}
+
+function deleteCurrentEntry() {
+  if (!confirm('Delete this entry?')) return;
+  db.logs = db.logs.filter(e => e.id !== currentEditId);
+  saveDB();
+  closeSheet();
+  renderHistory();
+  showToast('Deleted');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CHARTS
+   ════════════════════════════════════════════════════════════════════ */
+
+let weightChartInstance = null;  // holds the Chart.js instance
+let weightViewMode  = 'raw';     // 'raw' | 'avg7' | 'median7'
+let weightRangeMonths = 1;       // 1 | 3 | 12 | 0 (0 = all)
+
+/* ── Data helpers ──────────────────────────────────────────────── */
+
+/* ── Data helpers ──────────────────────────────────────────────── */
+
+function getWeightByDay() {
+  /* Returns one entry per day — the latest weight entry for that day.
+     Result: array of { date, value } sorted chronologically. */
+  const byDay = {};
+  db.logs
+    .filter(e => e.type === 'weight')
+    .forEach(e => {
+      if (!byDay[e.date] || e.id > byDay[e.date].id) byDay[e.date] = e;
+    });
+  return Object.values(byDay)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map(e => ({ date: e.date, value: e.value }));
+}
+
+function forwardFill(sparse) {
+  /* Given a sparse array of { date, value } points, return a dense
+     array covering every calendar day from first to last date,
+     carrying the last known value forward across gaps.
+     e.g. [Apr 28, Apr 30] -> [Apr 28, Apr 29 (=Apr 28 val), Apr 30] */
+  if (sparse.length === 0) return [];
+  const result = [];
+  let cursor = new Date(sparse[0].date + 'T12:00:00');
+  const end   = new Date(sparse[sparse.length - 1].date + 'T12:00:00');
+  let si = 0; // index into sparse
+  let lastVal = sparse[0].value;
+
+  while (cursor <= end) {
+    const dateStr = cursor.toISOString().slice(0, 10);
+    // Advance sparse pointer to this date if available
+    if (si < sparse.length && sparse[si].date === dateStr) {
+      lastVal = sparse[si].value;
+      si++;
+    }
+    result.push({ date: dateStr, value: lastVal });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return result;
+}
+
+function rollingAverage(filled, windowDays) {
+  /* Rolling average over `windowDays` on a dense (forward-filled) array. */
+  return filled.map((point, i) => {
+    const start = Math.max(0, i - windowDays + 1);
+    const subset = filled.slice(start, i + 1).map(p => p.value);
+    const avg = subset.reduce((s, v) => s + v, 0) / subset.length;
+    return { date: point.date, value: parseFloat(avg.toFixed(2)) };
+  });
+}
+
+function rollingMedian(filled, windowDays) {
+  /* Rolling median over `windowDays` on a dense (forward-filled) array. */
+  return filled.map((point, i) => {
+    const start = Math.max(0, i - windowDays + 1);
+    const subset = filled.slice(start, i + 1).map(p => p.value).sort((a, b) => a - b);
+    const mid = Math.floor(subset.length / 2);
+    const median = subset.length % 2 === 0
+      ? (subset[mid - 1] + subset[mid]) / 2
+      : subset[mid];
+    return { date: point.date, value: parseFloat(median.toFixed(2)) };
+  });
+}
+
+/* ── Chart rendering ───────────────────────────────────────────── */
+
+function renderCharts() {
+  renderRiseChart();
+  renderWeightChart();
+  renderCalChart();
+  renderProteinChart();
+  renderActivityChart();
+}
+
+function setWeightView(mode) {
+  weightViewMode = mode;
+  ['raw', 'avg7', 'median7'].forEach(m => {
+    document.getElementById('toggle-' + m).classList.toggle('active', m === mode);
+  });
+  renderWeightChart();
+}
+
+function setWeightRange(months) {
+  weightRangeMonths = months;
+  ['1w','1m','3m','all'].forEach(id => {
+    const el = document.getElementById('range-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const keyMap = {0.25:'1w', 1:'1m', 3:'3m', 12:'12m', 0:'all'};
+  const btn = document.getElementById('range-' + keyMap[months]);
+  if (btn) btn.classList.add('active');
+  renderWeightChart();
+}
+
+function renderWeightChart() {
+  const allRaw = getWeightByDay();
+  const canvas = document.getElementById('chart-weight');
+  const empty  = document.getElementById('chart-weight-empty');
+
+  if (allRaw.length === 0) {
+    canvas.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  canvas.style.display = 'block'; empty.style.display = 'none';
+
+  let rangeStart = null;
+  if (weightRangeMonths > 0) {
+    const d = new Date(); if (weightRangeMonths < 1) { const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]); const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1)); d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0); } else { d.setDate(d.getDate() - Math.round(weightRangeMonths * 30)); }
+    rangeStart = d.toISOString().slice(0, 10);
+  }
+  const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
+  if (raw.length === 0) {
+    canvas.style.display = 'none'; empty.style.display = 'block';
+    empty.textContent = 'No data in this range'; return;
+  }
+
+  const allFilled = forwardFill(allRaw);
+  const filled = rangeStart ? allFilled.filter(p => p.date >= rangeStart) : allFilled;
+
+  let chartData;
+  if (weightViewMode === 'raw') {
+    const rawSet = new Set(raw.map(p => p.date));
+    chartData = filled.map(p => ({ x: p.date, y: rawSet.has(p.date) ? p.value : null }));
+  } else if (weightViewMode === 'avg7') {
+    const fullAvg = rollingAverage(allFilled, 7);
+    chartData = (rangeStart ? fullAvg.filter(p => p.date >= rangeStart) : fullAvg).map(p => ({ x: p.date, y: p.value }));
+  } else {
+    const fullMed = rollingMedian(allFilled, 7);
+    chartData = (rangeStart ? fullMed.filter(p => p.date >= rangeStart) : fullMed).map(p => ({ x: p.date, y: p.value }));
+  }
+
+  const yVals = chartData.map(p => p.y).filter(v => v !== null);
+  const yDataMin = Math.min(...yVals);
+  const yDataMax = Math.max(...yVals);
+  const yMin = parseFloat((yDataMin - 0.1).toFixed(2));
+  const yMax = parseFloat((yDataMax + 0.1).toFixed(2));
+
+  if (weightChartInstance) { weightChartInstance.destroy(); weightChartInstance = null; }
+
+  const ctx   = canvas.getContext('2d');
+  const style = getComputedStyle(document.documentElement);
+  const accentColor = style.getPropertyValue('--accent').trim();
+  const mutedColor  = style.getPropertyValue('--muted').trim();
+  const borderColor = style.getPropertyValue('--border').trim();
+
+  weightChartInstance = new Chart(ctx, {
+    type: 'line',
+    plugins: [makeWeekBandPlugin('weightWeekBands', () => weightRangeMonths)],
+    data: {
+      datasets: [{
+        data: chartData,
+        borderColor: accentColor,
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointBackgroundColor: accentColor,
+        fill: false,
+        tension: 0.3,
+        spanGaps: weightViewMode !== 'raw',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          filter: item => item.parsed.y !== null,
+          callbacks: {
+            title: items => new Date(items[0].parsed.x).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+            label: item => item.parsed.y.toFixed(2) + ' kg'
+          }
+        }
+      },
+      scales: {
+        x: makeXScale(rangeStart || allRaw[0].date, allRaw, weightRangeMonths, mutedColor, borderColor),
+        y: {
+          min: yMin, max: yMax,
+          title: { display: true, text: 'kg', color: mutedColor, font: { size: 11 } },
+          afterBuildTicks: axis => {
+            const ticks = [];
+            let v = Math.ceil(yMin * 2) / 2;
+            while (v <= yMax + 0.001) { ticks.push({ value: v }); v = Math.round((v + 0.5) * 10) / 10; }
+            axis.ticks = ticks;
+          },
+          ticks: {
+            font: { size: 11 }, color: mutedColor,
+            callback: v => { const r = Math.round(v * 2) / 2; return Math.abs(r - v) > 0.01 ? null : r.toFixed(1); }
+          },
+          grid: { color: borderColor }
+        }
+      }
+    }
+  });
+}
+
+/* ── Date formatting for chart labels ──────────────────────────── */
+
+function formatDateShort(dateStr) {
+  /* "2025-01-12" -> "12 Jan" */
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   RISE TIME CHART
+   ════════════════════════════════════════════════════════════════════ */
+
+let riseChartInstance = null;
+let riseViewMode      = 'raw';
+let riseRangeMonths   = 0.25;
+
+function timeToMins(t) {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+function minsToTime(mins) {
+  const h = Math.floor(mins / 60) % 24;
+  const m = Math.round(mins % 60);
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+function getRiseByDay() {
+  const byDay = {};
+  db.logs.filter(e => e.type === 'rise').forEach(e => {
+    if (!byDay[e.date] || e.id > byDay[e.date].id) byDay[e.date] = e;
+  });
+  return Object.values(byDay)
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .map(e => ({ date: e.date, value: timeToMins(e.time) }))
+    .filter(e => e.value !== null);
+}
+
+function setRiseView(mode) {
+  riseViewMode = mode;
+  ['raw','avg7','median7'].forEach(m =>
+    document.getElementById('rise-toggle-' + m).classList.toggle('active', m === mode));
+  renderRiseChart();
+}
+
+function setRiseRange(months) {
+  riseRangeMonths = months;
+  ['1w','1m','3m','all'].forEach(id => {
+    const el = document.getElementById('rise-range-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const btn = document.getElementById('rise-range-' + ({0.25:'1w',1:'1m',3:'3m',0:'all'}[months]));
+  if (btn) btn.classList.add('active');
+  renderRiseChart();
+}
+
+function renderRiseChart() {
+  const allRaw = getRiseByDay();
+  const canvas = document.getElementById('chart-rise');
+  const empty  = document.getElementById('chart-rise-empty');
+  if (!canvas) return;
+  if (allRaw.length === 0) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+
+  let rangeStart = null;
+  if (riseRangeMonths > 0) {
+    const d = new Date(); if (riseRangeMonths < 1) { const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]); const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1)); d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0); } else { d.setDate(d.getDate() - Math.round(riseRangeMonths * 30)); }
+    rangeStart = d.toISOString().slice(0,10);
+  }
+  const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
+  if (raw.length === 0) { canvas.style.display='none'; empty.style.display='block'; empty.textContent='No data in this range'; return; }
+
+  const allFilled = forwardFill(allRaw);
+  const filled = rangeStart ? allFilled.filter(p => p.date >= rangeStart) : allFilled;
+
+  let chartData;
+  if (riseRangeMonths === 0.25 && rangeStart) {
+    // This week: dense Mon-Sun, raw values only, null for missing/future days
+    const rawSet = {}; raw.forEach(p => { rawSet[p.date] = p.value; });
+    chartData = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
+      const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      chartData.push({ x: dateStr, y: dateStr <= today() ? (rawSet[dateStr] ?? null) : null });
+    }
+  } else if (riseViewMode === 'raw') {
+    const rawSet = new Set(raw.map(p => p.date));
+    chartData = filled.map(p => ({ x: p.date, y: rawSet.has(p.date) ? p.value : null }));
+  } else if (riseViewMode === 'avg7') {
+    const full = rollingAverage(allFilled, 7);
+    chartData = (rangeStart ? full.filter(p => p.date >= rangeStart) : full).map(p => ({ x: p.date, y: p.value }));
+  } else {
+    const full = rollingMedian(allFilled, 7);
+    chartData = (rangeStart ? full.filter(p => p.date >= rangeStart) : full).map(p => ({ x: p.date, y: p.value }));
+  }
+
+  const yVals = chartData.map(p => p.y).filter(v => v !== null);
+  const riseTargetMinsForRange = (() => {
+    const t = db.settings && db.settings.riseTarget;
+    if (!t) return null;
+    const [h, m] = t.split(':').map(Number); return h * 60 + m;
+  })();
+  const yMin = Math.min(...yVals, riseRangeMonths === 0.25 && riseTargetMinsForRange ? riseTargetMinsForRange - 6 : Infinity) - 6;
+  const yMax = Math.max(...yVals, riseRangeMonths === 0.25 && riseTargetMinsForRange ? riseTargetMinsForRange + 6 : -Infinity) + 6;
+
+  if (riseChartInstance) { riseChartInstance.destroy(); riseChartInstance = null; }
+
+  const ctx = canvas.getContext('2d');
+  const style = getComputedStyle(document.documentElement);
+  const accentColor = style.getPropertyValue('--accent').trim();
+  const mutedColor  = style.getPropertyValue('--muted').trim();
+  const borderColor = style.getPropertyValue('--border').trim();
+
+  const weekBandPlugin = makeWeekBandPlugin('riseWeekBands', () => riseRangeMonths);
+
+  // Target line — only in This week view
+  const riseTargetStr = db.settings && db.settings.riseTarget;
+  const riseTargetMins = riseTargetStr ? (() => {
+    const [h, m] = riseTargetStr.split(':').map(Number); return h * 60 + m;
+  })() : null;
+
+  const riseTargetPlugin = {
+    id: 'riseTargetLine',
+    afterDraw(chart) {
+      if (!riseTargetMins || riseRangeMonths !== 0.25) return;
+      const { ctx: c, chartArea, scales } = chart;
+      const y = scales.y.getPixelForValue(riseTargetMins);
+      if (y < chartArea.top || y > chartArea.bottom) return;
+      c.save();
+      c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6, 4]);
+      c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = '#e76f51';
+      c.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+      c.textAlign = 'right';
+      c.fillText(minsToTime(riseTargetMins), chartArea.right - 4, y - 4);
+      c.restore();
+    }
+  };
+
+  riseChartInstance = new Chart(ctx, {
+    type: 'line', plugins: [weekBandPlugin, riseTargetPlugin],
+    data: { datasets: [{ data: chartData, borderColor: accentColor, backgroundColor: 'transparent',
+      borderWidth: 2, pointRadius: 0,
+      pointHoverRadius: 5, pointBackgroundColor: accentColor, fill: false, tension: 0.3,
+      spanGaps: riseViewMode !== 'raw' }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        filter: item => item.parsed.y !== null,
+        callbacks: {
+          title: items => new Date(items[0].parsed.x).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+          label: item => minsToTime(item.parsed.y)
+        }
+      }},
+      scales: {
+        x: makeXScale(rangeStart, allRaw, riseRangeMonths, mutedColor, borderColor,
+          riseRangeMonths === 0.25 && rangeStart ? (() => {
+            const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + 6);
+            return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+          })() : null),
+        y: {
+          min: yMin, max: yMax,
+          title: { display: false },
+          afterBuildTicks: axis => {
+            const ticks = [];
+            const first = Math.ceil(yMin / 30) * 30;
+            for (let v = first; v <= yMax + 0.5; v += 30) ticks.push({ value: v });
+            axis.ticks = ticks;
+          },
+          ticks: { font: { size: 11 }, color: mutedColor, callback: v => minsToTime(Math.round(v/30)*30) },
+          grid: { color: borderColor }
+        }
+      }
+    }
+  });
+}
+
+/* ── Shared chart helpers ─────────────────────────────────────────── */
+
+function makeWeekBandPlugin(id, getRangeMonths) {
+  return {
+    id,
+    beforeDraw(chart) {
+      const months = getRangeMonths();
+      if (months === 0 || months === 0.25) return;
+      const { ctx: c, chartArea, scales } = chart;
+      if (!chartArea) return;
+      const xScale = scales.x;
+      const startDate = new Date(xScale.min);
+      const dow = startDate.getDay();
+      startDate.setDate(startDate.getDate() - (dow===0?6:dow-1));
+      startDate.setHours(0,0,0,0);
+      const isDark = document.documentElement.classList.contains('dark');
+      const shadeColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+      let weekStart = new Date(startDate); let bandIndex = 0;
+      while (weekStart.getTime() < xScale.max) {
+        const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+7);
+        if (bandIndex % 2 === 0) {
+          const x1 = Math.max(xScale.getPixelForValue(weekStart.getTime()), chartArea.left);
+          const x2 = Math.min(xScale.getPixelForValue(weekEnd.getTime()),   chartArea.right);
+          if (x2>x1) { c.save(); c.fillStyle=shadeColor; c.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top); c.restore(); }
+        }
+        weekStart = weekEnd; bandIndex++;
+      }
+    }
+  };
+}
+
+function makeXScale(rangeStart, allRaw, rangeMonths, mutedColor, borderColor, xMaxOverride) {
+  const xMax = xMaxOverride || today();
+  return {
+    type: 'time',
+    min: rangeStart || (allRaw.length ? allRaw[0].date || allRaw[0] : ''),
+    max: xMax,
+    time: { unit: 'day', isoWeekday: true, tooltipFormat: 'd MMM yyyy', displayFormats: { day: 'd MMM' } },
+    afterBuildTicks: axis => {
+      axis.ticks = axis.ticks.filter(t => {
+        const d = new Date(t.value);
+        const day = d.getDate(), dow = d.getDay();
+        if (day === 1) return true;
+        if ((rangeMonths === 1 || rangeMonths === 0.25) && dow === 1) return true;
+        return false;
+      });
+    },
+    ticks: {
+      font: { size: 11 }, color: mutedColor, maxRotation: 0, autoSkip: false, maxTicksLimit: 10000,
+      callback: function(value) {
+        const d = new Date(value + 12*3600*1000);
+        const day = d.getUTCDate(), dow = d.getUTCDay();
+        if (day === 1) return '1 ' + new Date(value).toLocaleDateString('en-GB',{month:'short'});
+        if ((rangeMonths === 1 || rangeMonths === 0.25) && dow === 1) return String(day);
+        return null;
+      }
+    },
+    grid: {
+      color: ctx => new Date(ctx.tick.value).getDate() === 1 ? borderColor : 'transparent',
+      lineWidth: ctx => new Date(ctx.tick.value).getDate() === 1 ? 2 : 1
+    }
+  };
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   CALORIES CHART
+   Day boundary: 03:30 cutoff. Gap = 100 kcal (increment 500).
+   ════════════════════════════════════════════════════════════════════ */
+
+let calChartInstance = null;
+let calViewMode      = 'raw';
+let calRangeMonths   = 0.25;
+
+function getCalByDay() {
+  const totals = {};
+  db.logs.filter(e => e.type === 'meal' && e.totals && e.totals.calories != null).forEach(e => {
+    const [h, m] = (e.time || '12:00').split(':').map(Number);
+    let calDay = e.date;
+    if (h * 60 + m < 210) {
+      const d = new Date(e.date + 'T12:00:00'); d.setDate(d.getDate() - 1);
+      calDay = d.toISOString().slice(0,10);
+    }
+    totals[calDay] = (totals[calDay] || 0) + e.totals.calories;
+  });
+  return Object.entries(totals).sort(([a],[b]) => a.localeCompare(b))
+    .map(([date, value]) => ({ date, value: Math.round(value) }));
+}
+
+function setCalView(mode) {
+  calViewMode = mode;
+  ['raw','avg7','median7'].forEach(m =>
+    document.getElementById('cal-toggle-' + m).classList.toggle('active', m === mode));
+  renderCalChart();
+}
+
+function setCalRange(months) {
+  calRangeMonths = months;
+  ['1w','1m','3m','all'].forEach(id => {
+    const el = document.getElementById('cal-range-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const btn = document.getElementById('cal-range-' + ({0.25:'1w',1:'1m',3:'3m',0:'all'}[months]));
+  if (btn) btn.classList.add('active');
+  renderCalChart();
+}
+
+
+
+/* ════════════════════════════════════════════════════════════════════
+   PROTEIN CHART
+   Day boundary: 03:30 cutoff. Gap = 10 g (increment 50).
+   ════════════════════════════════════════════════════════════════════ */
+
+let proteinChartInstance = null;
+let proteinViewMode      = 'raw';
+let proteinRangeMonths   = 0.25;
+
+function getProteinByDay() {
+  const totals = {};
+  db.logs.filter(e => e.type === 'meal' && e.totals && e.totals.protein != null).forEach(e => {
+    const [h, m] = (e.time || '12:00').split(':').map(Number);
+    let calDay = e.date;
+    if (h * 60 + m < 210) {
+      const d = new Date(e.date + 'T12:00:00'); d.setDate(d.getDate() - 1);
+      calDay = d.toISOString().slice(0,10);
+    }
+    totals[calDay] = (totals[calDay] || 0) + e.totals.protein;
+  });
+  return Object.entries(totals).sort(([a],[b]) => a.localeCompare(b))
+    .map(([date, value]) => ({ date, value: Math.round(value * 10) / 10 }));
+}
+
+function setProteinView(mode) {
+  proteinViewMode = mode;
+  ['raw','avg7','median7'].forEach(m =>
+    document.getElementById('protein-toggle-' + m).classList.toggle('active', m === mode));
+  renderProteinChart();
+}
+
+function setProteinRange(months) {
+  proteinRangeMonths = months;
+  ['1w','1m','3m','all'].forEach(id => {
+    const el = document.getElementById('protein-range-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const btn = document.getElementById('protein-range-' + ({0.25:'1w',1:'1m',3:'3m',0:'all'}[months]));
+  if (btn) btn.classList.add('active');
+  renderProteinChart();
+}
+
+
+
+
+function renderCalChart() {
+  const allRaw = getCalByDay();
+  const canvas = document.getElementById('chart-cal');
+  const empty  = document.getElementById('chart-cal-empty');
+  if (!canvas) return;
+  if (allRaw.length === 0) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+
+  let rangeStart = null;
+  if (calRangeMonths > 0) {
+    const d = new Date();
+    if (calRangeMonths < 1) {
+      const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]);
+      const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
+      d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0);
+    } else { d.setDate(d.getDate() - Math.round(calRangeMonths * 30)); }
+    rangeStart = d.toISOString().slice(0, 10);
+  }
+
+  const targetVal = db.settings && db.settings.calTarget ? db.settings.calTarget : 0;
+  const style = getComputedStyle(document.documentElement);
+  const accentColor = style.getPropertyValue('--accent').trim();
+  const mutedColor  = style.getPropertyValue('--muted').trim();
+  const borderColor = style.getPropertyValue('--border').trim();
+
+  if (window['_calChartInst']) { window['_calChartInst'].destroy(); window['_calChartInst'] = null; }
+
+  if (calRangeMonths === 0.25) {
+    // ── THIS WEEK: bar chart Mon-Sun ─────────────────────────────
+    const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
+    const lookup = {}; raw.forEach(p => { lookup[p.date] = p.value; });
+    const labels = [], data = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
+      const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      labels.push(dateStr);
+      data.push(dateStr <= today() ? (lookup[dateStr] ?? null) : null);
+    }
+    const yVals = data.filter(v => v != null);
+    const yMin = 0;
+    const yMax = Math.max(...(yVals.length ? yVals : [0]), targetVal + 100) + 100;
+
+    const targetLinePlugin = {
+      id: '_calChartInstTarget',
+      afterDraw(chart) {
+        if (!targetVal) return;
+        const { ctx: c, chartArea, scales } = chart;
+        const y = scales.y.getPixelForValue(targetVal);
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        c.save(); c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6,4]);
+        c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+        c.setLineDash([]); c.fillStyle = '#e76f51';
+        c.font = '11px '+(getComputedStyle(document.body).fontFamily||'sans-serif');
+        c.textAlign = 'right';
+        c.fillText(targetVal, chartArea.right-4, y-4);
+        c.restore();
+      }
+    };
+
+    window['_calChartInst'] = new Chart(canvas.getContext('2d'), {
+      type: 'bar', plugins: [targetLinePlugin],
+      data: { labels, datasets: [{ data, backgroundColor: accentColor+'cc',
+        borderColor: accentColor, borderWidth:1, borderRadius:2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{
+          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
+            .toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}),
+          label: item => item.raw != null ? Math.round(item.parsed.y)+' kcal' : 'No data'
+        }}},
+        scales: {
+          x: { type:'category', ticks:{ font:{size:11}, color:mutedColor, maxRotation:0, autoSkip:false,
+            callback: (v,i) => new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}) },
+            grid:{color:'transparent'} },
+          y: { min:yMin, max:yMax, title:{display:true,text:'kcal',color:mutedColor,font:{size:11}},
+            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/500)*500; for(let v=first;v<=yMax+0.001;v+=500) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/500)*500}, grid:{color:borderColor} }
+        }
+      }
+    });
+
+  } else {
+    // ── OTHER RANGES: bar chart, one bar per day ─────────────────
+    const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
+    if (raw.length === 0) { canvas.style.display='none'; empty.style.display='block'; empty.textContent='No data in this range'; return; }
+    const lookup = {}; raw.forEach(p => { lookup[p.date] = p.value; });
+    const labels = [], data = [];
+    const startD = new Date((rangeStart || raw[0].date) + 'T12:00:00');
+    const endD   = new Date(today() + 'T12:00:00');
+    for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
+      const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      labels.push(ds); data.push(lookup[ds] ?? null);
+    }
+    const yVals = data.filter(v => v != null);
+    const yMin = 0;
+    const yMax = Math.max(...(yVals.length ? yVals : [0]), targetVal + 100) + 100;
+
+    // Week shading plugin (not for All view)
+    const weekBandPlugin = {
+      id: '_calChartInstWeekBands',
+      beforeDraw(chart) {
+        if (calRangeMonths === 0) return;
+        const { ctx: c, chartArea, scales } = chart;
+        const barW = (chartArea.right - chartArea.left) / labels.length;
+        const isDark = document.documentElement.classList.contains('dark');
+        const shadeColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+        const firstDate = new Date(labels[0] + 'T12:00:00');
+        const dow = firstDate.getDay();
+        let wStart = new Date(firstDate); wStart.setDate(wStart.getDate() - (dow === 0 ? 6 : dow - 1));
+        let bandIndex = 0;
+        while (wStart <= new Date(labels[labels.length-1] + 'T12:00:00')) {
+          const wEnd = new Date(wStart); wEnd.setDate(wEnd.getDate() + 7);
+          if (bandIndex % 2 === 0) {
+            let x1 = chartArea.right, x2 = chartArea.left;
+            labels.forEach((ds, i) => {
+              const d = new Date(ds + 'T12:00:00');
+              if (d >= wStart && d < wEnd) { x1 = Math.min(x1, chartArea.left + i*barW); x2 = Math.max(x2, chartArea.left + (i+1)*barW); }
+            });
+            if (x2 > x1) { c.save(); c.fillStyle=shadeColor; c.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top); c.restore(); }
+          }
+          wStart = wEnd; bandIndex++;
+        }
+      }
+    };
+
+    // Target line plugin (30d only)
+    const calTargetPlugin30 = {
+      id: '_calChartInstTarget30',
+      afterDraw(chart) {
+        if (!targetVal || calRangeMonths !== 1) return;
+        const { ctx: c, chartArea, scales } = chart;
+        const y = scales.y.getPixelForValue(targetVal);
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        c.save(); c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6,4]);
+        c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+        c.setLineDash([]); c.fillStyle = '#e76f51';
+        c.font = '11px '+(getComputedStyle(document.body).fontFamily||'sans-serif');
+        c.textAlign = 'right';
+        c.fillText(targetVal, chartArea.right-4, y-4);
+        c.restore();
+      }
+    };
+
+    // Month-start vertical line plugin
+    const monthPlugin = {
+      id: '_calChartInstMonthLines',
+      afterDraw(chart) {
+        const { ctx: c, chartArea, scales } = chart;
+        labels.forEach((ds, i) => {
+          if (new Date(ds+'T12:00:00').getDate() !== 1) return;
+          const x = scales.x.getPixelForValue(i);
+          if (x < chartArea.left || x > chartArea.right) return;
+          c.save(); c.strokeStyle = borderColor; c.lineWidth = 2;
+          c.beginPath(); c.moveTo(x,chartArea.top); c.lineTo(x,chartArea.bottom); c.stroke(); c.restore();
+        });
+      }
+    };
+
+    window['_calChartInst'] = new Chart(canvas.getContext('2d'), {
+      type: 'bar', plugins: [weekBandPlugin, monthPlugin, calTargetPlugin30],
+      data: { labels, datasets: [{ data, backgroundColor: accentColor+'cc',
+        borderColor: accentColor, borderWidth:1, borderRadius:2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{
+          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
+            .toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+          label: item => item.raw != null ? Math.round(item.raw)+' kcal' : 'No data'
+        }}},
+        scales: {
+          x: { type:'category', grid:{color:'transparent'},
+            ticks:{ font:{size:11}, color:mutedColor, maxRotation:0, autoSkip:false, maxTicksLimit:10000,
+              callback: (v,i) => {
+                const d = new Date(labels[i]+'T12:00:00');
+                const day = d.getDate(), dow = d.getDay();
+                if (day === 1) return '1 '+d.toLocaleDateString('en-GB',{month:'short'});
+                if (calRangeMonths === 1 && dow === 1) return String(day);
+                return '';
+              }
+            }
+          },
+          y: { min:yMin, max:yMax, title:{display:true,text:'kcal',color:mutedColor,font:{size:11}},
+            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/500)*500; for(let v=first;v<=yMax+0.001;v+=500) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/500)*500}, grid:{color:borderColor} }
+        }
+      }
+    });
+  }
+}
+
+function renderProteinChart() {
+  const allRaw = getProteinByDay();
+  const canvas = document.getElementById('chart-protein');
+  const empty  = document.getElementById('chart-protein-empty');
+  if (!canvas) return;
+  if (allRaw.length === 0) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+
+  let rangeStart = null;
+  if (proteinRangeMonths > 0) {
+    const d = new Date();
+    if (proteinRangeMonths < 1) {
+      const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]);
+      const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
+      d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0);
+    } else { d.setDate(d.getDate() - Math.round(proteinRangeMonths * 30)); }
+    rangeStart = d.toISOString().slice(0, 10);
+  }
+
+  const targetVal = db.settings && db.settings.proteinTarget ? db.settings.proteinTarget : 0;
+  const style = getComputedStyle(document.documentElement);
+  const accentColor = style.getPropertyValue('--accent').trim();
+  const mutedColor  = style.getPropertyValue('--muted').trim();
+  const borderColor = style.getPropertyValue('--border').trim();
+
+  if (window['_protChartInst']) { window['_protChartInst'].destroy(); window['_protChartInst'] = null; }
+
+  if (proteinRangeMonths === 0.25) {
+    // ── THIS WEEK: bar chart Mon-Sun ─────────────────────────────
+    const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
+    const lookup = {}; raw.forEach(p => { lookup[p.date] = p.value; });
+    const labels = [], data = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
+      const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      labels.push(dateStr);
+      data.push(dateStr <= today() ? (lookup[dateStr] ?? null) : null);
+    }
+    const yVals = data.filter(v => v != null);
+    const yMin = 0;
+    const yMax = Math.max(...(yVals.length ? yVals : [0]), targetVal + 10) + 10;
+
+    const targetLinePlugin = {
+      id: '_protChartInstTarget',
+      afterDraw(chart) {
+        if (!targetVal) return;
+        const { ctx: c, chartArea, scales } = chart;
+        const y = scales.y.getPixelForValue(targetVal);
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        c.save(); c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6,4]);
+        c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+        c.setLineDash([]); c.fillStyle = '#e76f51';
+        c.font = '11px '+(getComputedStyle(document.body).fontFamily||'sans-serif');
+        c.textAlign = 'right';
+        c.fillText(targetVal, chartArea.right-4, y-4);
+        c.restore();
+      }
+    };
+
+    window['_protChartInst'] = new Chart(canvas.getContext('2d'), {
+      type: 'bar', plugins: [targetLinePlugin],
+      data: { labels, datasets: [{ data, backgroundColor: accentColor+'cc',
+        borderColor: accentColor, borderWidth:1, borderRadius:2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{
+          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
+            .toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}),
+          label: item => item.raw != null ? item.parsed.y.toFixed(1)+' g' : 'No data'
+        }}},
+        scales: {
+          x: { type:'category', ticks:{ font:{size:11}, color:mutedColor, maxRotation:0, autoSkip:false,
+            callback: (v,i) => new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}) },
+            grid:{color:'transparent'} },
+          y: { min:yMin, max:yMax, title:{display:true,text:'g',color:mutedColor,font:{size:11}},
+            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/50)*50; for(let v=first;v<=yMax+0.001;v+=50) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/50)*50}, grid:{color:borderColor} }
+        }
+      }
+    });
+
+  } else {
+    // ── OTHER RANGES: bar chart, one bar per day ─────────────────
+    const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
+    if (raw.length === 0) { canvas.style.display='none'; empty.style.display='block'; empty.textContent='No data in this range'; return; }
+    const lookup = {}; raw.forEach(p => { lookup[p.date] = p.value; });
+    const labels = [], data = [];
+    const startD = new Date((rangeStart || raw[0].date) + 'T12:00:00');
+    const endD   = new Date(today() + 'T12:00:00');
+    for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
+      const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      labels.push(ds); data.push(lookup[ds] ?? null);
+    }
+    const yVals = data.filter(v => v != null);
+    const yMin = 0;
+    const yMax = Math.max(...(yVals.length ? yVals : [0]), targetVal + 10) + 10;
+
+    // Week shading plugin (not for All view)
+    const weekBandPlugin = {
+      id: '_protChartInstWeekBands',
+      beforeDraw(chart) {
+        if (proteinRangeMonths === 0) return;
+        const { ctx: c, chartArea, scales } = chart;
+        const barW = (chartArea.right - chartArea.left) / labels.length;
+        const isDark = document.documentElement.classList.contains('dark');
+        const shadeColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+        const firstDate = new Date(labels[0] + 'T12:00:00');
+        const dow = firstDate.getDay();
+        let wStart = new Date(firstDate); wStart.setDate(wStart.getDate() - (dow === 0 ? 6 : dow - 1));
+        let bandIndex = 0;
+        while (wStart <= new Date(labels[labels.length-1] + 'T12:00:00')) {
+          const wEnd = new Date(wStart); wEnd.setDate(wEnd.getDate() + 7);
+          if (bandIndex % 2 === 0) {
+            let x1 = chartArea.right, x2 = chartArea.left;
+            labels.forEach((ds, i) => {
+              const d = new Date(ds + 'T12:00:00');
+              if (d >= wStart && d < wEnd) { x1 = Math.min(x1, chartArea.left + i*barW); x2 = Math.max(x2, chartArea.left + (i+1)*barW); }
+            });
+            if (x2 > x1) { c.save(); c.fillStyle=shadeColor; c.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top); c.restore(); }
+          }
+          wStart = wEnd; bandIndex++;
+        }
+      }
+    };
+
+    // Target line plugin (30d only)
+    const protTargetPlugin30 = {
+      id: '_protChartInstTarget30',
+      afterDraw(chart) {
+        if (!targetVal || proteinRangeMonths !== 1) return;
+        const { ctx: c, chartArea, scales } = chart;
+        const y = scales.y.getPixelForValue(targetVal);
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        c.save(); c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6,4]);
+        c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+        c.setLineDash([]); c.fillStyle = '#e76f51';
+        c.font = '11px '+(getComputedStyle(document.body).fontFamily||'sans-serif');
+        c.textAlign = 'right';
+        c.fillText(targetVal, chartArea.right-4, y-4);
+        c.restore();
+      }
+    };
+
+    // Month-start vertical line plugin
+    const monthPlugin = {
+      id: '_protChartInstMonthLines',
+      afterDraw(chart) {
+        const { ctx: c, chartArea, scales } = chart;
+        labels.forEach((ds, i) => {
+          if (new Date(ds+'T12:00:00').getDate() !== 1) return;
+          const x = scales.x.getPixelForValue(i);
+          if (x < chartArea.left || x > chartArea.right) return;
+          c.save(); c.strokeStyle = borderColor; c.lineWidth = 2;
+          c.beginPath(); c.moveTo(x,chartArea.top); c.lineTo(x,chartArea.bottom); c.stroke(); c.restore();
+        });
+      }
+    };
+
+    window['_protChartInst'] = new Chart(canvas.getContext('2d'), {
+      type: 'bar', plugins: [weekBandPlugin, monthPlugin, protTargetPlugin30],
+      data: { labels, datasets: [{ data, backgroundColor: accentColor+'cc',
+        borderColor: accentColor, borderWidth:1, borderRadius:2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{
+          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
+            .toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+          label: item => item.raw != null ? item.raw.toFixed(1)+' g' : 'No data'
+        }}},
+        scales: {
+          x: { type:'category', grid:{color:'transparent'},
+            ticks:{ font:{size:11}, color:mutedColor, maxRotation:0, autoSkip:false, maxTicksLimit:10000,
+              callback: (v,i) => {
+                const d = new Date(labels[i]+'T12:00:00');
+                const day = d.getDate(), dow = d.getDay();
+                if (day === 1) return '1 '+d.toLocaleDateString('en-GB',{month:'short'});
+                if (proteinRangeMonths === 1 && dow === 1) return String(day);
+                return '';
+              }
+            }
+          },
+          y: { min:yMin, max:yMax, title:{display:true,text:'g',color:mutedColor,font:{size:11}},
+            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/50)*50; for(let v=first;v<=yMax+0.001;v+=50) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/50)*50}, grid:{color:borderColor} }
+        }
+      }
+    });
+  }
+}
+
+
+/* ── Shared chart helpers ─────────────────────────────────────────── */
+
+function makeWeekBandPlugin(id, getRangeMonths) {
+  return {
+    id,
+    beforeDraw(chart) {
+      const months = getRangeMonths();
+      if (months === 0 || months === 0.25) return;
+      const { ctx: c, chartArea, scales } = chart;
+      if (!chartArea) return;
+      const xScale = scales.x;
+      const startDate = new Date(xScale.min);
+      const dow = startDate.getDay();
+      startDate.setDate(startDate.getDate() - (dow===0?6:dow-1));
+      startDate.setHours(0,0,0,0);
+      const isDark = document.documentElement.classList.contains('dark');
+      const shadeColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+      let weekStart = new Date(startDate); let bandIndex = 0;
+      while (weekStart.getTime() < xScale.max) {
+        const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+7);
+        if (bandIndex % 2 === 0) {
+          const x1 = Math.max(xScale.getPixelForValue(weekStart.getTime()), chartArea.left);
+          const x2 = Math.min(xScale.getPixelForValue(weekEnd.getTime()),   chartArea.right);
+          if (x2>x1) { c.save(); c.fillStyle=shadeColor; c.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top); c.restore(); }
+        }
+        weekStart = weekEnd; bandIndex++;
+      }
+    }
+  };
+}
+
+function makeXScale(rangeStart, allRaw, rangeMonths, mutedColor, borderColor, xMaxOverride) {
+  const xMax = xMaxOverride || today();
+  return {
+    type: 'time',
+    min: rangeStart || (allRaw.length ? allRaw[0].date || allRaw[0] : ''),
+    max: xMax,
+    time: { unit: 'day', isoWeekday: true, tooltipFormat: 'd MMM yyyy', displayFormats: { day: 'd MMM' } },
+    afterBuildTicks: axis => {
+      axis.ticks = axis.ticks.filter(t => {
+        const d = new Date(t.value);
+        const day = d.getDate(), dow = d.getDay();
+        if (day === 1) return true;
+        if ((rangeMonths === 1 || rangeMonths === 0.25) && dow === 1) return true;
+        return false;
+      });
+    },
+    ticks: {
+      font: { size: 11 }, color: mutedColor, maxRotation: 0, autoSkip: false, maxTicksLimit: 10000,
+      callback: function(value) {
+        const d = new Date(value + 12*3600*1000);
+        const day = d.getUTCDate(), dow = d.getUTCDay();
+        if (day === 1) return '1 ' + new Date(value).toLocaleDateString('en-GB',{month:'short'});
+        if ((rangeMonths === 1 || rangeMonths === 0.25) && dow === 1) return String(day);
+        return null;
+      }
+    },
+    grid: {
+      color: ctx => new Date(ctx.tick.value).getDate()===1 ? borderColor : 'transparent',
+      lineWidth: ctx => new Date(ctx.tick.value).getDate()===1 ? 2 : 1
+    }
+  };
+}
+
+function forwardFill(sparse) {
+  if (!sparse.length) return [];
+  const result = [];
+  const start = new Date(sparse[0].date + 'T12:00:00');
+  const end   = new Date(sparse[sparse.length-1].date + 'T12:00:00');
+  let si = 0;
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+    const dateStr = d.toISOString().slice(0,10);
+    if (si < sparse.length && sparse[si].date === dateStr) {
+      result.push({date: dateStr, value: sparse[si].value});
+      si++;
+    } else {
+      result.push({date: dateStr, value: result.length ? result[result.length-1].value : null});
+    }
+  }
+  return result;
+}
+
+function rollingAverage(filled, windowDays) {
+  return filled.map((point, i) => {
+    const start = Math.max(0, i - windowDays + 1);
+    const subset = filled.slice(start, i + 1).map(p => p.value);
+    const avg = subset.reduce((s, v) => s + v, 0) / subset.length;
+    return { date: point.date, value: parseFloat(avg.toFixed(2)) };
+  });
+}
+
+function rollingMedian(filled, windowDays) {
+  return filled.map((point, i) => {
+    const start = Math.max(0, i - windowDays + 1);
+    const subset = filled.slice(start, i + 1).map(p => p.value).sort((a, b) => a - b);
+    const mid = Math.floor(subset.length / 2);
+    const median = subset.length % 2 === 0
+      ? (subset[mid-1] + subset[mid]) / 2
+      : subset[mid];
+    return { date: point.date, value: parseFloat(median.toFixed(2)) };
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   ACTIVITY THIS WEEK — stacked bar chart
+   ════════════════════════════════════════════════════════════════════ */
+
+let activityChartInstance = null;
+let activityRange = '1w';
+
+const ACTIVITY_COLOURS = {
+  gym:   null,
+  cycle: '#74c69d',
+  run:   '#adb5bd',
+};
+
+function getActivityDays() {
+  const tp = today().split('-').map(Number);
+  const todayDate = new Date(tp[0], tp[1]-1, tp[2]);
+
+  let startDate;
+  if (activityRange === '1w') {
+    startDate = new Date(todayDate);
+    const dow = startDate.getDay();
+    startDate.setDate(startDate.getDate() - (dow === 0 ? 6 : dow - 1));
+  } else {
+    startDate = new Date(todayDate);
+    startDate.setDate(startDate.getDate() - 29);
+  }
+
+  const endDate = activityRange === '1w'
+    ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 6)
+    : todayDate;
+
+  const labels = [];
+  const days   = [];
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    labels.push(dateStr);
+    days.push({ date: dateStr, sessions: [] });
+  }
+
+  const dayMap = {};
+  days.forEach(d => { dayMap[d.date] = d; });
+
+  db.logs.forEach(e => {
+    if (!dayMap[e.date]) return;
+    if (e.type === 'gym') {
+      dayMap[e.date].sessions.push({ type: 'gym', startTime: e.startTime || '00:00' });
+    } else if (e.type === 'cardio' && e.activityType === 'Cycle') {
+      dayMap[e.date].sessions.push({ type: 'cycle', startTime: e.startTime || '00:00' });
+    } else if (e.type === 'cardio' && e.activityType === 'Run') {
+      dayMap[e.date].sessions.push({ type: 'run', startTime: e.startTime || '00:00' });
+    }
+  });
+
+  days.forEach(d => {
+    d.sessions.sort((a, b) => a.startTime.localeCompare(b.startTime));
+  });
+
+  return { labels, days };
+}
+
+function setActivityRange(range) {
+  activityRange = range;
+  ['1w','30d'].forEach(id => {
+    const el = document.getElementById('activity-range-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const btn = document.getElementById('activity-range-' + range);
+  if (btn) btn.classList.add('active');
+  renderActivityChart();
+}
+
+function renderActivityChart() {
+  const canvas = document.getElementById('chart-activity');
+  const empty  = document.getElementById('chart-activity-empty');
+  if (!canvas) return;
+
+  const { labels, days } = getActivityDays();
+  const hasAny = days.some(d => d.sessions.length > 0);
+
+  if (!hasAny) {
+    canvas.style.display = 'none'; empty.style.display = 'block'; return;
+  }
+  canvas.style.display = 'block'; empty.style.display = 'none';
+
+  const styleEl = getComputedStyle(document.documentElement);
+  const accentColor = styleEl.getPropertyValue('--accent').trim();
+  const mutedColor  = styleEl.getPropertyValue('--muted').trim();
+  const borderColor = styleEl.getPropertyValue('--border').trim();
+
+  ACTIVITY_COLOURS.gym = accentColor;
+
+  const maxSessions = Math.max(...days.map(d => d.sessions.length), 0);
+  const datasets = [];
+  for (let k = 0; k < maxSessions; k++) {
+    const dataGym   = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'gym'   ? 1 : 0; });
+    const dataCycle = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'cycle' ? 1 : 0; });
+    const dataRun   = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'run'   ? 1 : 0; });
+    if (dataGym.some(v=>v>0))   datasets.push({ label:'Gym ('+k+')',   data:dataGym,   backgroundColor:ACTIVITY_COLOURS.gym,   borderWidth:0, stack:'stack' });
+    if (dataCycle.some(v=>v>0)) datasets.push({ label:'Cycle ('+k+')', data:dataCycle, backgroundColor:ACTIVITY_COLOURS.cycle, borderWidth:0, stack:'stack' });
+    if (dataRun.some(v=>v>0))   datasets.push({ label:'Run ('+k+')',   data:dataRun,   backgroundColor:ACTIVITY_COLOURS.run,   borderWidth:0, stack:'stack' });
+  }
+
+  if (activityChartInstance) { activityChartInstance.destroy(); activityChartInstance = null; }
+
+  const tickLabels = labels.map((dateStr, i) => {
+    const d = new Date(dateStr + 'T12:00:00');
+    if (activityRange === '1w') return d.toLocaleDateString('en-GB', { weekday: 'short' });
+    const day = d.getDate(), dow = d.getDay();
+    if (day === 1) return '';
+    if (dow === 1) return String(day);
+    return '';
+  });
+
+  const activityWeekBandPlugin = {
+    id: 'activityWeekBands',
+    beforeDraw(chart) {
+      if (activityRange !== '30d') return;
+      const { ctx: c, chartArea, scales } = chart;
+      const xScale = scales.x;
+      const totalBars = labels.length;
+      const barW = (chartArea.right - chartArea.left) / totalBars;
+      const isDark = document.documentElement.classList.contains('dark');
+      const shadeColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+      // Find Monday of first label
+      const firstDate = new Date(labels[0] + 'T12:00:00');
+      const dow = firstDate.getDay();
+      let weekBandStart = new Date(firstDate);
+      weekBandStart.setDate(weekBandStart.getDate() - (dow === 0 ? 6 : dow - 1));
+      let bandIndex = 0;
+      while (weekBandStart <= new Date(labels[labels.length-1] + 'T12:00:00')) {
+        const weekBandEnd = new Date(weekBandStart); weekBandEnd.setDate(weekBandEnd.getDate() + 7);
+        if (bandIndex % 2 === 0) {
+          // Find bar indices that fall in this week
+          let x1 = chartArea.right, x2 = chartArea.left;
+          labels.forEach((dateStr, i) => {
+            const d = new Date(dateStr + 'T12:00:00');
+            if (d >= weekBandStart && d < weekBandEnd) {
+              x1 = Math.min(x1, chartArea.left + i * barW);
+              x2 = Math.max(x2, chartArea.left + (i + 1) * barW);
+            }
+          });
+          if (x2 > x1) {
+            c.save(); c.fillStyle = shadeColor;
+            c.fillRect(x1, chartArea.top, x2 - x1, chartArea.bottom - chartArea.top);
+            c.restore();
+          }
+        }
+        weekBandStart = weekBandEnd; bandIndex++;
+      }
+    }
+  };
+
+  const activityMonthPlugin = {
+    id: 'activityMonthLines',
+    afterDraw(chart) {
+      if (activityRange !== '30d') return;
+      const { ctx: c, chartArea, scales } = chart;
+      const xScale = scales.x;
+      labels.forEach((dateStr, i) => {
+        const d = new Date(dateStr + 'T12:00:00');
+        if (d.getDate() !== 1) return;
+        const x = xScale.getPixelForValue(i);
+        if (x < chartArea.left || x > chartArea.right) return;
+        c.save();
+        c.strokeStyle = borderColor; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(x, chartArea.top); c.lineTo(x, chartArea.bottom); c.stroke();
+        c.restore();
+      });
+    }
+  };
+
+  activityChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    plugins: [activityWeekBandPlugin, activityMonthPlugin],
+    data: { labels: tickLabels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          title: items => {
+            const i = items[0].dataIndex;
+            return new Date(days[i].date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+          },
+          label: () => null,
+          afterBody: items => {
+            const i = items[0].dataIndex;
+            return days[i].sessions.map(s => s.type.charAt(0).toUpperCase()+s.type.slice(1)+' @ '+s.startTime);
+          }
+        }}
+      },
+      scales: {
+        x: { stacked: true, grid: { color: 'transparent' },
+          ticks: { font: { size: 11 }, color: mutedColor, maxRotation: 0, autoSkip: false, maxTicksLimit: 10000,
+            callback: function(value, index) {
+              const dateStr = labels[index];
+              const d = new Date(dateStr + 'T12:00:00');
+              if (activityRange === '1w') return d.toLocaleDateString('en-GB', { weekday: 'short' });
+              const day = d.getDate(), dow = d.getDay();
+              if (day === 1) return '1 ' + d.toLocaleDateString('en-GB', { month: 'short' });
+              if (dow === 1) return String(day);
+              return '';
+            }
+          }
+        },
+        y: { stacked: true, min: 0,
+          max: Math.max(...days.map(d => d.sessions.length), 1) + 0.5,
+          afterBuildTicks: axis => {
+            const ticks = [];
+            for (let v = 0; v <= axis.max; v++) ticks.push({ value: v });
+            axis.ticks = ticks;
+          },
+          ticks: { font: { size: 11 }, color: mutedColor, callback: v => Number.isInteger(v) ? v : null },
+          grid: { color: borderColor }
+        }
+      }
+    }
+  });
+}
+
+</script>
+</body>
+</html>
