@@ -1,7 +1,7 @@
 /* FitLog Service Worker
    Caches the app shell so it works offline after first load. */
 
-const CACHE_NAME = 'fitlog-v4';
+const CACHE_NAME = 'fitlog-v5';
 
 const SHELL = [
   './index.html',
@@ -22,6 +22,10 @@ self.addEventListener('activate', event => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
