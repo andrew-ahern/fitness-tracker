@@ -960,7 +960,7 @@
 
       <!-- App info -->
       <div style="text-align:center; font-size:12px; color:var(--muted); margin-top:1.5rem;">
-        FitLog
+        Fitness Tracker
       </div>
     </div>
 
@@ -1135,11 +1135,11 @@ function loadDB() {
         });
       } else {
         // Future: migrate(parsed) — for now just use defaults
-        console.warn('FitLog: schema version mismatch, using defaults');
+        console.warn('Fitness Tracker: schema version mismatch, using defaults');
       }
     }
   } catch (e) {
-    console.error('FitLog: failed to load db', e);
+    console.error('Fitness Tracker: failed to load db', e);
   }
 }
 
@@ -1150,7 +1150,7 @@ function saveDB() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
   } catch (e) {
     showToast('Storage error — please export your data');
-    console.error('FitLog: failed to save db', e);
+    console.error('Fitness Tracker: failed to save db', e);
   }
 }
 
@@ -1293,9 +1293,9 @@ function importData(event) {
   reader.onload = e => {
     try {
       const imported = JSON.parse(e.target.result);
-      // Basic validation — check it looks like a FitLog backup
+      // Basic validation — check it looks like a Fitness Tracker backup
       if (!imported.meta || !Array.isArray(imported.logs)) {
-        throw new Error('Not a valid FitLog backup file');
+        throw new Error('Not a valid Fitness Tracker backup file');
       }
       db = imported;
       saveDB();
