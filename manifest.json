@@ -1,8 +1,8 @@
 {
-  "name": "FitLog",
-  "short_name": "FitLog",
+  "name": "Fitness Tracker",
+  "short_name": "Fitness Tracker",
   "description": "Personal diet and fitness tracker",
-  "start_url": "/index.html",
+  "start_url": "/fitness-tracker/index.html",
   "display": "standalone",
   "background_color": "#f7f6f3",
   "theme_color": "#2d6a4f",
