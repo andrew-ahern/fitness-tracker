@@ -4331,7 +4331,7 @@ async function githubImport() {
     updateGithubImportStatus();
     showToast('Import complete \u2713');
   } catch(err) {
-    showToast('Import failed: ' + err.message);
+    showToast(err.message === 'Failed to fetch' || !navigator.onLine ? 'No internet connection' : 'Import failed: ' + err.message);
     console.error(err);
   }
 }
