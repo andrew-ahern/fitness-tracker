@@ -1942,12 +1942,20 @@ function wireFormDrafts() {
   }
 }
 
-function showToast(msg) {
+function showToast(msg, persist) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  if (!persist) {
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+}
+
+function hideToast() {
+  const t = document.getElementById('toast');
+  clearTimeout(t._timer);
+  t.classList.remove('show');
 }
 
 function fmtWeight(w) {
@@ -4265,7 +4273,7 @@ async function ghPutJSON(path, obj, sha) {
 async function githubExport() {
   const cfg = getGithubConfig();
   if (!cfg) { showToast('Load GitHub config first'); return; }
-  showToast('Exporting...');
+  showToast('Exporting...', true);
   try {
     const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
     const existingIds = new Set((ghLogs || []).map(e => e.id));
@@ -4286,8 +4294,10 @@ async function githubExport() {
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_export', now);
     updateGithubExportStatus();
+    hideToast();
     showToast(newLogs.length + ' new entries exported \u2713');
   } catch(err) {
+    hideToast();
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Export failed: ' + err.message);
     console.error(err);
@@ -4298,7 +4308,7 @@ async function githubImport() {
   const cfg = getGithubConfig();
   if (!cfg) { showToast('Load GitHub config first'); return; }
   if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
-  showToast('Importing...');
+  showToast('Importing...', true);
   try {
     const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
 
@@ -4324,8 +4334,10 @@ async function githubImport() {
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_import', now);
     updateGithubImportStatus();
+    hideToast();
     showToast('Import complete \u2713');
   } catch(err) {
+    hideToast();
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Import failed: ' + err.message);
     console.error(err);
