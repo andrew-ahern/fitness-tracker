@@ -4319,6 +4319,251 @@ async function githubImport() {
   }
 }
 
+
+
+/* ════════════════════════════════════════════════════════════════════
+   TEST SUITE — accessible via ?test=true
+   ════════════════════════════════════════════════════════════════════ */
+
+function runTests() {
+  const results = [];
+
+  function test(name, fn) {
+    try {
+      fn();
+      results.push({ name, pass: true });
+    } catch(e) {
+      results.push({ name, pass: false, error: e.message });
+    }
+  }
+
+  function assert(condition, msg) {
+    if (!condition) throw new Error(msg || 'Assertion failed');
+  }
+
+  function assertEqual(a, b, msg) {
+    if (a !== b) throw new Error((msg || 'Expected equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b));
+  }
+
+  // ── Utilities ──────────────────────────────────────────────────
+  test('today() returns YYYY-MM-DD format', () => {
+    const d = today();
+    assert(/^\d{4}-\d{2}-\d{2}$/.test(d), 'Invalid format: ' + d);
+  });
+
+  test('today() returns current local date', () => {
+    const d = new Date();
+    const expected = d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+    assertEqual(today(), expected);
+  });
+
+  test('getMondayOf() returns correct Monday', () => {
+    // 2026-05-27 is a Wednesday — Monday should be 2026-05-25
+    assertEqual(getMondayOf('2026-05-27'), '2026-05-25');
+    // 2026-05-25 is a Monday — should return itself
+    assertEqual(getMondayOf('2026-05-25'), '2026-05-25');
+    // 2026-05-31 is a Sunday — Monday should be 2026-05-25
+    assertEqual(getMondayOf('2026-05-31'), '2026-05-25');
+  });
+
+  // ── DB schema ──────────────────────────────────────────────────
+  test('db object has required keys', () => {
+    assert('logs'           in db, 'missing logs');
+    assert('settings'       in db, 'missing settings');
+    assert('exerciseLibrary' in db, 'missing exerciseLibrary');
+    assert('cardioLibrary'  in db, 'missing cardioLibrary');
+    assert('mealItemLibrary' in db, 'missing mealItemLibrary');
+    assert('meta'           in db, 'missing meta');
+  });
+
+  test('db.settings has required keys', () => {
+    assert('reminderDays'   in db.settings, 'missing reminderDays');
+    assert('darkMode'       in db.settings, 'missing darkMode');
+  });
+
+  test('db.logs is an array', () => {
+    assert(Array.isArray(db.logs), 'logs is not an array');
+  });
+
+  // ── Entry creation ─────────────────────────────────────────────
+  test('weight entry has required fields', () => {
+    const entry = { type:'weight', id: Date.now(), date: today(), time: '12:00', value: 75.5 };
+    assert(entry.type === 'weight');
+    assert(typeof entry.value === 'number');
+    assert(entry.value > 0);
+  });
+
+  test('rise entry has required fields', () => {
+    const entry = { type:'rise', id: Date.now(), date: today(), time: '07:30' };
+    assert(entry.type === 'rise');
+    assert(/^\d{2}:\d{2}$/.test(entry.time));
+  });
+
+  test('meal entry has required fields', () => {
+    const entry = { type:'meal', id: Date.now(), date: today(), time: '12:00',
+      items: [{ name:'Egg', quantity:2, calories:140, protein:12 }],
+      totals: { calories:140, protein:12 } };
+    assert(Array.isArray(entry.items));
+    assert(entry.items.length > 0);
+    assert('totals' in entry);
+  });
+
+  test('gym entry has required fields', () => {
+    const entry = { type:'gym', id: Date.now(), date: today(), startTime:'09:00',
+      exercises: [{ name:'Squat', sets:[{weight:100,reps:5}] }] };
+    assert(Array.isArray(entry.exercises));
+  });
+
+  test('cardio entry has required fields', () => {
+    const entry = { type:'cardio', id: Date.now(), date: today(), startTime:'07:00',
+      activityType:'Run', distance:5, duration:30 };
+    assert(entry.activityType === 'Run');
+    assert(typeof entry.distance === 'number');
+  });
+
+  // ── ID uniqueness ──────────────────────────────────────────────
+  test('log entry IDs are unique', () => {
+    const ids = db.logs.map(e => e.id);
+    const unique = new Set(ids);
+    assertEqual(ids.length, unique.size, 'Duplicate IDs found');
+  });
+
+  // ── Export merge logic ─────────────────────────────────────────
+  test('export merge: only new entries added', () => {
+    const ghLogs = [
+      { id: 1000, type:'weight', date:'2026-01-01', value:75 },
+      { id: 2000, type:'weight', date:'2026-01-02', value:74 },
+    ];
+    const localLogs = [
+      { id: 1000, type:'weight', date:'2026-01-01', value:75 },
+      { id: 3000, type:'weight', date:'2026-01-03', value:73 },
+    ];
+    const existingIds = new Set(ghLogs.map(e => e.id));
+    const newLogs = localLogs.filter(e => !existingIds.has(e.id));
+    assertEqual(newLogs.length, 1);
+    assertEqual(newLogs[0].id, 3000);
+  });
+
+  test('export merge: no entries lost', () => {
+    const ghLogs = [{ id:1 }, { id:2 }];
+    const localLogs = [{ id:1 }, { id:3 }];
+    const existingIds = new Set(ghLogs.map(e => e.id));
+    const newLogs = localLogs.filter(e => !existingIds.has(e.id));
+    const merged = [...ghLogs, ...newLogs].sort((a,b) => a.id - b.id);
+    assertEqual(merged.length, 3);
+  });
+
+  // ── Import merge logic ─────────────────────────────────────────
+  test('import merge: append-only, no overwrites', () => {
+    const localLogs = [{ id:1, value:75 }, { id:2, value:74 }];
+    const ghLogs    = [{ id:1, value:99 }, { id:3, value:73 }]; // id:1 has different value
+    const existingIds = new Set(localLogs.map(e => e.id));
+    const newLogs = ghLogs.filter(e => !existingIds.has(e.id));
+    const merged = [...localLogs, ...newLogs];
+    // id:1 should retain local value (75), not GitHub value (99)
+    const entry1 = merged.find(e => e.id === 1);
+    assertEqual(entry1.value, 75, 'Local entry was overwritten');
+    assertEqual(merged.length, 3);
+  });
+
+  test('import merge: no duplicates', () => {
+    const localLogs = [{ id:1 }, { id:2 }];
+    const ghLogs    = [{ id:1 }, { id:2 }, { id:3 }];
+    const existingIds = new Set(localLogs.map(e => e.id));
+    const newLogs = ghLogs.filter(e => !existingIds.has(e.id));
+    const merged = [...localLogs, ...newLogs];
+    const ids = merged.map(e => e.id);
+    assertEqual(new Set(ids).size, ids.length, 'Duplicates found');
+    assertEqual(merged.length, 3);
+  });
+
+  // ── Chart data functions ───────────────────────────────────────
+  test('getCalByDay() returns array', () => {
+    const data = getCalByDay();
+    assert(Array.isArray(data));
+  });
+
+  test('getCalByDay() entries have date and value', () => {
+    const data = getCalByDay();
+    data.forEach(p => {
+      assert('date'  in p, 'missing date');
+      assert('value' in p, 'missing value');
+      assert(/^\d{4}-\d{2}-\d{2}$/.test(p.date), 'invalid date: ' + p.date);
+    });
+  });
+
+  test('getProteinByDay() returns array', () => {
+    const data = getProteinByDay();
+    assert(Array.isArray(data));
+  });
+
+  test('rollingAverage() returns same length as input', () => {
+    const input = [1,2,3,4,5].map((v,i) => ({ date: '2026-01-0'+(i+1), value: v }));
+    const result = rollingAverage(input, 3);
+    assertEqual(result.length, input.length);
+  });
+
+  test('rollingMedian() returns same length as input', () => {
+    const input = [1,2,3,4,5].map((v,i) => ({ date: '2026-01-0'+(i+1), value: v }));
+    const result = rollingMedian(input, 3);
+    assertEqual(result.length, input.length);
+  });
+
+  // ── localStorage ───────────────────────────────────────────────
+  test('localStorage is available', () => {
+    localStorage.setItem('_test', '1');
+    assertEqual(localStorage.getItem('_test'), '1');
+    localStorage.removeItem('_test');
+  });
+
+  test('saveDB() and loadDB() round-trip', () => {
+    const original = db.logs.length;
+    saveDB();
+    const saved = JSON.parse(localStorage.getItem('fitlog_v1'));
+    assertEqual(saved.logs.length, original, 'Log count mismatch after save/load');
+  });
+
+  return results;
+}
+
+function showTestScreen() {
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('nav').style.display  = 'none';
+
+  const results = runTests();
+  const passed  = results.filter(r => r.pass).length;
+  const failed  = results.filter(r => !r.pass).length;
+
+  const html = `
+    <div style="padding:1.5rem; font-family:monospace; max-width:600px; margin:0 auto;">
+      <h2 style="margin-bottom:0.5rem;">Test Results</h2>
+      <div style="margin-bottom:1rem; font-size:14px;">
+        <span style="color:#2d6a4f; font-weight:bold;">${passed} passed</span>
+        ${failed > 0 ? ' · <span style="color:#e76f51; font-weight:bold;">' + failed + ' failed</span>' : ''}
+        · ${results.length} total
+      </div>
+      ${results.map(r => `
+        <div style="padding:6px 0; border-bottom:1px solid #eee; font-size:13px;">
+          <span style="color:${r.pass ? '#2d6a4f' : '#e76f51'}; margin-right:8px;">${r.pass ? '✓' : '✗'}</span>
+          ${r.name}
+          ${r.error ? '<div style="color:#e76f51; margin-left:20px; font-size:12px;">' + r.error + '</div>' : ''}
+        </div>
+      `).join('')}
+    </div>`;
+
+  document.body.insertAdjacentHTML('beforeend', '<div id="test-screen">' + html + '</div>');
+}
+
+// Run tests if ?test=true in URL
+if (new URLSearchParams(window.location.search).get('test') === 'true') {
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDB();
+    showTestScreen();
+  });
+}
+
 </script>
 <script>
   if ('serviceWorker' in navigator) {
