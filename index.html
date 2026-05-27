@@ -4563,21 +4563,43 @@ function showTestScreen() {
 
   document.body.style.margin = '0';
   document.body.style.background = 'var(--bg, #f7f6f3)';
+  const groups = [
+    { heading: 'Utilities',           tests: ['today() returns YYYY-MM-DD format', 'today() returns current local date', 'Monday calculation: Wed → Mon', 'Monday calculation: Sun → Mon'] },
+    { heading: 'DB schema',           tests: ['db object has required keys', 'db.settings has required keys', 'db.logs is an array'] },
+    { heading: 'Entry creation',      tests: ['weight entry has required fields', 'rise entry has required fields', 'meal entry has required fields', 'gym entry has required fields', 'cardio entry has required fields'] },
+    { heading: 'ID uniqueness',       tests: ['log entry IDs are unique'] },
+    { heading: 'Export merge logic',  tests: ['export merge: only new entries added', 'export merge: no entries lost'] },
+    { heading: 'Import merge logic',  tests: ['import merge: append-only, no overwrites', 'import merge: no duplicates'] },
+    { heading: 'Chart data',          tests: ['getCalByDay() returns array', 'getCalByDay() entries have date and value', 'getProteinByDay() returns array', 'rollingAverage() returns same length as input', 'rollingMedian() returns same length as input'] },
+    { heading: 'localStorage',        tests: ['localStorage is available', 'saveDB() and loadDB() round-trip'] },
+  ];
+
+  const resultMap = {};
+  results.forEach(r => { resultMap[r.name] = r; });
+
+  const groupHTML = groups.map(g => `
+    <div style="margin-bottom:1.2rem;">
+      <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:#888; margin-bottom:4px;">${g.heading}</div>
+      ${g.tests.map(name => {
+        const r = resultMap[name] || { name, pass: false, error: 'Not found' };
+        return `<div style="padding:5px 0; border-bottom:1px solid #eee; font-size:13px;">
+          <span style="color:${r.pass ? '#2d6a4f' : '#e76f51'}; margin-right:8px;">${r.pass ? '✓' : '✗'}</span>
+          ${r.name}
+          ${r.error ? '<div style="color:#e76f51; margin-left:20px; font-size:12px;">' + r.error + '</div>' : ''}
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
   const html = `
     <div style="padding:1.5rem; font-family:monospace; max-width:600px; margin:0 auto;">
       <h2 style="margin-bottom:0.5rem;">Test Results</h2>
-      <div style="margin-bottom:1rem; font-size:14px;">
+      <div style="margin-bottom:1.2rem; font-size:14px;">
         <span style="color:#2d6a4f; font-weight:bold;">${passed} passed</span>
         ${failed > 0 ? ' · <span style="color:#e76f51; font-weight:bold;">' + failed + ' failed</span>' : ''}
         · ${results.length} total
       </div>
-      ${results.map(r => `
-        <div style="padding:6px 0; border-bottom:1px solid #eee; font-size:13px;">
-          <span style="color:${r.pass ? '#2d6a4f' : '#e76f51'}; margin-right:8px;">${r.pass ? '✓' : '✗'}</span>
-          ${r.name}
-          ${r.error ? '<div style="color:#e76f51; margin-left:20px; font-size:12px;">' + r.error + '</div>' : ''}
-        </div>
-      `).join('')}
+      ${groupHTML}
     </div>`;
 
   const div = document.createElement('div');
