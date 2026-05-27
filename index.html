@@ -1990,8 +1990,13 @@ function renderAll() {
 
 /* ── Initialise ────────────────────────────────────────────────── */
 
-loadDB();
-renderAll();
+if (new URLSearchParams(window.location.search).get('test') === 'true') {
+  loadDB();
+  showTestScreen();
+} else {
+  loadDB();
+  renderAll();
+}
 
 
 /* ════════════════════════════════════════════════════════════════════
@@ -4556,13 +4561,7 @@ function showTestScreen() {
   document.body.insertAdjacentHTML('beforeend', '<div id="test-screen">' + html + '</div>');
 }
 
-// Run tests if ?test=true in URL
-if (new URLSearchParams(window.location.search).get('test') === 'true') {
-  // Override renderAll to show test screen instead
-  window.addEventListener('load', () => {
-    showTestScreen();
-  });
-}
+
 
 </script>
 <script>
