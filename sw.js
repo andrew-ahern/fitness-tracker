@@ -1,7 +1,7 @@
 /* FitLog Service Worker
    Caches the app shell so it works offline after first load. */
 
-const CACHE_NAME = 'fitlog-v6';
+const CACHE_NAME = 'fitlog-v7';
 
 const SHELL = [
   './index.html',

@@ -502,6 +502,11 @@
 </head>
 
 <body>
+<script>
+  if (new URLSearchParams(window.location.search).get('test') === 'true') {
+    document.documentElement.style.visibility = 'hidden';
+  }
+</script>
 <div id="app">
 
   <!-- ── Main content ─────────────────────────────────────────────── -->
@@ -4547,7 +4552,7 @@ function runTests() {
 function showTestScreen() {
   document.getElementById('main').style.display = 'none';
   document.getElementById('nav').style.display  = 'none';
-  document.body.style.padding = '0';
+  document.documentElement.style.visibility = 'visible';
 
   const results = runTests();
   const passed  = results.filter(r => r.pass).length;
