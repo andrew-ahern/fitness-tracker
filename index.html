@@ -4547,11 +4547,14 @@ function runTests() {
 function showTestScreen() {
   document.getElementById('main').style.display = 'none';
   document.getElementById('nav').style.display  = 'none';
+  document.body.style.padding = '0';
 
   const results = runTests();
   const passed  = results.filter(r => r.pass).length;
   const failed  = results.filter(r => !r.pass).length;
 
+  document.body.style.margin = '0';
+  document.body.style.background = 'var(--bg, #f7f6f3)';
   const html = `
     <div style="padding:1.5rem; font-family:monospace; max-width:600px; margin:0 auto;">
       <h2 style="margin-bottom:0.5rem;">Test Results</h2>
