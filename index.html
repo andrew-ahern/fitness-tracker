@@ -4301,7 +4301,12 @@ async function githubImport() {
   if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
   showToast('Importing...');
   try {
-    const { content: ghLogs } = await ghGetJSON('fitlog_backup.json');
+    const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
+    // If we got no response at all, likely offline
+    if (ghLogs === null && logsSha === null) {
+      const testRes = await fetch('https://api.github.com', { method: 'HEAD' }).catch(() => null);
+      if (!testRes) { showToast('No internet connection'); return; }
+    }
     if (ghLogs) {
       const existingIds = new Set(db.logs.map(e => e.id));
       const newLogs = ghLogs.filter(e => !existingIds.has(e.id));
