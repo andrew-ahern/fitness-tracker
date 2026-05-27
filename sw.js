@@ -1,7 +1,7 @@
 /* FitLog Service Worker
    Caches the app shell so it works offline after first load. */
 
-const CACHE_NAME = 'fitlog-v13';
+const CACHE_NAME = 'fitlog-v14';
 
 const SHELL = [
   './index.html',
@@ -29,10 +29,9 @@ self.addEventListener('message', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Never serve cached response for test mode
-  if (event.request.url.includes('test=true')) {
-    event.respondWith(fetch(event.request));
-    return;
+  // Pass through external requests (GitHub API, CDN etc.) and test mode
+  if (!event.request.url.startsWith(self.location.origin) || event.request.url.includes('test=true')) {
+    return; // let browser handle it normally
   }
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
