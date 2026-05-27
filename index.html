@@ -4577,7 +4577,11 @@ function showTestScreen() {
       `).join('')}
     </div>`;
 
-  document.body.insertAdjacentHTML('beforeend', '<div id="test-screen">' + html + '</div>');
+  const div = document.createElement('div');
+  div.id = 'test-screen';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:#f7f6f3;z-index:9999;';
+  div.innerHTML = html;
+  document.body.appendChild(div);
 }
 
 
