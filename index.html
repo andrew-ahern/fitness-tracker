@@ -798,7 +798,7 @@
       <!-- Export reminder banner (shown if overdue) -->
       <div id="export-banner" class="hidden">
         <div class="warn-text">⚠ Back up your data</div>
-        <button class="btn btn-primary" onclick="exportZip()">Export now</button>
+        <button class="btn btn-primary" onclick="exportData()">Export now</button>
       </div>
 
       <!-- GitHub sync -->
@@ -835,13 +835,13 @@
       <div class="card" style="margin-bottom:0.75rem;">
         <div class="card-row">
           <div style="font-weight:500">Export to device</div>
-          <button class="btn" onclick="exportZip()">Export</button>
+          <button class="btn" onclick="exportData()">Export</button>
         </div>
         <div class="card-row">
           <div style="font-weight:500">Import from device</div>
           <label class="btn" style="cursor:pointer;">
             Import
-            <input type="file" accept=".zip,.json" onchange="importZip(event)" style="display:none">
+            <input type="file" accept=".zip,.json" onchange="importData(event)" style="display:none">
           </label>
         </div>
       </div>
@@ -1240,6 +1240,10 @@ function toCSV(headers, rows) {
 /* ── Import ────────────────────────────────────────────────────── */
 
 function importData(event) {
+  if (!confirm('Import from device backup? This will merge logs and overwrite libraries and settings.')) {
+    event.target.value = '';
+    return;
+  }
   /* Read a fitlog_backup.json file and restore the database.
      Warns the user before overwriting existing data. */
   const file = event.target.files[0];
