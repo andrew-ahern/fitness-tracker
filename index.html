@@ -1112,7 +1112,11 @@ function saveDB() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
   } catch (e) {
     showToast('Storage error — please export your data');
-    console.error('Fitness Tracker: failed to save db', e);
+    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      showToast('Local storage full — export data');
+    } else {
+      console.error('Fitness Tracker: failed to save db', e);
+    }
   }
 }
 
@@ -1248,6 +1252,14 @@ function importData(event) {
   const file = event.target.files[0];
   if (!file) return;
 
+  // File type check
+  const fileName = file.name.toLowerCase();
+  if (!fileName.endsWith('.zip') && !fileName.endsWith('.json')) {
+    showToast('Invalid file type — select a .zip or .json backup');
+    event.target.value = '';
+    return;
+  }
+
   if (db.logs.length > 0) {
     const ok = confirm(
       'This will replace ALL your current data with the imported backup.\n\nAre you sure?'
@@ -1258,10 +1270,19 @@ function importData(event) {
   const reader = new FileReader();
   reader.onload = e => {
     try {
-      const imported = JSON.parse(e.target.result);
-      // Basic validation — check it looks like a Fitness Tracker backup
-      if (!imported.meta || !Array.isArray(imported.logs)) {
-        throw new Error('Not a valid Fitness Tracker backup file');
+      let imported;
+      try {
+        imported = JSON.parse(e.target.result);
+      } catch(e) {
+        showToast('File is corrupted or unreadable');
+        event.target.value = '';
+        return;
+      }
+      // Structure check
+      if (!imported || !Array.isArray(imported.logs)) {
+        showToast('Invalid backup — not a Fitness Tracker backup file');
+        event.target.value = '';
+        return;
       }
       db = imported;
       saveDB();
@@ -1269,7 +1290,7 @@ function importData(event) {
       renderAll();
       showToast('Import successful ✓');
     } catch (err) {
-      alert('Import failed: ' + err.message);
+      showToast('Import failed: ' + err.message);
     }
     event.target.value = ''; // reset file input
   };
@@ -4185,8 +4206,10 @@ async function ghGet(path) {
   const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
     headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
   });
+  if (res.status === 401) throw new Error('Invalid token — reload your config file');
+  if (res.status === 403) throw new Error('Access denied — check your token has repo permissions');
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+  if (!res.ok) throw new Error('Data repo not found — check your config file');
   return res.json();
 }
 
@@ -4200,6 +4223,9 @@ async function ghPut(path, content, sha) {
                'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
+  if (res.status === 401) throw new Error('Invalid token — reload your config file');
+  if (res.status === 403) throw new Error('Access denied — check your token has repo permissions');
+  if (res.status === 404) throw new Error('Data repo not found — check your config file');
   if (!res.ok) throw new Error('GitHub write error: ' + res.status);
   return res.json();
 }
