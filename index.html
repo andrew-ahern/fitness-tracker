@@ -2973,7 +2973,7 @@ function renderWeightChart() {
   }
 
   const yVals = chartData.map(p => p.y).filter(v => v !== null);
-  const wTarget = db.settings && db.settings.weightTarget && weightRangeMonths === 0.25 ? db.settings.weightTarget : null;
+  const wTarget = db.settings && db.settings.weightTarget && weightRangeMonths === 0.25 ? parseFloat(db.settings.weightTarget) : null;
   const yDataMin = Math.min(...yVals, wTarget !== null ? wTarget - 0.1 : Infinity);
   const yDataMax = Math.max(...yVals, wTarget !== null ? wTarget + 0.1 : -Infinity);
   const yMin = parseFloat((yDataMin - 0.1).toFixed(2));
@@ -2987,7 +2987,7 @@ function renderWeightChart() {
   const mutedColor  = style.getPropertyValue('--muted').trim();
   const borderColor = style.getPropertyValue('--border').trim();
 
-  const weightTargetVal = db.settings && db.settings.weightTarget ? db.settings.weightTarget : null;
+  const weightTargetVal = db.settings && db.settings.weightTarget ? parseFloat(db.settings.weightTarget) : null;
   const weightTargetPlugin = {
     id: 'weightTargetLine',
     afterDraw(chart) {
