@@ -4294,10 +4294,8 @@ async function githubExport() {
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_export', now);
     updateGithubExportStatus();
-    hideToast();
     showToast(newLogs.length + ' new entries exported \u2713');
   } catch(err) {
-    hideToast();
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Export failed: ' + err.message);
     console.error(err);
@@ -4334,10 +4332,8 @@ async function githubImport() {
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_import', now);
     updateGithubImportStatus();
-    hideToast();
     showToast('Import complete \u2713');
   } catch(err) {
-    hideToast();
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Import failed: ' + err.message);
     console.error(err);
