@@ -1066,6 +1066,7 @@ function loadDB() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
+      db._isNewInstall = false;
       // Basic migration hook: if stored version < current, handle upgrades
       if (parsed.meta && parsed.meta.version === SCHEMA_VERSION) {
         db = parsed;
@@ -1102,6 +1103,27 @@ function loadDB() {
     }
   } catch (e) {
     console.error('Fitness Tracker: failed to load db', e);
+  }
+}
+
+async function loadDefaultLibraries() {
+  /* Fetch default libraries from the app repo on first install.
+     Only runs if localStorage was empty (fresh install or after clear). */
+  const BASE = 'https://andrew-ahern.github.io/fitness-tracker/';
+  try {
+    const [exRes, cardRes, mealRes] = await Promise.all([
+      fetch(BASE + 'library_exercises.json'),
+      fetch(BASE + 'library_cardio.json'),
+      fetch(BASE + 'library_meals.json'),
+    ]);
+    if (exRes.ok)   db.exerciseLibrary  = await exRes.json();
+    if (cardRes.ok) db.cardioLibrary    = await cardRes.json();
+    if (mealRes.ok) db.mealItemLibrary  = await mealRes.json();
+    saveDB();
+    renderAll();
+  } catch(e) {
+    // Offline on first load — defaults stay as empty arrays, user can add later
+    console.warn('Could not fetch default libraries:', e.message);
   }
 }
 
@@ -1952,8 +1974,10 @@ if (new URLSearchParams(window.location.search).get('test') === 'true') {
   loadDB();
   showTestScreen();
 } else {
+  const isFirstLoad = !localStorage.getItem(STORAGE_KEY);
   loadDB();
   renderAll();
+  if (isFirstLoad) loadDefaultLibraries();
 }
 
 
