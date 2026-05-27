@@ -1295,7 +1295,6 @@ function toggleDarkMode() {
 }
 
 function saveSettings() {
-  db.settings.reminderDays  = parseInt(document.getElementById('reminder-days').value);
   const calT    = parseFloat(document.getElementById('cal-target').value);
   const protT   = parseFloat(document.getElementById('prot-target').value);
   const weightT = parseFloat(document.getElementById('weight-target').value);
@@ -1621,8 +1620,7 @@ function showScreen(name, btn) {
     renderExerciseLibrary();
     renderCardioLibrary();
     renderMealItemLibrary();
-      document.getElementById('reminder-days').value = db.settings.reminderDays;
-    if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
+      if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
     if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
@@ -1906,7 +1904,6 @@ function renderAll() {
   renderMealItemLibrary();
   populateCardioActivityDropdown();
   if (db.settings) {
-    document.getElementById('reminder-days').value = db.settings.reminderDays;
     if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
