@@ -1254,7 +1254,7 @@ function exportData() {
     db.meta.lastExport = new Date().toISOString();
     saveDB();
     updateExportStatus();
-    showToast('Exported ✓');
+    showToast('Saved: fitlog_' + timestamp + '.zip');
   });
 }
 
@@ -4265,6 +4265,7 @@ async function ghPutJSON(path, obj, sha) {
 async function githubExport() {
   const cfg = getGithubConfig();
   if (!cfg) { showToast('Load GitHub config first'); return; }
+  if (!navigator.onLine) { showToast('No internet connection'); return; }
   showToast('Exporting...');
   try {
     const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
