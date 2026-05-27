@@ -839,10 +839,8 @@
         </div>
         <div class="card-row">
           <div style="font-weight:500">Import from device</div>
-          <label class="btn" style="cursor:pointer;">
-            Import
-            <input type="file" accept=".zip,.json" onchange="importData(event)" style="display:none">
-          </label>
+          <button class="btn" onclick="confirmDeviceImport()">Import</button>
+          <input type="file" id="device-import-input" accept=".zip,.json" onchange="importData(event)" style="display:none">
         </div>
       </div>
 
@@ -1123,7 +1121,7 @@ function saveDB() {
 
 function exportData() {
   /* Produces a ZIP file containing:
-     1. fitlog_backup.json  — the full db object (importable)
+     1. fitness-tracker-backup.json  — the full db object (importable)
      2. meals.csv           — all meal entries, one row each
      3. weight.csv          — all weight entries
      4. gym.csv              — gym entries flattened to one row per set
@@ -1134,10 +1132,10 @@ function exportData() {
 
   const zip = new JSZip();
   const timestamp = new Date().toISOString().slice(0,16).replace('T','_').replace(':','h') + 'm';
-  const folder = zip.folder('fitlog_' + timestamp);
+  const folder = zip.folder('fitness-tracker-backup-' + timestamp);
 
   // 1. Full JSON backup
-  folder.file('fitlog_backup.json', JSON.stringify(db, null, 2));
+  folder.file('fitness-tracker-backup.json', JSON.stringify(db, null, 2));
 
   // 2. Meals CSV — one row per item, meal-level fields repeated on each row
   const mealHeaders = ['meal_id','date','time','item_name','quantity','calories','protein_g','note'];
@@ -1211,14 +1209,14 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'fitlog_' + timestamp + '.zip';
+    a.download = 'fitness-tracker-backup-' + timestamp + '.zip';
     a.click();
     URL.revokeObjectURL(url);
 
     // Record export time
     db.meta.lastExport = new Date().toISOString();
     saveDB();
-      showToast('Saved: fitlog_' + timestamp + '.zip');
+      showToast('Exported: fitness-tracker-backup-' + timestamp + '.zip');
   });
 }
 
@@ -1239,12 +1237,13 @@ function toCSV(headers, rows) {
 
 /* ── Import ────────────────────────────────────────────────────── */
 
+function confirmDeviceImport() {
+  if (!confirm('Import from device backup? This will merge logs and overwrite libraries and settings.')) return;
+  document.getElementById('device-import-input').click();
+}
+
 function importData(event) {
-  if (!confirm('Import from device backup? This will merge logs and overwrite libraries and settings.')) {
-    event.target.value = '';
-    return;
-  }
-  /* Read a fitlog_backup.json file and restore the database.
+  /* Read a fitness-tracker-backup.json file and restore the database.
      Warns the user before overwriting existing data. */
   const file = event.target.files[0];
   if (!file) return;
@@ -4221,11 +4220,11 @@ async function githubExport() {
   if (!cfg) { showToast('Load GitHub config first'); return; }
   showToast('Exporting...', 30000);
   try {
-    const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
+    const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitness-tracker-backup.json');
     const existingIds = new Set((ghLogs || []).map(e => e.id));
     const newLogs = db.logs.filter(e => !existingIds.has(e.id));
     const mergedLogs = [...(ghLogs || []), ...newLogs].sort((a, b) => a.id - b.id);
-    await ghPutJSON('fitlog_backup.json', mergedLogs, logsSha);
+    await ghPutJSON('fitness-tracker-backup.json', mergedLogs, logsSha);
 
     const libEx   = await ghGet('library_exercises.json');
     const libCard = await ghGet('library_cardio.json');
@@ -4254,7 +4253,7 @@ async function githubImport() {
   if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
   showToast('Importing...', 30000);
   try {
-    const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
+    const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitness-tracker-backup.json');
 
     let importedCount = 0;
     if (ghLogs) {
