@@ -4297,6 +4297,7 @@ async function githubExport() {
 async function githubImport() {
   const cfg = getGithubConfig();
   if (!cfg) { showToast('Load GitHub config first'); return; }
+  if (!navigator.onLine) { showToast('No internet connection'); return; }
   if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
   showToast('Importing...');
   try {
