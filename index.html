@@ -3811,8 +3811,8 @@ function makeXScale(rangeStart, allRaw, rangeMonths, mutedColor, borderColor, xM
       }
     },
     grid: {
-      color: ctx => new Date(ctx.tick.value).getDate()===1 ? borderColor : 'transparent',
-      lineWidth: ctx => new Date(ctx.tick.value).getDate()===1 ? 2 : 1
+      color: ctx => ctx.tick && new Date(ctx.tick.value).getDate()===1 ? borderColor : 'transparent',
+      lineWidth: ctx => ctx.tick && new Date(ctx.tick.value).getDate()===1 ? 2 : 1
     }
   };
 }
