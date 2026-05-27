@@ -2987,9 +2987,29 @@ function renderWeightChart() {
   const mutedColor  = style.getPropertyValue('--muted').trim();
   const borderColor = style.getPropertyValue('--border').trim();
 
+  const weightTargetVal = db.settings && db.settings.weightTarget ? db.settings.weightTarget : null;
+  const weightTargetPlugin = {
+    id: 'weightTargetLine',
+    afterDraw(chart) {
+      if (!weightTargetVal || weightRangeMonths !== 0.25) return;
+      const { ctx: c, chartArea, scales } = chart;
+      const y = scales.y.getPixelForValue(weightTargetVal);
+      if (y < chartArea.top || y > chartArea.bottom) return;
+      c.save();
+      c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6, 4]);
+      c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = '#e76f51';
+      c.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+      c.textAlign = 'right';
+      c.fillText(weightTargetVal, chartArea.right - 4, y - 4);
+      c.restore();
+    }
+  };
+
   weightChartInstance = new Chart(ctx, {
     type: 'line',
-    plugins: [makeWeekBandPlugin('weightWeekBands', () => weightRangeMonths)],
+    plugins: [makeWeekBandPlugin('weightWeekBands', () => weightRangeMonths), weightTargetPlugin],
     data: {
       datasets: [{
         data: chartData,
