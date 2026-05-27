@@ -797,59 +797,12 @@
 
       <!-- Export reminder banner (shown if overdue) -->
       <div id="export-banner" class="hidden">
-        <span class="warn-text">Back up your data</span>
-        <button class="btn btn-primary" onclick="exportData()" style="padding:7px 14px; font-size:14px;">Export now</button>
+        <div class="warn-text">⚠ Back up your data</div>
+        <button class="btn btn-primary" onclick="exportZip()">Export now</button>
       </div>
 
-      <!-- Export section -->
-      <h3>Data</h3>
-      <div class="card">
-        <div class="card-row">
-          <div>
-            <div style="font-weight:500">Export all data</div>
-            <div style="font-size:13px; color:var(--muted)" id="last-export-label">Never</div>
-          </div>
-          <button class="btn btn-primary" onclick="exportData()">Export</button>
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Export reminder every</div>
-          <select id="reminder-days" onchange="saveSettings()" style="font-size:15px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
-            <option value="3" selected>3 days</option>
-            <option value="7">7 days</option>
-            <option value="14">14 days</option>
-            <option value="30">30 days</option>
-            <option value="0">Never</option>
-          </select>
-        </div>
-        <div class="card-row">
-          <div>
-            <div style="font-weight:500">Import backup</div>
-            <div style="font-size:13px; color:var(--muted)">Restore from a JSON backup</div>
-          </div>
-          <label class="btn" style="cursor:pointer;">
-            Import
-            <input type="file" accept=".json" onchange="importData(event)" style="display:none">
-          </label>
-        </div>
-      </div>
-
-      <!-- GitHub Sync -->
+      <!-- GitHub sync -->
       <h3>GitHub sync</h3>
-      <div class="card" style="margin-bottom:0.75rem;">
-        <div class="card-row">
-          <div>
-            <div style="font-weight:500">Load config</div>
-            <div style="font-size:13px; color:var(--muted)">Select github_config.txt</div>
-          </div>
-          <label class="btn" style="cursor:pointer;">
-            Load
-            <input type="file" accept=".txt" onchange="loadGithubConfig(event)" style="display:none">
-          </label>
-        </div>
-        <div class="card-row">
-          <div style="font-size:13px; color:var(--muted)" id="github-config-status">Config: not loaded</div>
-        </div>
-      </div>
       <div class="card" style="margin-bottom:0.75rem;">
         <div class="card-row">
           <div>
@@ -864,6 +817,86 @@
             <div style="font-size:13px; color:var(--muted)" id="github-import-status">Never imported</div>
           </div>
           <button class="btn" onclick="githubImport()">Import</button>
+        </div>
+        <div class="card-row">
+          <div>
+            <div style="font-weight:500">Load config</div>
+            <div style="font-size:13px; color:var(--muted)" id="github-config-status">Config: not loaded</div>
+          </div>
+          <label class="btn" style="cursor:pointer;">
+            Load
+            <input type="file" accept=".txt" onchange="loadGithubConfig(event)" style="display:none">
+          </label>
+        </div>
+      </div>
+
+      <!-- Backup on device -->
+      <h3>Backup on device</h3>
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card-row">
+          <div style="font-weight:500">Export to device</div>
+          <button class="btn" onclick="exportZip()">Export</button>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Import from device</div>
+          <label class="btn" style="cursor:pointer;">
+            Import
+            <input type="file" accept=".zip,.json" onchange="importZip(event)" style="display:none">
+          </label>
+        </div>
+      </div>
+
+      <!-- Libraries -->
+      <h3>Libraries</h3>
+      <details class="lib-details">
+        <summary class="lib-summary">Gym exercises</summary>
+        <div id="exercise-library-list"></div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input type="text" id="new-exercise-name" placeholder="Exercise name" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;">
+          <button class="btn btn-primary" onclick="addExercise()">Add</button>
+        </div>
+      </details>
+      <details class="lib-details">
+        <summary class="lib-summary">Cardio activities</summary>
+        <div id="cardio-library-list"></div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <input type="text" id="new-cardio-name" placeholder="Activity name" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;">
+          <button class="btn btn-primary" onclick="addCardioActivity()">Add</button>
+        </div>
+      </details>
+      <details class="lib-details">
+        <summary class="lib-summary">Meal items</summary>
+        <div id="meal-item-library-list"></div>
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+          <input type="text"   id="new-meal-item-name"     placeholder="Item name"  style="flex:2; min-width:120px; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;">
+          <input type="number" id="new-meal-item-calories"  placeholder="kcal"       style="flex:1; min-width:60px;  padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;" inputmode="decimal">
+          <input type="number" id="new-meal-item-protein"   placeholder="protein g"  style="flex:1; min-width:60px;  padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;" inputmode="decimal">
+          <button class="btn btn-primary" onclick="addMealItem()">Add</button>
+        </div>
+      </details>
+
+      <!-- Targets -->
+      <h3>Targets</h3>
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card-row">
+          <div style="font-weight:500">Calories (kcal)</div>
+          <input type="number" id="cal-target" min="0" inputmode="numeric" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Protein (g)</div>
+          <input type="number" id="prot-target" min="0" inputmode="decimal" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Weight (kg)</div>
+          <input type="number" id="weight-target" min="0" inputmode="decimal" step="0.1" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Rising time</div>
+          <input type="time" id="rise-target" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
         </div>
       </div>
 
@@ -881,88 +914,19 @@
         </div>
       </div>
 
-      <h3>Targets</h3>
-      <div class="card" style="margin-bottom:0.75rem;">
-        <div class="card-row">
-          <div style="font-weight:500">Calories (kcal)</div>
-          <input type="number" id="cal-target" min="0" inputmode="numeric" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Protein (g)</div>
-          <input type="number" id="prot-target" min="0" inputmode="decimal" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Rising time</div>
-          <input type="time" id="rise-target" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
-        </div>
-      </div>
-
-      <!-- Gym exercises -->
-      <details class="lib-details">
-        <summary class="lib-summary">Gym exercises</summary>
-        <div class="card" style="margin-top:0.5rem;">
-          <div id="exercise-library-list"></div>
-          <div style="display:flex; gap:8px; margin-top:0.75rem;">
-            <input type="text" id="new-exercise" placeholder="New exercise name"
-              style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text);">
-            <button class="btn btn-primary" onclick="addExercise()">Add</button>
-          </div>
-        </div>
-      </details>
-
-      <!-- Cardio library -->
-      <details class="lib-details">
-        <summary class="lib-summary">Cardio activities</summary>
-        <div class="card" style="margin-top:0.5rem;">
-          <div id="cardio-library-list"></div>
-          <div style="display:flex; gap:8px; margin-top:0.75rem;">
-            <input type="text" id="new-cardio-activity" placeholder="New activity name"
-              style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text);">
-            <button class="btn btn-primary" onclick="addCardioActivity()">Add</button>
-          </div>
-        </div>
-      </details>
-
-      <!-- Meal item library -->
-      <details class="lib-details">
-        <summary class="lib-summary">Meal items</summary>
-        <div class="card" style="margin-top:0.5rem;">
-          <div id="meal-item-library-list"></div>
-          <div style="display:flex; gap:8px; margin-top:0.75rem;">
-            <input type="text" id="new-meal-item-name" placeholder="New item name"
-              style="flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text);">
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-            <input type="number" id="new-meal-item-cal"  placeholder="kcal" min="0" inputmode="numeric"
-              style="padding:9px 6px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text); width:100%; min-width:0;">
-            <input type="number" id="new-meal-item-pro"  placeholder="P(g)" min="0" inputmode="decimal"
-              style="padding:9px 6px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:inherit; font-size:16px; color:var(--text); width:100%; min-width:0;">
-          </div>
-          <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="addMealItem()">Add</button>
-        </div>
-      </details>
-
       <!-- Danger zone -->
       <h3>Danger zone</h3>
       <div class="card">
         <div class="card-row">
           <div>
             <div style="font-weight:500">Clear all data</div>
-            <div style="font-size:13px; color:var(--muted)">Permanently deletes everything</div>
+            <div style="font-size:13px; color:var(--muted)">Permanently delete all logs</div>
           </div>
-          <button class="btn btn-danger" onclick="clearAllData()">Clear</button>
+          <button class="btn" style="color:#e76f51; border-color:#e76f51;" onclick="clearAllData()">Clear</button>
         </div>
       </div>
 
-      <!-- App info -->
-      <div style="text-align:center; font-size:12px; color:var(--muted); margin-top:1.5rem;">
-        Fitness Tracker
-      </div>
     </div>
-
   </div><!-- /#main -->
 
   <!-- ── Bottom navigation ───────────────────────────────────────── -->
@@ -1081,6 +1045,7 @@ let db = {
     darkMode: false,
     calTarget: null,
     proteinTarget: null,
+    weightTarget: null,
     riseTarget: null
   },
   exerciseLibrary: [
@@ -1253,8 +1218,7 @@ function exportData() {
     // Record export time
     db.meta.lastExport = new Date().toISOString();
     saveDB();
-    updateExportStatus();
-    showToast('Saved: fitlog_' + timestamp + '.zip');
+      showToast('Saved: fitlog_' + timestamp + '.zip');
   });
 }
 
@@ -1332,50 +1296,18 @@ function toggleDarkMode() {
 
 function saveSettings() {
   db.settings.reminderDays  = parseInt(document.getElementById('reminder-days').value);
-  const calT  = parseFloat(document.getElementById('cal-target').value);
-  const protT = parseFloat(document.getElementById('prot-target').value);
-  db.settings.calTarget     = isNaN(calT)  ? null : calT;
-  db.settings.proteinTarget = isNaN(protT) ? null : protT;
+  const calT    = parseFloat(document.getElementById('cal-target').value);
+  const protT   = parseFloat(document.getElementById('prot-target').value);
+  const weightT = parseFloat(document.getElementById('weight-target').value);
+  db.settings.calTarget     = isNaN(calT)    ? null : calT;
+  db.settings.proteinTarget = isNaN(protT)   ? null : protT;
+  db.settings.weightTarget  = isNaN(weightT) ? null : weightT;
   const riseT = document.getElementById('rise-target').value;
   db.settings.riseTarget = riseT || null;
   saveDB();
-  updateExportStatus();
-}
-
-function updateExportStatus() {
-  /* Show/hide the export reminder banner based on days since last export. */
-  const label = document.getElementById('last-export-label');
-  const banner = document.getElementById('export-banner');
-  const reminderDays = db.settings.reminderDays;
-
-  if (!db.meta.lastExport) {
-    label.textContent = 'Never';
-    banner.classList.toggle('hidden', db.logs.length === 0 || reminderDays === 0);
-    return;
-  }
-
-  const daysSince = Math.floor(
-    (Date.now() - new Date(db.meta.lastExport).getTime()) / 86400000
-  );
-  const daysLabel = daysSince === 0 ? 'Today' : daysSince + ' day' + (daysSince !== 1 ? 's' : '') + ' ago';
-  label.textContent = 'Last export: ' + daysLabel;
-
-  const overdue = reminderDays > 0 && daysSince >= reminderDays;
-  banner.classList.toggle('hidden', !overdue);
 }
 
 
-/* ── Libraries (exercises and cardio activities) ───────────────── */
-/*
-   Each library is a named array in db (e.g. db.exerciseLibrary).
-   renderLibrary()  — renders the list with up/down/delete controls
-   addToLibrary()   — adds a new item
-   moveInLibrary()  — swaps two items (called by up/down buttons)
-   deleteFromLibrary() — removes an item with optional in-use check
-
-   onUpdate is a callback fired after any mutation (e.g. to refresh
-   a dropdown that depends on the library).
-*/
 
 function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   /* Generic library renderer. key = db property name (string).
@@ -1689,11 +1621,11 @@ function showScreen(name, btn) {
     renderExerciseLibrary();
     renderCardioLibrary();
     renderMealItemLibrary();
-    updateExportStatus();
-    document.getElementById('reminder-days').value = db.settings.reminderDays;
-    if (db.settings.calTarget)     document.getElementById('cal-target').value    = db.settings.calTarget;
-    if (db.settings.proteinTarget) document.getElementById('prot-target').value   = db.settings.proteinTarget;
-    if (db.settings.riseTarget)    document.getElementById('rise-target').value    = db.settings.riseTarget;
+      document.getElementById('reminder-days').value = db.settings.reminderDays;
+    if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
+    if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
+    if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
+    if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
   }
   updateGithubConfigStatus();
   updateGithubExportStatus();
@@ -1973,12 +1905,12 @@ function renderAll() {
   renderCardioLibrary();
   renderMealItemLibrary();
   populateCardioActivityDropdown();
-  updateExportStatus();
   if (db.settings) {
     document.getElementById('reminder-days').value = db.settings.reminderDays;
-    if (db.settings.calTarget)     document.getElementById('cal-target').value    = db.settings.calTarget;
-    if (db.settings.proteinTarget) document.getElementById('prot-target').value   = db.settings.proteinTarget;
-    if (db.settings.riseTarget)    document.getElementById('rise-target').value    = db.settings.riseTarget;
+    if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
+    if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
+    if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
+    if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
   }
   // Initialise gym and meal forms then restore any drafts
   resetGymForm();
@@ -3044,8 +2976,9 @@ function renderWeightChart() {
   }
 
   const yVals = chartData.map(p => p.y).filter(v => v !== null);
-  const yDataMin = Math.min(...yVals);
-  const yDataMax = Math.max(...yVals);
+  const wTarget = db.settings && db.settings.weightTarget && weightRangeMonths === 0.25 ? db.settings.weightTarget : null;
+  const yDataMin = Math.min(...yVals, wTarget !== null ? wTarget - 0.1 : Infinity);
+  const yDataMax = Math.max(...yVals, wTarget !== null ? wTarget + 0.1 : -Infinity);
   const yMin = parseFloat((yDataMin - 0.1).toFixed(2));
   const yMax = parseFloat((yDataMax + 0.1).toFixed(2));
 
