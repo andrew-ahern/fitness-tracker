@@ -4289,7 +4289,8 @@ async function githubExport() {
     updateGithubExportStatus();
     showToast(newLogs.length + ' new entries exported \u2713');
   } catch(err) {
-    showToast('Export failed: ' + err.message);
+    const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
+    showToast(offline ? 'No internet connection' : 'Export failed: ' + err.message);
     console.error(err);
   }
 }
