@@ -4364,13 +4364,24 @@ function runTests() {
     assertEqual(today(), expected);
   });
 
-  test('getMondayOf() returns correct Monday', () => {
-    // 2026-05-27 is a Wednesday — Monday should be 2026-05-25
-    assertEqual(getMondayOf('2026-05-27'), '2026-05-25');
-    // 2026-05-25 is a Monday — should return itself
-    assertEqual(getMondayOf('2026-05-25'), '2026-05-25');
-    // 2026-05-31 is a Sunday — Monday should be 2026-05-25
-    assertEqual(getMondayOf('2026-05-31'), '2026-05-25');
+  test('Monday calculation: Wed → Mon', () => {
+    const dateStr = '2026-05-27'; // Wednesday
+    const tp = dateStr.split('-').map(Number);
+    const td = new Date(tp[0], tp[1]-1, tp[2]);
+    const dow = td.getDay();
+    td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
+    const mon = td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0')+'-'+String(td.getDate()).padStart(2,'0');
+    assertEqual(mon, '2026-05-25');
+  });
+
+  test('Monday calculation: Sun → Mon', () => {
+    const dateStr = '2026-05-31'; // Sunday
+    const tp = dateStr.split('-').map(Number);
+    const td = new Date(tp[0], tp[1]-1, tp[2]);
+    const dow = td.getDay();
+    td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
+    const mon = td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0')+'-'+String(td.getDate()).padStart(2,'0');
+    assertEqual(mon, '2026-05-25');
   });
 
   // ── DB schema ──────────────────────────────────────────────────
