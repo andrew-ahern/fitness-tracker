@@ -1,16 +1,9 @@
-/* FitLog Service Worker
-   Caches the app shell so it works offline after first load. */
-
-const CACHE_NAME = 'fitlog-v20';
-
-const SHELL = [
-  './index.html',
-  './manifest.json'
-];
+const CACHE_NAME = 'fitlog-v21';
+const CACHED_ASSETS = ['./manifest.json'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(CACHED_ASSETS))
   );
   self.skipWaiting();
 });
@@ -24,16 +17,22 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
 self.addEventListener('fetch', event => {
-  // Pass through external requests (GitHub API, CDN etc.) and test mode
-  if (!event.request.url.startsWith(self.location.origin) || event.request.url.includes('test=true')) {
-    return; // let browser handle it normally
+  // Skip non-origin and test mode requests
+  if (!event.request.url.startsWith(self.location.origin)) return;
+
+  // Always fetch index.html fresh — ensures updates are instant
+  if (event.request.url.includes('index.html') || event.request.url.endsWith('/fitness-tracker/') || event.request.url.endsWith('/fitness-tracker')) {
+    event.respondWith(fetch(event.request).catch(() => caches.match('./index.html')));
+    return;
   }
+
+  // Cache-first for other assets
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
