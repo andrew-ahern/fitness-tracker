@@ -4558,8 +4558,8 @@ function showTestScreen() {
 
 // Run tests if ?test=true in URL
 if (new URLSearchParams(window.location.search).get('test') === 'true') {
-  document.addEventListener('DOMContentLoaded', () => {
-    loadDB();
+  // Override renderAll to show test screen instead
+  window.addEventListener('load', () => {
     showTestScreen();
   });
 }
