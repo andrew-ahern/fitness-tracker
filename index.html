@@ -2973,7 +2973,7 @@ function renderWeightChart() {
   }
 
   const yVals = chartData.map(p => p.y).filter(v => v !== null);
-  const wTarget = db.settings && db.settings.weightTarget && weightRangeMonths === 0.25 ? parseFloat(db.settings.weightTarget) : null;
+  const wTarget = db.settings && db.settings.weightTarget && weightRangeMonths !== 0 ? parseFloat(db.settings.weightTarget) : null;
   const yDataMin = Math.min(...yVals, wTarget !== null ? wTarget - 0.1 : Infinity);
   const yDataMax = Math.max(...yVals, wTarget !== null ? wTarget + 0.1 : -Infinity);
   const yMin = parseFloat((yDataMin - 0.1).toFixed(2));
@@ -2991,7 +2991,7 @@ function renderWeightChart() {
   const weightTargetPlugin = {
     id: 'weightTargetLine',
     afterDraw(chart) {
-      if (!weightTargetVal || weightRangeMonths !== 0.25) return;
+      if (!weightTargetVal || weightRangeMonths === 0) return;
       const { ctx: c, chartArea, scales } = chart;
       const y = scales.y.getPixelForValue(weightTargetVal);
       if (y < chartArea.top || y > chartArea.bottom) return;
@@ -3162,8 +3162,8 @@ function renderRiseChart() {
     if (!t) return null;
     const [h, m] = t.split(':').map(Number); return h * 60 + m;
   })();
-  const yMin = Math.min(...yVals, riseRangeMonths === 0.25 && riseTargetMinsForRange ? riseTargetMinsForRange - 6 : Infinity) - 6;
-  const yMax = Math.max(...yVals, riseRangeMonths === 0.25 && riseTargetMinsForRange ? riseTargetMinsForRange + 6 : -Infinity) + 6;
+  const yMin = Math.min(...yVals, riseRangeMonths !== 0 && riseTargetMinsForRange ? riseTargetMinsForRange - 6 : Infinity) - 6;
+  const yMax = Math.max(...yVals, riseRangeMonths !== 0 && riseTargetMinsForRange ? riseTargetMinsForRange + 6 : -Infinity) + 6;
 
   if (riseChartInstance) { riseChartInstance.destroy(); riseChartInstance = null; }
 
@@ -3184,7 +3184,7 @@ function renderRiseChart() {
   const riseTargetPlugin = {
     id: 'riseTargetLine',
     afterDraw(chart) {
-      if (!riseTargetMins || riseRangeMonths !== 0.25) return;
+      if (!riseTargetMins || riseRangeMonths === 0) return;
       const { ctx: c, chartArea, scales } = chart;
       const y = scales.y.getPixelForValue(riseTargetMins);
       if (y < chartArea.top || y > chartArea.bottom) return;
@@ -3521,7 +3521,7 @@ function renderCalChart() {
     const calTargetPlugin30 = {
       id: '_calChartInstTarget30',
       afterDraw(chart) {
-        if (!targetVal || calRangeMonths !== 1) return;
+        if (!targetVal || calRangeMonths === 0) return;
         const { ctx: c, chartArea, scales } = chart;
         const y = scales.y.getPixelForValue(targetVal);
         if (y < chartArea.top || y > chartArea.bottom) return;
@@ -3711,7 +3711,7 @@ function renderProteinChart() {
     const protTargetPlugin30 = {
       id: '_protChartInstTarget30',
       afterDraw(chart) {
-        if (!targetVal || proteinRangeMonths !== 1) return;
+        if (!targetVal || proteinRangeMonths === 0) return;
         const { ctx: c, chartArea, scales } = chart;
         const y = scales.y.getPixelForValue(targetVal);
         if (y < chartArea.top || y > chartArea.bottom) return;
