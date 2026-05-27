@@ -4236,7 +4236,7 @@ async function githubExport() {
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_export', now);
     updateGithubExportStatus();
-    showToast(newLogs.length + ' new entries exported \u2713');
+    showToast('Export complete \u2713' + (newLogs.length ? ' (' + newLogs.length + ' new entr' + (newLogs.length === 1 ? 'y' : 'ies') + ')' : ''));
   } catch(err) {
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Export failed: ' + err.message);
@@ -4252,10 +4252,12 @@ async function githubImport() {
   try {
     const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitlog_backup.json');
 
+    let importedCount = 0;
     if (ghLogs) {
       const existingIds = new Set(db.logs.map(e => e.id));
       const newLogs = ghLogs.filter(e => !existingIds.has(e.id));
       db.logs = [...db.logs, ...newLogs].sort((a, b) => a.id - b.id);
+      importedCount = newLogs.length;
     }
 
     const { content: ghEx }   = await ghGetJSON('library_exercises.json');
@@ -4274,7 +4276,7 @@ async function githubImport() {
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_import', now);
     updateGithubImportStatus();
-    showToast('Import complete \u2713');
+    showToast('Import complete \u2713' + (importedCount ? ' (' + importedCount + ' new entr' + (importedCount === 1 ? 'y' : 'ies') + ')' : ''));
   } catch(err) {
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Import failed: ' + err.message);
