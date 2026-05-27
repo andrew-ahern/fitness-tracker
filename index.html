@@ -4279,6 +4279,14 @@ async function githubImport() {
   if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
   showToast('Importing...', 30000);
   try {
+    // Check repo exists
+    const repoCheck = await fetch('https://api.github.com/repos/' + cfg.repo, {
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (repoCheck.status === 401) throw new Error('Invalid token — reload your config file');
+    if (repoCheck.status === 403) throw new Error('Access denied — check your token has repo permissions');
+    if (repoCheck.status === 404) throw new Error('Data repo not found — check your config file');
+
     const { content: ghLogs, sha: logsSha } = await ghGetJSON('fitness-tracker-backup.json');
 
     let importedCount = 0;
