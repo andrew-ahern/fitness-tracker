@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitlog-v38';
+const CACHE_NAME = 'fitlog-v39';
 const CACHED_ASSETS = ['./manifest.json'];
 
 self.addEventListener('install', event => {
