@@ -2872,6 +2872,7 @@ function rollingMedian(filled, windowDays) {
    ────────────────────────────────────────────────────────────────── */
 function getOrCreateChartCard(chartId, buildFn) {
   const container = document.getElementById('charts-container');
+  if (!container) { console.error('charts-container not found for', chartId); return null; }
   let card = document.getElementById('chart-card-' + chartId);
   if (!card) {
     card = document.createElement('div');
@@ -3117,6 +3118,24 @@ function setRiseRange(months) {
 }
 
 function renderRiseChart() {
+  getOrCreateChartCard('rise', () => `
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+      <div style="font-size:15px; font-weight:500">Rising time</div>
+      <div style="display:flex; gap:4px;">
+        <button class="chart-toggle active" id="rise-toggle-raw"     onclick="setRiseView('raw')">Raw</button>
+        <button class="chart-toggle"        id="rise-toggle-avg7"    onclick="setRiseView('avg7')">7-day avg</button>
+        <button class="chart-toggle"        id="rise-toggle-median7" onclick="setRiseView('median7')">7-day median</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+      <button class="chart-toggle active" id="rise-range-1w"  onclick="setRiseRange(0.25)">This week</button>
+      <button class="chart-toggle" id="rise-range-1m"  onclick="setRiseRange(1)">30 days</button>
+      <button class="chart-toggle" id="rise-range-3m"  onclick="setRiseRange(3)">90 days</button>
+      <button class="chart-toggle" id="rise-range-all" onclick="setRiseRange(0)">All</button>
+    </div>
+    <div style="position:relative; height:240px;"><canvas id="chart-rise"></canvas></div>
+    <div id="chart-rise-empty" class="empty" style="display:none; padding:2rem 0;">No rise time entries yet</div>
+  `);
   const allRaw = getRiseByDay();
   const canvas = document.getElementById('chart-rise');
   const empty  = document.getElementById('chart-rise-empty');
@@ -3393,6 +3412,19 @@ function setProteinRange(months) {
 
 
 function renderCalChart() {
+  getOrCreateChartCard('cal', () => `
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+      <div style="font-size:15px; font-weight:500">Calories</div>
+    </div>
+    <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+      <button class="chart-toggle active" id="cal-range-1w"  onclick="setCalRange(0.25)">This week</button>
+      <button class="chart-toggle" id="cal-range-1m"  onclick="setCalRange(1)">30 days</button>
+      <button class="chart-toggle" id="cal-range-3m"  onclick="setCalRange(3)">90 days</button>
+      <button class="chart-toggle" id="cal-range-all" onclick="setCalRange(0)">All</button>
+    </div>
+    <div style="position:relative; height:240px;"><canvas id="chart-cal"></canvas></div>
+    <div id="chart-cal-empty" class="empty" style="display:none; padding:2rem 0;">No calorie entries yet</div>
+  `);
   const allRaw = getCalByDay();
   const canvas = document.getElementById('chart-cal');
   const empty  = document.getElementById('chart-cal-empty');
@@ -3583,6 +3615,19 @@ function renderCalChart() {
 }
 
 function renderProteinChart() {
+  getOrCreateChartCard('protein', () => `
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+      <div style="font-size:15px; font-weight:500">Protein</div>
+    </div>
+    <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+      <button class="chart-toggle active" id="protein-range-1w"  onclick="setProteinRange(0.25)">This week</button>
+      <button class="chart-toggle" id="protein-range-1m"  onclick="setProteinRange(1)">30 days</button>
+      <button class="chart-toggle" id="protein-range-3m"  onclick="setProteinRange(3)">90 days</button>
+      <button class="chart-toggle" id="protein-range-all" onclick="setProteinRange(0)">All</button>
+    </div>
+    <div style="position:relative; height:240px;"><canvas id="chart-protein"></canvas></div>
+    <div id="chart-protein-empty" class="empty" style="display:none; padding:2rem 0;">No protein entries yet</div>
+  `);
   const allRaw = getProteinByDay();
   const canvas = document.getElementById('chart-protein');
   const empty  = document.getElementById('chart-protein-empty');
@@ -3948,6 +3993,22 @@ function setActivityRange(range) {
 }
 
 function renderActivityChart() {
+  getOrCreateChartCard('activity', () => `
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
+      <div style="font-size:15px; font-weight:500">Activity</div>
+      <div style="display:flex; gap:10px; font-size:12px; color:var(--muted); align-items:center;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span>Gym</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#74c69d"></span>Cycle</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#adb5bd"></span>Run</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
+      <button class="chart-toggle active" id="activity-range-1w"  onclick="setActivityRange('1w')">This week</button>
+      <button class="chart-toggle"        id="activity-range-30d" onclick="setActivityRange('30d')">30 days</button>
+    </div>
+    <div style="position:relative; height:240px;"><canvas id="chart-activity"></canvas></div>
+    <div id="chart-activity-empty" class="empty" style="display:none; padding:2rem 0;">No activity this week</div>
+  `);
   const canvas = document.getElementById('chart-activity');
   const empty  = document.getElementById('chart-activity-empty');
   if (!canvas) return;
