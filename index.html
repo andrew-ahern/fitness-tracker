@@ -2877,6 +2877,7 @@ function clearChartCards() {
 
 function createChartCard(chartId, headerHTML, canvasId, emptyId, emptyMsg) {
   const container = document.getElementById('charts-container');
+  if (document.getElementById('chart-card-' + chartId)) return; // already exists
   const card = document.createElement('div');
   card.className = 'card';
   card.style.marginBottom = '0.75rem';
