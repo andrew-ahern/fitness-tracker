@@ -1397,6 +1397,9 @@ function addMealItem() {
   });
   saveDB();
   renderMealItemLibrary();
+  // Refresh all existing meal item datalists in the log form
+  const opts = (db.mealItemLibrary || []).map(i => '<option value="' + i.name + '">').join('');
+  document.querySelectorAll('[id^="mi-list-"]').forEach(dl => { dl.innerHTML = opts; });
   ['new-meal-item-name','new-meal-item-calories','new-meal-item-protein']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   showToast('Added: ' + name);
