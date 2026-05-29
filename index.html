@@ -1326,7 +1326,7 @@ function renderExerciseLibrary() {
 }
 
 function addExercise() {
-  addToLibrary('exerciseLibrary', 'new-exercise', () => {
+  addToLibrary('exerciseLibrary', 'new-exercise-name', () => {
     renderExerciseLibrary();
     refreshExerciseDropdowns();
   });
@@ -1416,7 +1416,7 @@ function renderCardioLibrary() {
 }
 
 function addCardioActivity() {
-  addToLibrary('cardioLibrary', 'new-cardio-activity', () => {
+  addToLibrary('cardioLibrary', 'new-cardio-name', () => {
     renderCardioLibrary();
     populateCardioActivityDropdown();
   });
