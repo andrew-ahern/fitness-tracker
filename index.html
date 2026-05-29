@@ -4215,22 +4215,35 @@ async function githubExport() {
     const existingIds = new Set((ghLogs || []).map(e => e.id));
     const newLogs = db.logs.filter(e => !existingIds.has(e.id));
     const mergedLogs = [...(ghLogs || []), ...newLogs].sort((a, b) => a.id - b.id);
-    await ghPutJSON('fitness-tracker-backup.json', mergedLogs, logsSha);
 
-    const libEx   = await ghGet('library_exercises.json');
-    const libCard = await ghGet('library_cardio.json');
-    const libMeal = await ghGet('library_meals.json');
-    await ghPutJSON('library_exercises.json', db.exerciseLibrary, libEx   ? libEx.sha   : null);
-    await ghPutJSON('library_cardio.json',    db.cardioLibrary,   libCard ? libCard.sha : null);
-    await ghPutJSON('library_meals.json',     db.mealItemLibrary, libMeal ? libMeal.sha : null);
+    // Fetch current GitHub state to detect changes
+    const { content: ghEx,   sha: exSha   } = await ghGetJSON('library_exercises.json');
+    const { content: ghCard, sha: cardSha  } = await ghGetJSON('library_cardio.json');
+    const { content: ghMeal, sha: mealSha  } = await ghGetJSON('library_meals.json');
+    const { content: ghSettings, sha: settingsSha } = await ghGetJSON('settings.json');
 
-    const { sha: settingsSha } = await ghGetJSON('settings.json');
-    await ghPutJSON('settings.json', db.settings, settingsSha);
+    const libExChanged   = JSON.stringify(ghEx)       !== JSON.stringify(db.exerciseLibrary);
+    const libCardChanged = JSON.stringify(ghCard)     !== JSON.stringify(db.cardioLibrary);
+    const libMealChanged = JSON.stringify(ghMeal)     !== JSON.stringify(db.mealItemLibrary);
+    const settingsChanged = JSON.stringify(ghSettings) !== JSON.stringify(db.settings);
+    const anyChange = newLogs.length > 0 || libExChanged || libCardChanged || libMealChanged || settingsChanged;
+
+    if (anyChange) {
+      await ghPutJSON('fitness-tracker-backup.json', mergedLogs, logsSha);
+      if (libExChanged)   await ghPutJSON('library_exercises.json', db.exerciseLibrary, exSha);
+      if (libCardChanged) await ghPutJSON('library_cardio.json',    db.cardioLibrary,   cardSha);
+      if (libMealChanged) await ghPutJSON('library_meals.json',     db.mealItemLibrary, mealSha);
+      if (settingsChanged) await ghPutJSON('settings.json',         db.settings,        settingsSha);
+    }
 
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_export', now);
     updateGithubExportStatus();
-    showToast('Export complete \u2713' + (newLogs.length ? ' (' + newLogs.length + ' new entr' + (newLogs.length === 1 ? 'y' : 'ies') + ')' : ''));
+    if (!anyChange) {
+      showToast('Export complete \u2713 (no changes made)');
+    } else {
+      showToast('Export complete \u2713' + (newLogs.length ? ' (' + newLogs.length + ' new entr' + (newLogs.length === 1 ? 'y' : 'ies') + ')' : ''));
+    }
   } catch(err) {
     const offline = !navigator.onLine || err.message.toLowerCase().includes('fetch') || err.message.toLowerCase().includes('network');
     showToast(offline ? 'No internet connection' : 'Export failed: ' + err.message);
