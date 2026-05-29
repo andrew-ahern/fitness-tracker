@@ -1392,12 +1392,12 @@ function addMealItem() {
   if (!db.mealItemLibrary) db.mealItemLibrary = [];
   db.mealItemLibrary.push({
     name,
-    calories: num('new-meal-item-cal'),
-    protein:  num('new-meal-item-pro')
+    calories: num('new-meal-item-calories'),
+    protein:  num('new-meal-item-protein')
   });
   saveDB();
   renderMealItemLibrary();
-  ['new-meal-item-name','new-meal-item-cal','new-meal-item-pro']
+  ['new-meal-item-name','new-meal-item-calories','new-meal-item-protein']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   showToast('Added: ' + name);
 }
