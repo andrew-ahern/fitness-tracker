@@ -696,99 +696,7 @@
     <!-- ══ CHARTS SCREEN ═══════════════════════════════════════════ -->
     <div id="screen-charts" class="screen">
       <div class="screen-header"><h1>Charts</h1></div>
-
-      <!-- Activity chart -->
-      <div class="card" id="chart-activity-card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
-          <div style="font-size:15px; font-weight:500">Activity</div>
-          <div style="display:flex; gap:10px; font-size:12px; color:var(--muted); align-items:center;">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span>Gym</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#74c69d"></span>Cycle</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#adb5bd"></span>Run</span>
-          </div>
-        </div>
-        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
-          <button class="chart-toggle active" id="activity-range-1w"  onclick="setActivityRange('1w')">This week</button>
-          <button class="chart-toggle"        id="activity-range-30d" onclick="setActivityRange('30d')">30 days</button>
-        </div>
-        <div style="position:relative; height:240px;"><canvas id="chart-activity"></canvas></div>
-        <div id="chart-activity-empty" class="empty" style="display:none; padding:2rem 0;">No activity this week</div>
-      </div>
-
-      <!-- Calories chart -->
-      <div class="card" id="chart-cal-card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
-          <div style="font-size:15px; font-weight:500">Calories</div>
-        </div>
-        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
-          <button class="chart-toggle active" id="cal-range-1w"  onclick="setCalRange(0.25)">This week</button>
-          <button class="chart-toggle" id="cal-range-1m"  onclick="setCalRange(1)">30 days</button>
-          <button class="chart-toggle" id="cal-range-3m"  onclick="setCalRange(3)">90 days</button>
-          <button class="chart-toggle" id="cal-range-all" onclick="setCalRange(0)">All</button>
-        </div>
-        <div style="position:relative; height:240px;"><canvas id="chart-cal"></canvas></div>
-        <div id="chart-cal-empty" class="empty" style="display:none; padding:2rem 0;">No calorie entries yet</div>
-      </div>
-
-      <!-- Protein chart -->
-      <div class="card" id="chart-protein-card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
-          <div style="font-size:15px; font-weight:500">Protein</div>
-        </div>
-        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
-          <button class="chart-toggle active" id="protein-range-1w"  onclick="setProteinRange(0.25)">This week</button>
-          <button class="chart-toggle" id="protein-range-1m"  onclick="setProteinRange(1)">30 days</button>
-          <button class="chart-toggle" id="protein-range-3m"  onclick="setProteinRange(3)">90 days</button>
-          <button class="chart-toggle" id="protein-range-all" onclick="setProteinRange(0)">All</button>
-        </div>
-        <div style="position:relative; height:240px;"><canvas id="chart-protein"></canvas></div>
-        <div id="chart-protein-empty" class="empty" style="display:none; padding:2rem 0;">No protein entries yet</div>
-      </div>
-
-      <!-- Rising time chart -->
-      <div class="card" id="chart-rise-card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
-          <div style="font-size:15px; font-weight:500">Rising time</div>
-          <div style="display:flex; gap:4px;">
-            <button class="chart-toggle active" id="rise-toggle-raw"     onclick="setRiseView('raw')">Raw</button>
-            <button class="chart-toggle"        id="rise-toggle-avg7"    onclick="setRiseView('avg7')">7-day avg</button>
-            <button class="chart-toggle"        id="rise-toggle-median7" onclick="setRiseView('median7')">7-day median</button>
-          </div>
-        </div>
-        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
-          <button class="chart-toggle active" id="rise-range-1w"  onclick="setRiseRange(0.25)">This week</button>
-          <button class="chart-toggle" id="rise-range-1m"  onclick="setRiseRange(1)">30 days</button>
-          <button class="chart-toggle" id="rise-range-3m"  onclick="setRiseRange(3)">90 days</button>
-          <button class="chart-toggle" id="rise-range-all" onclick="setRiseRange(0)">All</button>
-        </div>
-        <div style="position:relative; height:240px;"><canvas id="chart-rise"></canvas></div>
-        <div id="chart-rise-empty" class="empty" style="display:none; padding:2rem 0;">No rise time entries yet</div>
-      </div>
-
-      <!-- Weight chart -->
-      <div class="card" id="chart-weight-card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.6rem;">
-          <div style="font-size:15px; font-weight:500">Body weight</div>
-          <div style="display:flex; gap:4px;">
-            <button class="chart-toggle active" id="toggle-raw"     onclick="setWeightView('raw')">Raw</button>
-            <button class="chart-toggle"        id="toggle-avg7"    onclick="setWeightView('avg7')">7-day avg</button>
-            <button class="chart-toggle"        id="toggle-median7" onclick="setWeightView('median7')">7-day median</button>
-          </div>
-        </div>
-        <div style="display:flex; gap:4px; margin-bottom:0.75rem;">
-          <button class="chart-toggle" id="range-1w"  onclick="setWeightRange(0.25)">This week</button>
-          <button class="chart-toggle active" id="range-1m"  onclick="setWeightRange(1)">30 days</button>
-          <button class="chart-toggle" id="range-3m"  onclick="setWeightRange(3)">90 days</button>
-          <button class="chart-toggle" id="range-all" onclick="setWeightRange(0)">All</button>
-        </div>
-        <div style="position:relative; height:240px;">
-          <canvas id="chart-weight"></canvas>
-        </div>
-        <div id="chart-weight-empty" class="empty" style="display:none; padding:2rem 0;">
-          No weight entries yet
-        </div>
-      </div>
-
+      <div id="charts-container"></div>
     </div>
 
     <!-- ══ SETTINGS SCREEN ═════════════════════════════════════════ -->
@@ -2956,12 +2864,36 @@ function rollingMedian(filled, windowDays) {
 
 /* ── Chart rendering ───────────────────────────────────────────── */
 
+
+/* ── Chart card builder ───────────────────────────────────────────
+   Each render function calls createChartCard(id, headerHTML) to
+   create and append its card to #charts-container, then renders
+   into the canvas inside it.
+   ─────────────────────────────────────────────────────────────────*/
+function clearChartCards() {
+  const c = document.getElementById('charts-container');
+  if (c) c.innerHTML = '';
+}
+
+function createChartCard(chartId, headerHTML, canvasId, emptyId, emptyMsg) {
+  const container = document.getElementById('charts-container');
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.marginBottom = '0.75rem';
+  card.id = 'chart-card-' + chartId;
+  card.innerHTML = headerHTML
+    + '<div style="position:relative;height:240px;"><canvas id="' + canvasId + '"></canvas></div>'
+    + '<div id="' + emptyId + '" class="empty" style="display:none;padding:2rem 0;">' + emptyMsg + '</div>';
+  container.appendChild(card);
+}
+
 function renderCharts() {
-  renderRiseChart();
-  renderWeightChart();
+  clearChartCards();
+  renderActivityChart();
   renderCalChart();
   renderProteinChart();
-  renderActivityChart();
+  renderRiseChart();
+  renderWeightChart();
 }
 
 function setWeightView(mode) {
@@ -2985,6 +2917,7 @@ function setWeightRange(months) {
 }
 
 function renderWeightChart() {
+  createChartCard('weight', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Body weight</div><div style="display:flex;gap:4px;"><button class="chart-toggle active" id="toggle-raw" onclick="setWeightView(\'raw\')">Raw</button><button class="chart-toggle" id="toggle-avg7" onclick="setWeightView(\'avg7\')">7-day avg</button><button class="chart-toggle" id="toggle-median7" onclick="setWeightView(\'median7\')">7-day median</button></div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle" id="range-1w" onclick="setWeightRange(0.25)">This week</button><button class="chart-toggle active" id="range-1m" onclick="setWeightRange(1)">30 days</button><button class="chart-toggle" id="range-3m" onclick="setWeightRange(3)">90 days</button><button class="chart-toggle" id="range-all" onclick="setWeightRange(0)">All</button></div>', 'chart-weight', 'chart-weight-empty', 'No weight entries yet');
   const allRaw = getWeightByDay();
   const canvas = document.getElementById('chart-weight');
   const empty  = document.getElementById('chart-weight-empty');
@@ -3165,6 +3098,7 @@ function setRiseRange(months) {
 }
 
 function renderRiseChart() {
+  createChartCard('rise', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Rising time</div><div style="display:flex;gap:4px;"><button class="chart-toggle active" id="rise-toggle-raw" onclick="setRiseView(\'raw\')">Raw</button><button class="chart-toggle" id="rise-toggle-avg7" onclick="setRiseView(\'avg7\')">7-day avg</button><button class="chart-toggle" id="rise-toggle-median7" onclick="setRiseView(\'median7\')">7-day median</button></div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle active" id="rise-range-1w" onclick="setRiseRange(0.25)">This week</button><button class="chart-toggle" id="rise-range-1m" onclick="setRiseRange(1)">30 days</button><button class="chart-toggle" id="rise-range-3m" onclick="setRiseRange(3)">90 days</button><button class="chart-toggle" id="rise-range-all" onclick="setRiseRange(0)">All</button></div>', 'chart-rise', 'chart-rise-empty', 'No rise time entries yet');
   const allRaw = getRiseByDay();
   const canvas = document.getElementById('chart-rise');
   const empty  = document.getElementById('chart-rise-empty');
@@ -3441,6 +3375,7 @@ function setProteinRange(months) {
 
 
 function renderCalChart() {
+  createChartCard('cal', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Calories</div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle active" id="cal-range-1w" onclick="setCalRange(0.25)">This week</button><button class="chart-toggle" id="cal-range-1m" onclick="setCalRange(1)">30 days</button><button class="chart-toggle" id="cal-range-3m" onclick="setCalRange(3)">90 days</button><button class="chart-toggle" id="cal-range-all" onclick="setCalRange(0)">All</button></div>', 'chart-cal', 'chart-cal-empty', 'No calorie entries yet');
   const allRaw = getCalByDay();
   const canvas = document.getElementById('chart-cal');
   const empty  = document.getElementById('chart-cal-empty');
@@ -3631,6 +3566,7 @@ function renderCalChart() {
 }
 
 function renderProteinChart() {
+  createChartCard('protein', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Protein</div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle active" id="protein-range-1w" onclick="setProteinRange(0.25)">This week</button><button class="chart-toggle" id="protein-range-1m" onclick="setProteinRange(1)">30 days</button><button class="chart-toggle" id="protein-range-3m" onclick="setProteinRange(3)">90 days</button><button class="chart-toggle" id="protein-range-all" onclick="setProteinRange(0)">All</button></div>', 'chart-protein', 'chart-protein-empty', 'No protein entries yet');
   const allRaw = getProteinByDay();
   const canvas = document.getElementById('chart-protein');
   const empty  = document.getElementById('chart-protein-empty');
@@ -3996,6 +3932,7 @@ function setActivityRange(range) {
 }
 
 function renderActivityChart() {
+  createChartCard('activity', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Activity</div><div style="display:flex;gap:10px;font-size:12px;color:var(--muted);align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span>Gym</span><span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#74c69d"></span>Cycle</span><span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#adb5bd"></span>Run</span></div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle active" id="activity-range-1w" onclick="setActivityRange(\'1w\')">This week</button><button class="chart-toggle" id="activity-range-30d" onclick="setActivityRange(\'30d\')">30 days</button></div>', 'chart-activity', 'chart-activity-empty', 'No activity this week');
   const canvas = document.getElementById('chart-activity');
   const empty  = document.getElementById('chart-activity-empty');
   if (!canvas) return;
