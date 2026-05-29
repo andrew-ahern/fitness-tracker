@@ -4177,7 +4177,7 @@ async function ghGet(path) {
 
 async function ghPut(path, content, sha) {
   const cfg = getGithubConfig();
-  const body = { message: 'Fitness Tracker sync', content: btoa(unescape(encodeURIComponent(content))) };
+  const body = { message: 'Fitness Tracker sync', content: btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1))) };
   if (sha) body.sha = sha;
   const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
     method: 'PUT',
