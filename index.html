@@ -1264,8 +1264,6 @@ function saveSettings() {
 
 
 function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
-  /* Generic library renderer. key = db property name (string).
-     moveFn and deleteFn are global function name strings for inline onclick. */
   const list = document.getElementById(listId);
   const arr = db[key];
   const n = arr.length;
@@ -1273,10 +1271,14 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
     list.innerHTML = `<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">${emptyMsg}</div>`;
     return;
   }
-  list.innerHTML = arr.map((name, i) => `
-    <div class="card-row">
-      <span style="font-size:15px; flex:1">${name}</span>
-      <div style="display:flex; align-items:center; gap:2px;">
+  list.innerHTML = arr.map((item, i) => {
+    const name  = typeof item === 'string' ? item : item.name;
+    const group = (item && item.group) ? item.group : '';
+    const tags  = (item && item.tags)  ? item.tags.join(', ') : '';
+    return `
+    <div class="card-row" style="flex-wrap:wrap; gap:4px;">
+      <span style="font-size:15px; flex:1; min-width:120px;">${name}</span>
+      <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
         <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
           style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === 0 ? '0.2' : '1'}">↑</button>
         <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
@@ -1284,16 +1286,38 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
         <button onclick="${deleteFn}(${i})"
           style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:0 4px; line-height:1;">&times;</button>
       </div>
+      <div style="width:100%; display:flex; gap:8px; padding-bottom:4px;">
+        <input type="text" placeholder="Group" value="${group}"
+          oninput="updateLibraryItemField('${key}', ${i}, 'group', this.value)"
+          style="flex:1; font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
+        <input type="text" placeholder="Tags (comma-separated)" value="${tags}"
+          oninput="updateLibraryItemField('${key}', ${i}, 'tags', this.value)"
+          style="flex:2; font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
+      </div>
     </div>
-  `).join('');
+  `;}).join('');
+}
+
+function updateLibraryItemField(key, index, field, value) {
+  const item = db[key][index];
+  if (typeof item === 'string') {
+    // Migrate plain string to object
+    db[key][index] = { name: item };
+  }
+  if (field === 'tags') {
+    db[key][index][field] = value.split(',').map(t => t.trim()).filter(Boolean);
+  } else {
+    db[key][index][field] = value.trim() || null;
+  }
+  saveDB();
 }
 
 function addToLibrary(key, inputId, onUpdate) {
   const input = document.getElementById(inputId);
   const name = input.value.trim();
   if (!name) return;
-  if (db[key].includes(name)) { showToast('Already in library'); return; }
-  db[key].push(name);
+  if (db[key].some(i => (typeof i === 'string' ? i : i.name) === name)) { showToast('Already in library'); return; }
+  db[key].push({ name, group: null, tags: [] });
   saveDB();
   onUpdate();
   input.value = '';
@@ -1371,15 +1395,25 @@ function renderMealItemLibrary() {
     if (item.calories != null) parts.push(item.calories + ' kcal');
     if (item.protein  != null) parts.push('P ' + item.protein + 'g');
 
-    return `<div class="card-row">
-      <div style="flex:1;min-width:0;">
+    const group = item.group || '';
+    const tags  = (item.tags || []).join(', ');
+    return `<div class="card-row" style="flex-wrap:wrap; gap:4px;">
+      <div style="flex:1;min-width:120px;">
         <div style="font-size:15px">${item.name}</div>
         ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
       </div>
-      <div style="display:flex;align-items:center;gap:2px;">
+      <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
         <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
         <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
         <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>
+      </div>
+      <div style="width:100%;display:flex;gap:8px;padding-bottom:4px;">
+        <input type="text" placeholder="Group" value="${group}"
+          oninput="updateLibraryItemField('mealItemLibrary', ${i}, 'group', this.value)"
+          style="flex:1;font-size:13px;padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;">
+        <input type="text" placeholder="Tags (comma-separated)" value="${tags}"
+          oninput="updateLibraryItemField('mealItemLibrary', ${i}, 'tags', this.value)"
+          style="flex:2;font-size:13px;padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;">
       </div>
     </div>`;
   }).join('');
@@ -1394,7 +1428,9 @@ function addMealItem() {
   db.mealItemLibrary.push({
     name,
     calories: num('new-meal-item-calories'),
-    protein:  num('new-meal-item-protein')
+    protein:  num('new-meal-item-protein'),
+    group: null,
+    tags: []
   });
   saveDB();
   renderMealItemLibrary();
@@ -1446,9 +1482,19 @@ function deleteCardioActivity(index) {
 function populateCardioActivityDropdown(selectedVal) {
   const sel = document.getElementById('c-type');
   if (!sel) return;
-  sel.innerHTML = db.cardioLibrary.map(n =>
-    `<option value="${n}" ${n === selectedVal ? 'selected' : ''}>${n}</option>`
-  ).join('');
+  const cGrouped = {};
+  db.cardioLibrary.forEach(i => {
+    const n = typeof i === 'string' ? i : i.name;
+    const g = (i && i.group) ? i.group : '';
+    if (!cGrouped[g]) cGrouped[g] = [];
+    cGrouped[g].push({ n, selected: n === selectedVal });
+  });
+  let cOpts = '';
+  Object.keys(cGrouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b)).forEach(g => {
+    const items = cGrouped[g].map(({n,selected}) => `<option value="${n}" ${selected?'selected':''}>${n}</option>`).join('');
+    cOpts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
+  });
+  sel.innerHTML = cOpts;
 }
 
 

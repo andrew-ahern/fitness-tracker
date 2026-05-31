@@ -1,17 +1,120 @@
 [
-  "Bench press",
-  "Squat",
-  "Deadlift",
-  "Overhead press",
-  "Barbell row",
-  "Pull-up",
-  "Dip",
-  "Bicep curl",
-  "Tricep pushdown",
-  "Lat pulldown",
-  "Leg press",
-  "Leg curl",
-  "Calf raise",
-  "Plank",
-  "Romanian deadlift"
+  {
+    "name": "Bench press",
+    "group": "Push",
+    "tags": [
+      "chest",
+      "triceps",
+      "shoulders"
+    ]
+  },
+  {
+    "name": "Overhead press",
+    "group": "Push",
+    "tags": [
+      "shoulders",
+      "triceps"
+    ]
+  },
+  {
+    "name": "Dip",
+    "group": "Push",
+    "tags": [
+      "chest",
+      "triceps"
+    ]
+  },
+  {
+    "name": "Squat",
+    "group": "Legs",
+    "tags": [
+      "quads",
+      "glutes",
+      "hamstrings"
+    ]
+  },
+  {
+    "name": "Deadlift",
+    "group": "Legs",
+    "tags": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ]
+  },
+  {
+    "name": "Leg press",
+    "group": "Legs",
+    "tags": [
+      "quads",
+      "glutes"
+    ]
+  },
+  {
+    "name": "Leg curl",
+    "group": "Legs",
+    "tags": [
+      "hamstrings"
+    ]
+  },
+  {
+    "name": "Calf raise",
+    "group": "Legs",
+    "tags": [
+      "calves"
+    ]
+  },
+  {
+    "name": "Romanian deadlift",
+    "group": "Legs",
+    "tags": [
+      "hamstrings",
+      "glutes"
+    ]
+  },
+  {
+    "name": "Pull-up",
+    "group": "Pull",
+    "tags": [
+      "back",
+      "biceps"
+    ]
+  },
+  {
+    "name": "Barbell row",
+    "group": "Pull",
+    "tags": [
+      "back",
+      "biceps"
+    ]
+  },
+  {
+    "name": "Lat pulldown",
+    "group": "Pull",
+    "tags": [
+      "back",
+      "biceps"
+    ]
+  },
+  {
+    "name": "Bicep curl",
+    "group": "Pull",
+    "tags": [
+      "biceps"
+    ]
+  },
+  {
+    "name": "Tricep pushdown",
+    "group": "Push",
+    "tags": [
+      "triceps"
+    ]
+  },
+  {
+    "name": "Plank",
+    "group": "Core",
+    "tags": [
+      "core"
+    ]
+  }
 ]
