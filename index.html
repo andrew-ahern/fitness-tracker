@@ -4189,7 +4189,8 @@ async function ghGet(path) {
 
 async function ghPut(path, content, sha) {
   const cfg = getGithubConfig();
-  const body = { message: 'Fitness Tracker sync', content: btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1))) };
+  const encoded = btoa(encodeURIComponent(content).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1)));
+  const body = { message: 'Fitness Tracker sync', content: encoded };
   if (sha) body.sha = sha;
   const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
     method: 'PUT',
@@ -4200,6 +4201,20 @@ async function ghPut(path, content, sha) {
   if (res.status === 401) throw new Error('Invalid token — reload your config file');
   if (res.status === 403) throw new Error('Access denied — check your token has repo permissions');
   if (res.status === 404) throw new Error('Data repo not found — check your config file');
+  if (res.status === 409) {
+    // SHA conflict — re-fetch current SHA and retry once
+    const current = await ghGet(path);
+    if (!current) throw new Error('Conflict: file disappeared during export');
+    const retryBody = { message: 'Fitness Tracker sync', content: encoded, sha: current.sha };
+    const retry = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json',
+                 'Content-Type': 'application/json' },
+      body: JSON.stringify(retryBody)
+    });
+    if (!retry.ok) throw new Error('GitHub write error after retry: ' + retry.status);
+    return retry.json();
+  }
   if (!res.ok) throw new Error('GitHub write error: ' + res.status);
   return res.json();
 }
