@@ -935,6 +935,7 @@
    ════════════════════════════════════════════════════════════════════ */
 
 const STORAGE_KEY = 'fitlog_v1';
+const EXERCISE_GROUP_ORDER = ['Push', 'Pull', 'Legs', 'Delts', 'Core'];
 let exerciseCount = 0; // unique IDs for exercise blocks
 let mealItemCount = 0;  // unique IDs for meal item blocks
 const SCHEMA_VERSION = 1;
@@ -2259,8 +2260,6 @@ function saveWake() {
 /* ── Exercise blocks ───────────────────────────────────────────── */
 
 
-const EXERCISE_GROUP_ORDER = ['Push', 'Pull', 'Legs', 'Delts', 'Core'];
-
 function buildExerciseOptions(selectedName) {
   /* Build the <option> list fresh from the current library each time,
      so exercises added in Settings are immediately available here. */
@@ -2275,7 +2274,7 @@ function buildExerciseOptions(selectedName) {
     exGrouped[g].push({ name, selected: name === selectedName });
   });
   let opts = '';
-  const exGroupOrder = typeof EXERCISE_GROUP_ORDER !== 'undefined' ? EXERCISE_GROUP_ORDER : [];
+  const exGroupOrder = EXERCISE_GROUP_ORDER;
   const exGroupKeys = Object.keys(exGrouped).sort((a,b) => {
     if (a === '') return 1; if (b === '') return -1;
     const ai = exGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
