@@ -2264,9 +2264,18 @@ function buildExerciseOptions(selectedName) {
   if (db.exerciseLibrary.length === 0) {
     return '<option value="">— add exercises in Settings first —</option>';
   }
-  const opts = db.exerciseLibrary.map(name =>
-    `<option value="${name}" ${name === selectedName ? 'selected' : ''}>${name}</option>`
-  ).join('');
+  const exGrouped = {};
+  db.exerciseLibrary.forEach(i => {
+    const name = typeof i === 'string' ? i : i.name;
+    const g = (i && i.group) ? i.group : '';
+    if (!exGrouped[g]) exGrouped[g] = [];
+    exGrouped[g].push({ name, selected: name === selectedName });
+  });
+  let opts = '';
+  Object.keys(exGrouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b)).forEach(g => {
+    const items = exGrouped[g].map(({name,selected}) => `<option value="${name}" ${selected?'selected':''}>${name}</option>`).join('');
+    opts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
+  });
   return `<option value="">— select exercise —</option>${opts}`;
 }
 
