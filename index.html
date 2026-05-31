@@ -981,6 +981,16 @@ function loadDB() {
         // Patch in any fields added in later versions that may be missing
         // from data saved before those fields existed
         if (!db.cardioLibrary)          db.cardioLibrary = ['Cycle', 'Run'];
+        // Migrate plain string libraries to objects with IDs
+        if (db.exerciseLibrary && db.exerciseLibrary.length && typeof db.exerciseLibrary[0] === 'string') {
+          db.exerciseLibrary = db.exerciseLibrary.map(name => ({ id: Date.now() + Math.random(), name }));
+        }
+        if (db.cardioLibrary && db.cardioLibrary.length && typeof db.cardioLibrary[0] === 'string') {
+          db.cardioLibrary = db.cardioLibrary.map(name => ({ id: Date.now() + Math.random(), name }));
+        }
+        if (db.mealItemLibrary && db.mealItemLibrary.length && !db.mealItemLibrary[0].id) {
+          db.mealItemLibrary = db.mealItemLibrary.map(item => ({ id: Date.now() + Math.random(), ...item }));
+        }
         if (!db.drafts)                  db.drafts = {};
         if (!db.settings.darkMode)      db.settings.darkMode = false;
         if ('draft' in db)               delete db.draft;
@@ -1272,7 +1282,9 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
     list.innerHTML = `<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">${emptyMsg}</div>`;
     return;
   }
-  list.innerHTML = arr.map((name, i) => `
+  list.innerHTML = arr.map((item, i) => {
+    const name = typeof item === 'string' ? item : item.name;
+    return `
     <div class="card-row">
       <span style="font-size:15px; flex:1">${name}</span>
       <div style="display:flex; align-items:center; gap:2px;">
@@ -1284,15 +1296,15 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
           style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:0 4px; line-height:1;">&times;</button>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 
 function addToLibrary(key, inputId, onUpdate) {
   const input = document.getElementById(inputId);
   const name = input.value.trim();
   if (!name) return;
-  if (db[key].includes(name)) { showToast('Already in library'); return; }
-  db[key].push(name);
+  if (db[key].some(i => (typeof i === 'string' ? i : i.name) === name)) { showToast('Already in library'); return; }
+  db[key].push({ id: Date.now(), name });
   saveDB();
   onUpdate();
   input.value = '';
@@ -1391,6 +1403,7 @@ function addMealItem() {
   if ((db.mealItemLibrary || []).some(i => i.name === name)) { showToast('Already in library'); return; }
   if (!db.mealItemLibrary) db.mealItemLibrary = [];
   db.mealItemLibrary.push({
+    id: Date.now(),
     name,
     calories: num('new-meal-item-calories'),
     protein:  num('new-meal-item-protein')
@@ -1445,9 +1458,7 @@ function deleteCardioActivity(index) {
 function populateCardioActivityDropdown(selectedVal) {
   const sel = document.getElementById('c-type');
   if (!sel) return;
-  sel.innerHTML = db.cardioLibrary.map(n =>
-    `<option value="${n}" ${n === selectedVal ? 'selected' : ''}>${n}</option>`
-  ).join('');
+  sel.innerHTML = db.cardioLibrary.map(i => { const n = typeof i === 'string' ? i : i.name; return `<option value="${n}" ${n === selectedVal ? 'selected' : ''}>${n}</option>`; }).join('');
 }
 
 
@@ -2217,9 +2228,7 @@ function buildExerciseOptions(selectedName) {
   if (db.exerciseLibrary.length === 0) {
     return '<option value="">— add exercises in Settings first —</option>';
   }
-  const opts = db.exerciseLibrary.map(name =>
-    `<option value="${name}" ${name === selectedName ? 'selected' : ''}>${name}</option>`
-  ).join('');
+  const opts = db.exerciseLibrary.map(i => { const name = typeof i === 'string' ? i : i.name; return `<option value="${name}" ${name === selectedName ? 'selected' : ''}>${name}</option>`; }).join('');
   return `<option value="">— select exercise —</option>${opts}`;
 }
 
@@ -2541,7 +2550,7 @@ function buildEditForm(e) {
   }
 
   if (e.type === 'cardio') {
-    const actOpts = (db.cardioLibrary || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
+    const actOpts = (db.cardioLibrary || [{name:'Cycle'},{name:'Run'}]).map(i => { const a = typeof i === 'string' ? i : i.name; return `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`; }).join('');
     return `<div class="field"><label>Activity</label><select id="e-acttype">${actOpts}</select></div>` +
       row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
       row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
@@ -4222,18 +4231,32 @@ async function githubExport() {
     const { content: ghMeal, sha: mealSha  } = await ghGetJSON('library_meals.json');
     const { content: ghSettings, sha: settingsSha } = await ghGetJSON('settings.json');
 
-    const libExChanged   = JSON.stringify(ghEx)       !== JSON.stringify(db.exerciseLibrary);
-    const libCardChanged = JSON.stringify(ghCard)     !== JSON.stringify(db.cardioLibrary);
-    const libMealChanged = JSON.stringify(ghMeal)     !== JSON.stringify(db.mealItemLibrary);
+    // Merge libraries by ID (append-only both directions)
+    function mergeLibrary(ghLib, localLib) {
+      const ghIds = new Set((ghLib || []).map(i => i.id));
+      const localIds = new Set((localLib || []).map(i => i.id));
+      const newFromLocal = (localLib || []).filter(i => !ghIds.has(i.id));
+      const newFromGh    = (ghLib || []).filter(i => !localIds.has(i.id));
+      return { merged: [...(ghLib || []), ...newFromLocal], newFromLocal, newFromGh };
+    }
+    const exMerge   = mergeLibrary(ghEx,   db.exerciseLibrary);
+    const cardMerge = mergeLibrary(ghCard, db.cardioLibrary);
+    const mealMerge = mergeLibrary(ghMeal, db.mealItemLibrary);
     const settingsChanged = JSON.stringify(ghSettings) !== JSON.stringify(db.settings);
-    const anyChange = newLogs.length > 0 || libExChanged || libCardChanged || libMealChanged || settingsChanged;
+    const anyChange = newLogs.length > 0 || exMerge.newFromLocal.length > 0 ||
+      cardMerge.newFromLocal.length > 0 || mealMerge.newFromLocal.length > 0 || settingsChanged;
 
     if (anyChange) {
       await ghPutJSON('fitness-tracker-backup.json', mergedLogs, logsSha);
-      if (libExChanged)   await ghPutJSON('library_exercises.json', db.exerciseLibrary, exSha);
-      if (libCardChanged) await ghPutJSON('library_cardio.json',    db.cardioLibrary,   cardSha);
-      if (libMealChanged) await ghPutJSON('library_meals.json',     db.mealItemLibrary, mealSha);
-      if (settingsChanged) await ghPutJSON('settings.json',         db.settings,        settingsSha);
+      if (exMerge.newFromLocal.length)   await ghPutJSON('library_exercises.json', exMerge.merged,   exSha);
+      if (cardMerge.newFromLocal.length) await ghPutJSON('library_cardio.json',    cardMerge.merged,  cardSha);
+      if (mealMerge.newFromLocal.length) await ghPutJSON('library_meals.json',     mealMerge.merged,  mealSha);
+      if (settingsChanged)               await ghPutJSON('settings.json',           db.settings,       settingsSha);
+      // Also update local libraries with any new items from GitHub
+      if (exMerge.newFromGh.length)   { db.exerciseLibrary  = [...db.exerciseLibrary,  ...exMerge.newFromGh]; }
+      if (cardMerge.newFromGh.length) { db.cardioLibrary    = [...db.cardioLibrary,    ...cardMerge.newFromGh]; }
+      if (mealMerge.newFromGh.length) { db.mealItemLibrary  = [...db.mealItemLibrary,  ...mealMerge.newFromGh]; }
+      if (exMerge.newFromGh.length || cardMerge.newFromGh.length || mealMerge.newFromGh.length) saveDB();
     }
 
     const now = new Date().toISOString();
@@ -4278,9 +4301,10 @@ async function githubImport() {
     const { content: ghEx }   = await ghGetJSON('library_exercises.json');
     const { content: ghCard } = await ghGetJSON('library_cardio.json');
     const { content: ghMeal } = await ghGetJSON('library_meals.json');
-    if (ghEx)   db.exerciseLibrary  = ghEx;
-    if (ghCard) db.cardioLibrary    = ghCard;
-    if (ghMeal) db.mealItemLibrary  = ghMeal;
+    // Merge libraries by ID (append-only)
+    if (ghEx)   { const localIds = new Set(db.exerciseLibrary.map(i=>i.id)); db.exerciseLibrary  = [...db.exerciseLibrary,  ...(ghEx  ||[]).filter(i=>!localIds.has(i.id))]; }
+    if (ghCard) { const localIds = new Set(db.cardioLibrary.map(i=>i.id));   db.cardioLibrary    = [...db.cardioLibrary,    ...(ghCard||[]).filter(i=>!localIds.has(i.id))]; }
+    if (ghMeal) { const localIds = new Set(db.mealItemLibrary.map(i=>i.id)); db.mealItemLibrary  = [...db.mealItemLibrary,  ...(ghMeal||[]).filter(i=>!localIds.has(i.id))]; }
 
     const { content: ghSettings } = await ghGetJSON('settings.json');
     if (ghSettings) db.settings = { ...db.settings, ...ghSettings };
