@@ -4664,7 +4664,7 @@ function showTestScreen() {
    Sets per muscle tag, grouped by week (Mon 03:30 boundary)
    ════════════════════════════════════════════════════════════════════ */
 
-const MUSCLE_DEFAULT_TAGS = ['chest', 'back', 'legs', 'shoulders', 'triceps', 'biceps'];
+const MUSCLE_DEFAULT_TAGS = ['chest', 'back', 'legs', 'triceps', 'biceps', 'delts'];
 
 let muscleChartInstance = null;
 let muscleSelectedWeek  = null; // null = current week; else 'YYYY-MM-DD' (Monday)
@@ -4766,7 +4766,12 @@ function renderMuscleChart() {
   const empty  = document.getElementById('chart-muscle-empty');
   if (!canvas) return;
 
-  const allTags  = getMuscleTagsInData();
+  // Sort: defaults first, then others alphabetically
+  const allTagsRaw = getMuscleTagsInData();
+  const allTags = [
+    ...MUSCLE_DEFAULT_TAGS.filter(t => allTagsRaw.includes(t)),
+    ...allTagsRaw.filter(t => !MUSCLE_DEFAULT_TAGS.includes(t)).sort()
+  ];
   const tagState = getMuscleActiveTags();
   const weeks    = getMuscleWeeks();
 
@@ -4838,7 +4843,11 @@ function redrawMuscleChart(weeks, tagState) {
   }
   canvas.style.display = 'block'; empty.style.display = 'none';
 
-  const labels = activeTags;
+  // Sort: defaults first in defined order, then others alphabetically
+  const labels = [
+    ...MUSCLE_DEFAULT_TAGS.filter(t => activeTags.includes(t)),
+    ...activeTags.filter(t => !MUSCLE_DEFAULT_TAGS.includes(t)).sort()
+  ];
   const data   = activeTags.map(t => counts[t] || 0);
   const yMax   = Math.max(...data, 1) + 2;
 
