@@ -982,6 +982,7 @@ function loadDB() {
         // from data saved before those fields existed
         if (!db.cardioLibrary)          db.cardioLibrary = ['Cycle', 'Run'];
 
+
         if (!db.drafts)                  db.drafts = {};
         if (!db.settings.darkMode)      db.settings.darkMode = false;
         if ('draft' in db)               delete db.draft;
