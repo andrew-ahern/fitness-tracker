@@ -407,20 +407,6 @@
     .exercise-header input[type=text]:focus { outline: none; border-color: var(--accent); }
 
     /* Set rows within an exercise */
-    .set-note-row {
-      padding: 0 0 4px 2rem;
-    }
-    .set-note-row input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
-      font-family: inherit;
-      font-size: 13px;
-      padding: 2px 0;
-      outline: none;
-    }
     .set-row {
       display: grid;
       grid-template-columns: 28px 2fr 2fr 28px;
@@ -1672,8 +1658,7 @@ function saveDraft(type) {
       block.querySelectorAll('.set-row').forEach(row => {
         sets.push({
           weight: row.querySelector('.s-weight').value,
-          reps:   row.querySelector('.s-reps').value,
-          note:   (row.nextElementSibling && row.nextElementSibling.classList.contains('set-note-row')) ? row.nextElementSibling.querySelector('.s-note').value.trim() || null : null
+          reps:   row.querySelector('.s-reps').value
         });
       });
       d.exercises.push({ name, sets });
@@ -2305,25 +2290,15 @@ function addSetRow(blockId, setData) {
   rInput.value = (setData && setData.reps != null) ? setData.reps : '';
   const rDiv = document.createElement('div'); rDiv.appendChild(rInput);
 
-  const nInput = document.createElement('input');
-  nInput.type = 'text'; nInput.className = 's-note';
-  nInput.placeholder = 'note'; nInput.style.cssText = 'font-size:13px;width:100%;';
-  nInput.value = (setData && setData.note) ? setData.note : '';
-  const nRow = document.createElement('div');
-  nRow.className = 'set-note-row';
-  nRow.appendChild(nInput);
-
   const delBtn = document.createElement('button');
   delBtn.className = 'set-del'; delBtn.textContent = '×'; delBtn.title = 'Remove set';
   delBtn.addEventListener('click', function() {
     row.remove();
-    nRow.remove();
     container.querySelectorAll('.set-num').forEach((el, i) => { el.textContent = i + 1; });
   });
 
   row.appendChild(nDiv); row.appendChild(wDiv); row.appendChild(rDiv); row.appendChild(delBtn);
   container.appendChild(row);
-  container.appendChild(nRow);
 }
 
 
@@ -2360,10 +2335,9 @@ function saveWorkout() {
     block.querySelectorAll('.set-row').forEach(row => {
       const weight = parseFloat(row.querySelector('.s-weight').value);
       const reps   = parseInt(row.querySelector('.s-reps').value);
-      const note   = (row.nextElementSibling && row.nextElementSibling.classList.contains('set-note-row')) ? row.nextElementSibling.querySelector('.s-note').value.trim() || null : null;
       if (isNaN(weight) && isNaN(reps)) return; // skip entirely empty rows
       if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
-      sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps), ...(note ? { note } : {}) });
+      sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
     });
 
     if (sets.length > 0) exercises.push({ name, sets });
@@ -2787,7 +2761,7 @@ function saveEdit() {
         const reps   = parseInt(row.querySelector('.s-reps').value);
         if (isNaN(weight) && isNaN(reps)) return; // skip empty rows
         if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
-        sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps), ...(note ? { note } : {}) });
+        sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
       });
       if (sets.length > 0) exercises.push({ name, sets });
     });
