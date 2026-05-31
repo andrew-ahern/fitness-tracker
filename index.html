@@ -2259,6 +2259,8 @@ function saveWake() {
 /* ── Exercise blocks ───────────────────────────────────────────── */
 
 
+const EXERCISE_GROUP_ORDER = ['Push', 'Pull', 'Legs', 'Delts', 'Core'];
+
 function buildExerciseOptions(selectedName) {
   /* Build the <option> list fresh from the current library each time,
      so exercises added in Settings are immediately available here. */
@@ -2273,7 +2275,16 @@ function buildExerciseOptions(selectedName) {
     exGrouped[g].push({ name, selected: name === selectedName });
   });
   let opts = '';
-  Object.keys(exGrouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b)).forEach(g => {
+  const exGroupOrder = typeof EXERCISE_GROUP_ORDER !== 'undefined' ? EXERCISE_GROUP_ORDER : [];
+  const exGroupKeys = Object.keys(exGrouped).sort((a,b) => {
+    if (a === '') return 1; if (b === '') return -1;
+    const ai = exGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = exGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1; if (bi === -1) return -1;
+    return ai - bi;
+  });
+  exGroupKeys.forEach(g => {
     const items = exGrouped[g].map(({name,selected}) => `<option value="${name}" ${selected?'selected':''}>${name}</option>`).join('');
     opts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
   });
