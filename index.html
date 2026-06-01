@@ -1289,7 +1289,8 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
 
   let html = '';
   groupKeys.forEach(g => {
-    if (g) html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 0 4px 0;">${g}</div>`;
+    const heading = g || 'Misc';
+    html += `<div style="font-size:13px;font-weight:600;color:var(--muted);padding:8px 0 4px 0;">${heading}</div>`;
     grouped[g].forEach(({ item, i }) => {
       const name     = typeof item === 'string' ? item : item.name;
       const editable = !item || item.editableInApp !== false;
@@ -1400,7 +1401,8 @@ function renderMealItemLibrary() {
 
   let html = '';
   groupKeys.forEach(g => {
-    if (g) html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 0 4px 0;">${g}</div>`;
+    const heading = g || 'Misc';
+    html += `<div style="font-size:13px;font-weight:600;color:var(--muted);padding:8px 0 4px 0;">${heading}</div>`;
     grouped[g].forEach(({ item, i }) => {
       const parts = [];
       if (item.calories != null) parts.push(item.calories + 'kcal');
@@ -2086,7 +2088,8 @@ function buildMealItemOptions(selectedName) {
     const items = grouped[g].map(i =>
       `<option value="${i.name}" ${i.name === selectedName ? 'selected' : ''}>${i.name}</option>`
     ).join('');
-    opts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
+    const label = g || 'Misc';
+    opts += `<optgroup label="${label}">${items}</optgroup>`;
   });
   opts += `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Other (enter manually)</option>`;
   return opts;
