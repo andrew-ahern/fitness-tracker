@@ -687,6 +687,9 @@
           <option value="weight">Weight</option>
           <option value="rise">Rise</option>
         </select>
+        <select id="exercise-filter" onchange="renderHistory()" style="display:none; font-size:14px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; margin-top:6px;">
+          <option value="">All exercises</option>
+        </select>
       </div>
       <div id="history-list">
         <div class="empty">No entries yet — start logging!</div>
@@ -1509,7 +1512,8 @@ function renderHistory() {
   // Show entries newest first
   const entries = [...db.logs]
     .reverse()
-    .filter(e => filter === 'all' || e.type === filter);
+    .filter(e => filter === 'all' || e.type === filter)
+    .filter(e => !exFilter || (e.type === 'gym' && e.exercises.some(ex => ex.name === exFilter)));
 
   if (entries.length === 0) {
     list.innerHTML = '<div class="empty">No entries yet — start logging!</div>';
@@ -1527,13 +1531,13 @@ function renderHistory() {
     <div style="margin-bottom:1rem;">
       <h3 style="margin-bottom:0.5rem">${formatDate(date)}</h3>
       <div class="card" style="padding:0 1rem;">
-        ${byDate[date].map(e => renderHistoryEntry(e)).join('')}
+        ${byDate[date].map(e => renderHistoryEntry(e, exFilter)).join('')}
       </div>
     </div>
   `).join('');
 }
 
-function renderHistoryEntry(e) {
+function renderHistoryEntry(e, exFilter) {
   /* Returns an HTML string for one history entry row. */
   const typeLabel = {
     meal: 'Meal', weight: 'Weight', gym: 'Gym', cardio: 'Cardio', rise: 'Rise'
@@ -1559,11 +1563,18 @@ function renderHistoryEntry(e) {
   } else if (e.type === 'weight') {
     detail = e.value + ' kg';
   } else if (e.type === 'gym') {
-    const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
-    const parts = [];
-    if (e.duration) parts.push(e.duration + ' min');
-    if (exNames)    parts.push(exNames);
-    detail = parts.join(' · ');
+    if (exFilter) {
+      // Show sets for the filtered exercise only
+      const ex = (e.exercises || []).find(ex => ex.name === exFilter);
+      const sets = ex ? ex.sets.map(s => s.weight + ' kg × ' + s.reps).join(', ') : '';
+      detail = sets || '—';
+    } else {
+      const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
+      const parts = [];
+      if (e.duration) parts.push(e.duration + ' min');
+      if (exNames)    parts.push(exNames);
+      detail = parts.join(' · ');
+    }
   } else if (e.type === 'cardio') {
     const parts = [e.activityType];
     if (e.distance) parts.push(e.distance + ' km');
