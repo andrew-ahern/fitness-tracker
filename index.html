@@ -1582,18 +1582,11 @@ function renderHistoryEntry(e, exFilter) {
   } else if (e.type === 'weight') {
     detail = e.value + ' kg';
   } else if (e.type === 'gym') {
-    if (exFilter) {
-      // Show sets for the filtered exercise only
-      const ex = (e.exercises || []).find(ex => ex.name === exFilter);
-      const sets = ex ? ex.sets.map(s => Math.round(s.weight) + 'kg × ' + s.reps).join(', ') : '';
-      detail = sets || '—';
-    } else {
-      const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
-      const parts = [];
-      if (e.duration) parts.push(e.duration + ' min');
-      if (exNames)    parts.push(exNames);
-      detail = parts.join(' · ');
-    }
+    const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
+    const gymParts = [];
+    if (e.duration) gymParts.push(e.duration + 'min');
+    if (exNames)    gymParts.push(exNames);
+    detail = gymParts.join(' · ');
   } else if (e.type === 'cardio') {
     const parts = [e.activityType];
     if (e.distance) parts.push(e.distance + ' km');
@@ -1609,6 +1602,7 @@ function renderHistoryEntry(e, exFilter) {
       <div style="flex:1; min-width:0;">
         <div style="font-size:12px; color:var(--muted); margin-bottom:2px;">${dateTime}</div>
         <div style="font-size:15px;"><strong>${typeLabel}:</strong> ${detail}</div>
+        ${exFilter && e.type === 'gym' ? (() => { const ex = (e.exercises||[]).find(ex=>ex.name===exFilter); return ex ? '<div style="font-size:12px;color:var(--muted);margin-top:3px;">' + exFilter + ': ' + ex.sets.map(s=>Math.round(s.weight)+'kg×'+s.reps).join(', ') + '</div>' : ''; })() : ''}
         ${e.note ? `<div style="font-size:13px; color:var(--muted); margin-top:2px">${e.note}</div>` : ''}
       </div>
       <span style="color:var(--muted); font-size:18px; padding-left:12px; flex-shrink:0;">›</span>
