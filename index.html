@@ -4421,9 +4421,9 @@ async function githubImport() {
     const { content: ghCard } = await ghGetJSON('library_cardio.json');
     const { content: ghMeal } = await ghGetJSON('library_meals.json');
     // Merge libraries by name (append-only)
-    if (ghEx)   { const localNames = new Set(db.exerciseLibrary);  db.exerciseLibrary  = [...db.exerciseLibrary,  ...(ghEx  ||[]).filter(i=>!localNames.has(i))]; }
-    if (ghCard) { const localNames = new Set(db.cardioLibrary);    db.cardioLibrary    = [...db.cardioLibrary,    ...(ghCard||[]).filter(i=>!localNames.has(i))]; }
-    if (ghMeal) { const localNames = new Set(db.mealItemLibrary.map(i=>i.name)); db.mealItemLibrary = [...db.mealItemLibrary, ...(ghMeal||[]).filter(i=>!localNames.has(i.name))]; }
+    if (ghEx)   { const localNames = new Set(db.exerciseLibrary.map(i => typeof i === 'string' ? i : i.name));  db.exerciseLibrary  = [...db.exerciseLibrary,  ...(ghEx  ||[]).filter(i=>!localNames.has(typeof i === 'string' ? i : i.name))]; }
+    if (ghCard) { const localNames = new Set(db.cardioLibrary.map(i => typeof i === 'string' ? i : i.name));    db.cardioLibrary    = [...db.cardioLibrary,    ...(ghCard||[]).filter(i=>!localNames.has(typeof i === 'string' ? i : i.name))]; }
+    if (ghMeal) { const localNames = new Set(db.mealItemLibrary.map(i => typeof i === 'string' ? i : i.name)); db.mealItemLibrary = [...db.mealItemLibrary, ...(ghMeal||[]).filter(i=>!localNames.has(typeof i === 'string' ? i : i.name))]; }
 
     const { content: ghSettings } = await ghGetJSON('settings.json');
     if (ghSettings) db.settings = { ...db.settings, ...ghSettings };
