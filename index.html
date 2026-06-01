@@ -2916,7 +2916,10 @@ function saveEdit() {
         if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
         sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
       });
-      if (sets.length > 0) exercises.push({ name, sets });
+      const pEls3 = block.querySelectorAll('.ex-param');
+      const params3 = {};
+      pEls3.forEach(el => { const v = el.value.trim(); params3[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v; });
+      if (sets.length > 0) exercises.push({ name, ...(Object.keys(params3).length ? { params: params3 } : {}), sets });
     });
 
     if (hasIncomplete) {
