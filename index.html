@@ -1584,7 +1584,7 @@ function renderHistoryEntry(e, exFilter) {
     if (exFilter) {
       // Show sets for the filtered exercise only
       const ex = (e.exercises || []).find(ex => ex.name === exFilter);
-      const sets = ex ? ex.sets.map(s => s.weight + ' kg × ' + s.reps).join(', ') : '';
+      const sets = ex ? ex.sets.map(s => Math.round(s.weight) + 'kg × ' + s.reps).join(', ') : '';
       detail = sets || '—';
     } else {
       const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
