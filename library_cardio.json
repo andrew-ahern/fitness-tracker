@@ -1,27 +1,4 @@
 [
-  {
-    "name": "Cycle",
-    "group": null,
-    "tags": []
-  },
-  {
-    "name": "Run",
-    "group": null,
-    "tags": []
-  },
-  {
-    "name": "Walk",
-    "group": null,
-    "tags": []
-  },
-  {
-    "name": "Swim",
-    "group": null,
-    "tags": []
-  },
-  {
-    "name": "Row",
-    "group": null,
-    "tags": []
-  }
+  {"name": "Cycle"},
+  {"name": "Run"}
 ]
