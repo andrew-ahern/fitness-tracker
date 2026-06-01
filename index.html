@@ -4030,9 +4030,9 @@ function renderActivityChart() {
     const dataGym   = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'gym'   ? 1 : 0; });
     const dataCycle = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'cycle' ? 1 : 0; });
     const dataRun   = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'run'   ? 1 : 0; });
-    if (dataGym.some(v=>v>0))   datasets.push({ label:'Gym ('+k+')',   data:dataGym,   backgroundColor:ACTIVITY_COLOURS.gym,   borderWidth:0, stack:'stack' });
-    if (dataCycle.some(v=>v>0)) datasets.push({ label:'Cycle ('+k+')', data:dataCycle, backgroundColor:ACTIVITY_COLOURS.cycle, borderWidth:0, stack:'stack' });
-    if (dataRun.some(v=>v>0))   datasets.push({ label:'Run ('+k+')',   data:dataRun,   backgroundColor:ACTIVITY_COLOURS.run,   borderWidth:0, stack:'stack' });
+    if (dataGym.some(v=>v>0))   datasets.push({ label:'Gym ('+k+')',   data:dataGym,   backgroundColor:ACTIVITY_COLOURS.gym,   borderWidth:0, borderRadius:2, stack:'stack' });
+    if (dataCycle.some(v=>v>0)) datasets.push({ label:'Cycle ('+k+')', data:dataCycle, backgroundColor:ACTIVITY_COLOURS.cycle, borderWidth:0, borderRadius:2, stack:'stack' });
+    if (dataRun.some(v=>v>0))   datasets.push({ label:'Run ('+k+')',   data:dataRun,   backgroundColor:ACTIVITY_COLOURS.run,   borderWidth:0, borderRadius:2, stack:'stack' });
   }
 
   if (activityChartInstance) { activityChartInstance.destroy(); activityChartInstance = null; }
