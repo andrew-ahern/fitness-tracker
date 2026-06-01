@@ -1598,7 +1598,7 @@ function renderHistoryEntry(e, exFilter) {
   }
 
   return `
-    <div class="card-row" onclick="openEntry(${e.id})" style="cursor:pointer;">
+    <div class="card-row" onclick="openEntry(${e.id}, '${exFilter || ''}' )" style="cursor:pointer;">
       <div style="flex:1; min-width:0;">
         <div style="font-size:12px; color:var(--muted); margin-bottom:2px;">${dateTime}</div>
         <div style="font-size:15px;"><strong>${typeLabel}:</strong> ${detail}</div>
