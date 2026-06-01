@@ -2494,7 +2494,22 @@ function switchToEditMode() {
   const entry = db.logs.find(e => e.id === currentEditId);
   if (!entry) return;
   document.getElementById('sheet-body').innerHTML = buildEditForm(entry);
-  if (entry.type === 'gym')  buildSheetExercises(entry.exercises || []);
+  if (entry.type === 'gym') {
+    buildSheetExercises(entry.exercises || []);
+    if (highlightExercise) {
+      setTimeout(() => {
+        const container = document.getElementById('sheet-exercises-container');
+        if (!container) return;
+        container.querySelectorAll('.exercise-block').forEach(block => {
+          const nameEl = block.querySelector('.ex-name');
+          if (nameEl && nameEl.value === highlightExercise) {
+            block.style.borderLeft = '3px solid var(--accent)';
+            block.style.paddingLeft = '8px';
+          }
+        });
+      }, 50);
+    }
+  }
   if (entry.type === 'meal') buildSheetMealItems(entry.items || []);
   document.getElementById('sheet-footer-view').style.display = 'none';
   document.getElementById('sheet-footer-edit').style.display = 'flex';
