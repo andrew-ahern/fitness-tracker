@@ -1277,22 +1277,36 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
     list.innerHTML = `<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">${emptyMsg}</div>`;
     return;
   }
-  list.innerHTML = arr.map((item, i) => {
-    const name     = typeof item === 'string' ? item : item.name;
-    const editable = !item || item.editableInApp !== false;
-    const buttons  = editable ? `
-      <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
-        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === 0 ? '0.2' : '1'}">↑</button>
-      <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
-        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
-      <button onclick="${deleteFn}(${i})"
-        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:0 4px; line-height:1;">&times;</button>` : '';
-    return `
-    <div class="card-row">
-      <span style="font-size:15px; flex:1;">${name}</span>
-      <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">${buttons}</div>
-    </div>
-  `;}).join('');
+
+  // Group items by group field
+  const grouped = {};
+  arr.forEach((item, i) => {
+    const g = (item && item.group) ? item.group : '';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push({ item, i });
+  });
+  const groupKeys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
+
+  let html = '';
+  groupKeys.forEach(g => {
+    if (g) html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 0 4px 0;">${g}</div>`;
+    grouped[g].forEach(({ item, i }) => {
+      const name     = typeof item === 'string' ? item : item.name;
+      const editable = !item || item.editableInApp !== false;
+      const buttons  = editable ? `
+        <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
+          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i === 0 ? '0.2' : '1'}">↑</button>
+        <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
+          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
+        <button onclick="${deleteFn}(${i})"
+          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
+      html += `<div class="card-row">
+        <span style="font-size:15px;flex:1;">${name}</span>
+        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">${buttons}</div>
+      </div>`;
+    });
+  });
+  list.innerHTML = html;
 }
 
 
@@ -1375,23 +1389,37 @@ function renderMealItemLibrary() {
     list.innerHTML = '<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">No items yet</div>';
     return;
   }
-  list.innerHTML = arr.map((item, i) => {
-    const parts = [];
-    if (item.calories != null) parts.push(item.calories + 'kcal');
-    if (item.protein  != null) parts.push('P ' + item.protein + 'g');
-    const editable = !item || item.editableInApp !== false;
-    const buttons = editable ? `
-        <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
-        <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
-        <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
-    return `<div class="card-row">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:15px">${item.name}</div>
-        ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
-      </div>
-      <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">${buttons}</div>
-    </div>`;
-  }).join('');
+  // Group by item.group
+  const grouped = {};
+  arr.forEach((item, i) => {
+    const g = (item && item.group) ? item.group : '';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push({ item, i });
+  });
+  const groupKeys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
+
+  let html = '';
+  groupKeys.forEach(g => {
+    if (g) html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);padding:8px 0 4px 0;">${g}</div>`;
+    grouped[g].forEach(({ item, i }) => {
+      const parts = [];
+      if (item.calories != null) parts.push(item.calories + 'kcal');
+      if (item.protein  != null) parts.push('P ' + item.protein + 'g');
+      const editable = !item || item.editableInApp !== false;
+      const buttons = editable ? `
+          <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
+          <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
+          <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
+      html += `<div class="card-row">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px">${item.name}</div>
+          ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">${buttons}</div>
+      </div>`;
+    });
+  });
+  list.innerHTML = html;
 }
 
 function addMealItem() {
