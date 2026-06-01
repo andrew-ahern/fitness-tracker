@@ -2283,6 +2283,70 @@ function buildExerciseOptions(selectedName) {
   return `<option value="">— select exercise —</option>${opts}`;
 }
 
+function getExerciseLibItem(name) {
+  return db.exerciseLibrary.find(i => (typeof i === 'string' ? i : i.name) === name) || null;
+}
+
+function renderExerciseParams(block, exerciseName, existingParams) {
+  /* Render param fields for an exercise block based on library definition.
+     existingParams is an object of saved values (e.g. {equipment:'barbell', incline:30}) */
+  let paramsDiv = block.querySelector('.ex-params');
+  if (!paramsDiv) {
+    paramsDiv = document.createElement('div');
+    paramsDiv.className = 'ex-params';
+    paramsDiv.style.cssText = 'margin:6px 0 8px 0; display:flex; flex-wrap:wrap; gap:8px;';
+    const header = block.querySelector('.exercise-header');
+    header.after(paramsDiv);
+  }
+  paramsDiv.innerHTML = '';
+
+  const libItem = getExerciseLibItem(exerciseName);
+  const params = (libItem && libItem.params) ? libItem.params : [];
+  if (params.length === 0) return;
+
+  params.forEach(param => {
+    const val = existingParams && existingParams[param.name] != null
+      ? existingParams[param.name] : param.default;
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex; align-items:center; gap:4px; font-size:13px;';
+
+    const label = document.createElement('label');
+    label.textContent = param.name + ':';
+    label.style.cssText = 'color:var(--muted); text-transform:capitalize;';
+    wrapper.appendChild(label);
+
+    if (param.type === 'select') {
+      const sel = document.createElement('select');
+      sel.className = 'ex-param';
+      sel.dataset.param = param.name;
+      sel.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;';
+      param.options.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt; o.textContent = opt;
+        if (opt === val) o.selected = true;
+        sel.appendChild(o);
+      });
+      wrapper.appendChild(sel);
+    } else if (param.type === 'number') {
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.className = 'ex-param';
+      inp.dataset.param = param.name;
+      inp.value = val != null ? val : '';
+      inp.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; width:70px;';
+      inp.inputMode = 'decimal';
+      wrapper.appendChild(inp);
+      if (param.unit) {
+        const unit = document.createElement('span');
+        unit.textContent = param.unit === 'deg' ? '°' : param.unit;
+        unit.style.color = 'var(--muted)';
+        wrapper.appendChild(unit);
+      }
+    }
+    paramsDiv.appendChild(wrapper);
+  });
+}
+
 function addExerciseBlock(exerciseData, containerId) {
   /* Add one exercise block to a gym form.
      containerId defaults to 'exercises-container' (log form);
@@ -2316,6 +2380,16 @@ function addExerciseBlock(exerciseData, containerId) {
   block.querySelector('.add-set-btn').addEventListener('click', () => addSetRow(blockId));
 
   document.getElementById(targetId).appendChild(block);
+
+  // Render params for initial exercise selection
+  const initialName = exerciseData ? exerciseData.name : '';
+  const initialParams = (exerciseData && exerciseData.params) ? exerciseData.params : {};
+  if (initialName) renderExerciseParams(block, initialName, initialParams);
+
+  // Re-render params when exercise selection changes
+  block.querySelector('.ex-name').addEventListener('change', function() {
+    renderExerciseParams(block, this.value, {});
+  });
 
   if (exerciseData && exerciseData.sets && exerciseData.sets.length > 0) {
     exerciseData.sets.forEach(s => addSetRow(blockId, s));
