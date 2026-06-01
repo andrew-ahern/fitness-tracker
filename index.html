@@ -4679,24 +4679,23 @@ function showTestScreen() {
 
 
 
+
 /* ════════════════════════════════════════════════════════════════════
    MUSCLE VOLUME CHART
-   Sets per muscle tag, grouped by week (Mon 03:30 boundary)
+   Sets per default muscle tag for selected week
    ════════════════════════════════════════════════════════════════════ */
 
 const MUSCLE_DEFAULT_TAGS = ['chest', 'back', 'legs', 'triceps', 'biceps', 'delts'];
 
 let muscleChartInstance = null;
-let muscleSelectedWeek  = null; // null = current week; else 'YYYY-MM-DD' (Monday)
+let muscleSelectedWeek  = null;
 
 function getMuscleWeeks() {
-  /* Return sorted list of Monday date strings (YYYY-MM-DD) that have gym data. */
   const mondays = new Set();
   db.logs.forEach(e => {
     if (e.type !== 'gym') return;
     mondays.add(getWeekMondayForDate(e.date, e.startTime));
   });
-  // Always include current week
   mondays.add(getCurrentWeekMonday());
   return [...mondays].sort().reverse();
 }
@@ -4710,52 +4709,17 @@ function getCurrentWeekMonday() {
 }
 
 function getWeekMondayForDate(dateStr, timeStr) {
-  /* Given a date and time, return the Monday of that week (respecting 03:30 boundary). */
   const [h, m] = (timeStr || '12:00').split(':').map(Number);
   const tp = dateStr.split('-').map(Number);
   const d = new Date(tp[0], tp[1]-1, tp[2], h, m);
-  // If before 03:30, treat as previous day
   if (h < 3 || (h === 3 && m < 30)) d.setDate(d.getDate() - 1);
   const dow = d.getDay();
   d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
-function getMuscleTagsInData() {
-  /* All unique tags that appear across all gym log exercises. */
-  const tags = new Set();
-  db.logs.forEach(e => {
-    if (e.type !== 'gym') return;
-    e.exercises.forEach(ex => {
-      const lib = db.exerciseLibrary.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
-      if (lib && lib.tags) lib.tags.forEach(t => tags.add(t.toLowerCase().trim()));
-    });
-  });
-  return [...tags].sort();
-}
-
-function getMuscleActiveTags() {
-  const saved = localStorage.getItem('muscle_active_tags');
-  const allTags = getMuscleTagsInData();
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    // Include any new tags not previously seen (unticked by default unless in MUSCLE_DEFAULT_TAGS)
-    allTags.forEach(t => { if (!(t in parsed)) parsed[t] = MUSCLE_DEFAULT_TAGS.includes(t); });
-    return parsed;
-  }
-  const result = {};
-  allTags.forEach(t => { result[t] = MUSCLE_DEFAULT_TAGS.includes(t); });
-  return result;
-}
-
-function saveMuscleActiveTags(tagState) {
-  localStorage.setItem('muscle_active_tags', JSON.stringify(tagState));
-}
-
 function getMuscleSetCounts(weekMonday) {
-  /* Return {tag: setCount} for the given week. */
   const counts = {};
-  // Determine week range: weekMonday 03:30 to next Monday 03:30
   const [y,mo,d] = weekMonday.split('-').map(Number);
   const weekStart = new Date(y, mo-1, d, 3, 30);
   const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
@@ -4766,110 +4730,50 @@ function getMuscleSetCounts(weekMonday) {
     const [ey, emo, ed] = e.date.split('-').map(Number);
     const entryTime = new Date(ey, emo-1, ed, h, m);
     if (entryTime < weekStart || entryTime >= weekEnd) return;
-
     e.exercises.forEach(ex => {
       const lib = db.exerciseLibrary.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
       const tags = (lib && lib.tags) ? lib.tags.map(t => t.toLowerCase().trim()) : [];
       const setCount = (ex.sets || []).length;
-      tags.forEach(tag => {
-        counts[tag] = (counts[tag] || 0) + setCount;
-      });
+      tags.forEach(tag => { counts[tag] = (counts[tag] || 0) + setCount; });
     });
   });
   return counts;
 }
 
 function renderMuscleChart() {
-  createChartCard('muscle', '<div style="font-size:15px;font-weight:500;margin-bottom:0.6rem;">Sets by muscle group</div>', 'chart-muscle', 'chart-muscle-empty', 'No gym entries yet');
+  createChartCard('muscle',
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
+    '<div style="font-size:15px;font-weight:500">Sets by muscle group</div>' +
+    '<select id="muscle-week-sel" onchange="muscleSelectedWeek=this.value;renderMuscleChart()" ' +
+    'style="font-size:13px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;"></select>' +
+    '</div>',
+    'chart-muscle', 'chart-muscle-empty', 'No gym entries yet');
 
-  const canvas = document.getElementById('chart-muscle');
-  const empty  = document.getElementById('chart-muscle-empty');
-  if (!canvas) return;
-
-  // Sort: defaults first, then others alphabetically
-  const allTagsRaw = getMuscleTagsInData();
-  const allTags = [
-    ...MUSCLE_DEFAULT_TAGS.filter(t => allTagsRaw.includes(t)),
-    ...allTagsRaw.filter(t => !MUSCLE_DEFAULT_TAGS.includes(t)).sort()
-  ];
-  const tagState = getMuscleActiveTags();
-  const weeks    = getMuscleWeeks();
-
-  // Build tag checkboxes if not already in card
-  const card = document.getElementById('chart-card-muscle');
-  if (card && !card.querySelector('.muscle-tag-toggles')) {
-    const toggleDiv = document.createElement('div');
-    toggleDiv.className = 'muscle-tag-toggles';
-    toggleDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:0.75rem;';
-    allTags.forEach(tag => {
-      const active = tagState[tag] !== false && (tagState[tag] === true || MUSCLE_DEFAULT_TAGS.includes(tag));
-      const pill = document.createElement('button');
-      pill.textContent = tag;
-      pill.dataset.tag = tag;
-      pill.className = 'chart-toggle' + (active ? ' active' : '');
-      pill.style.cssText = 'font-size:12px;padding:3px 10px;';
-      pill.onclick = () => {
-        tagState[tag] = !tagState[tag];
-        saveMuscleActiveTags(tagState);
-        pill.classList.toggle('active', tagState[tag]);
-        redrawMuscleChart(weeks, tagState);
-      };
-      toggleDiv.appendChild(pill);
-    });
-
-    // Week selector
-    const weekDiv = document.createElement('div');
-    weekDiv.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;';
-    const label = document.createElement('span');
-    label.style.cssText = 'font-size:13px;color:var(--muted);';
-    label.textContent = 'Week:';
-    const sel = document.createElement('select');
-    sel.style.cssText = 'font-size:13px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;';
-    weeks.forEach(mon => {
-      const opt = document.createElement('option');
-      opt.value = mon;
+  // Populate week selector
+  const sel = document.getElementById('muscle-week-sel');
+  if (sel) {
+    const weeks = getMuscleWeeks();
+    const curMon = getCurrentWeekMonday();
+    sel.innerHTML = weeks.map(mon => {
       const d = new Date(mon + 'T12:00:00');
-      opt.textContent = 'w/c ' + d.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
-      if (mon === getCurrentWeekMonday()) opt.textContent = 'This week';
-      sel.appendChild(opt);
-    });
-    sel.value = muscleSelectedWeek || getCurrentWeekMonday();
-    sel.onchange = () => {
-      muscleSelectedWeek = sel.value;
-      redrawMuscleChart(weeks, tagState);
-    };
-    weekDiv.appendChild(label);
-    weekDiv.appendChild(sel);
-
-    const header = card.querySelector('div');
-    header.after(toggleDiv);
-    toggleDiv.after(weekDiv);
+      const label = mon === curMon ? 'This week' : 'w/c ' + d.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+      return '<option value="' + mon + '"' + (mon === (muscleSelectedWeek || curMon) ? ' selected' : '') + '>' + label + '</option>';
+    }).join('');
   }
 
-  redrawMuscleChart(weeks, tagState);
-}
-
-function redrawMuscleChart(weeks, tagState) {
   const canvas = document.getElementById('chart-muscle');
   const empty  = document.getElementById('chart-muscle-empty');
   if (!canvas) return;
 
   const weekMonday = muscleSelectedWeek || getCurrentWeekMonday();
-  const counts  = getMuscleSetCounts(weekMonday);
-  const activeTags = Object.keys(tagState).filter(t => tagState[t]);
+  const counts = getMuscleSetCounts(weekMonday);
+  const data   = MUSCLE_DEFAULT_TAGS.map(t => counts[t] || 0);
+  const yMax   = Math.max(...data, 1) + 2;
 
-  if (activeTags.length === 0 || Object.keys(counts).length === 0) {
+  if (data.every(v => v === 0)) {
     canvas.style.display = 'none'; empty.style.display = 'block'; return;
   }
   canvas.style.display = 'block'; empty.style.display = 'none';
-
-  // Sort: defaults first in defined order, then others alphabetically
-  const labels = [
-    ...MUSCLE_DEFAULT_TAGS.filter(t => activeTags.includes(t)),
-    ...activeTags.filter(t => !MUSCLE_DEFAULT_TAGS.includes(t)).sort()
-  ];
-  const data   = activeTags.map(t => counts[t] || 0);
-  const yMax   = Math.max(...data, 1) + 2;
 
   const style = getComputedStyle(document.documentElement);
   const accentColor = style.getPropertyValue('--accent').trim();
@@ -4880,7 +4784,7 @@ function redrawMuscleChart(weeks, tagState) {
 
   muscleChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'bar',
-    data: { labels, datasets: [{ data, backgroundColor: accentColor + 'cc', borderColor: accentColor, borderWidth: 1, borderRadius: 3 }] },
+    data: { labels: MUSCLE_DEFAULT_TAGS, datasets: [{ data, backgroundColor: accentColor + 'cc', borderColor: accentColor, borderWidth: 1, borderRadius: 3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: {
