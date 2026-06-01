@@ -1,4 +1,10 @@
 [
-  {"name": "Cycle"},
-  {"name": "Run"}
+  {
+    "name": "Cycle",
+    "editableInApp": false
+  },
+  {
+    "name": "Run",
+    "editableInApp": false
+  }
 ]
