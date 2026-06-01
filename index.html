@@ -2641,8 +2641,16 @@ function buildViewBody(e) {
           <span>${s.reps != null ? s.reps + ' reps' : '—'}</span>
         </div>`
       ).join('');
+      const paramsHTML = ex.params && Object.keys(ex.params).length
+        ? '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">' +
+          Object.entries(ex.params)
+            .filter(([k,v]) => v != null && v !== '')
+            .map(([k,v]) => k + ': ' + (typeof v === 'number' && k === 'incline' ? v + '°' : v))
+            .join(' · ') + '</div>'
+        : '';
       return `<div class="gym-exercise-view" style="margin-bottom:0.75rem;">
         <div class="gym-ex-name" style="font-weight:500;margin-bottom:4px;">${ex.name}</div>
+        ${paramsHTML}
         ${setsHTML}
       </div>`;
     }).join('');
