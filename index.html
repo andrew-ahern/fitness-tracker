@@ -1678,7 +1678,7 @@ function saveDraft(type) {
     d.items = [];
     document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
       d.items.push({
-        name:        block.querySelector('.mi-name')?.value  || '',
+        name:        (() => { const s = block.querySelector('.mi-select'); return s && s.value === '__custom__' ? (block.querySelector('.mi-name')?.value.trim() || '') : (s ? s.value : (block.querySelector('.mi-name')?.value.trim() || '')); })(),
         quantity:    block.querySelector('.mi-qty')?.value   || '1',
         calories:    block.querySelector('.mi-cal')?.value   || '',
         protein:     block.querySelector('.mi-pro')?.value   || '',
@@ -2045,6 +2045,25 @@ function saveWeight() {
    ════════════════════════════════════════════════════════════════════ */
 
 
+function buildMealItemOptions(selectedName) {
+  const grouped = {};
+  (db.mealItemLibrary || []).forEach(i => {
+    const g = (i && i.group) ? i.group : '';
+    if (!grouped[g]) grouped[g] = [];
+    grouped[g].push(i);
+  });
+  let opts = '<option value="">-- select item --</option>';
+  const keys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
+  keys.forEach(g => {
+    const items = grouped[g].map(i =>
+      `<option value="${i.name}" ${i.name === selectedName ? 'selected' : ''}>${i.name}</option>`
+    ).join('');
+    opts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
+  });
+  opts += `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Other (enter manually)</option>`;
+  return opts;
+}
+
 function addMealItemBlock(itemData, interactive) {
   mealItemCount++;
   const blockId = 'mi-' + mealItemCount;
@@ -2055,24 +2074,34 @@ function addMealItemBlock(itemData, interactive) {
   const listId = 'mi-list-' + mealItemCount;
   const libraryOptions = (db.mealItemLibrary || []).map(i => `<option value="${i.name}">`).join('');
 
+  const inputStyle = 'width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;';
+  const selStyle   = 'flex:1;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
+
   block.innerHTML =
-    `<datalist id="${listId}">${libraryOptions}</datalist>` +
     '<div class="exercise-header">' +
-      `<input type="text" class="mi-name" list="${listId}" placeholder="Item name">` +
+      `<select class="mi-select" style="${selStyle}">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
       '<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
+    '</div>' +
+    '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
+      '<input type="text" class="mi-name" placeholder="Item name" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);">' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
-      `<input type="number" class="mi-cal"  min="0" inputmode="numeric" style="width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
-      `<input type="number" class="mi-pro"  min="0" inputmode="decimal" style="width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
+      `<input type="number" class="mi-cal" min="0" inputmode="numeric" style="${inputStyle}">` +
+      `<input type="number" class="mi-pro" min="0" inputmode="decimal" style="${inputStyle}">` +
     '</div>' +
     '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
       '<textarea class="mi-note" style="height:42px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
     '</div>';
+
+  const selInput  = block.querySelector('.mi-select');
+  const nameRow   = block.querySelector('.mi-custom-name-row');
+  const nameInput = block.querySelector('.mi-name');
+  const qtyInput  = block.querySelector('.mi-qty');
 
   // Delete button
   block.querySelector('.del-btn').addEventListener('click', () => {
@@ -2080,50 +2109,62 @@ function addMealItemBlock(itemData, interactive) {
   });
 
   // Any input change: update totals + save draft
-  block.querySelectorAll('input, textarea').forEach(el => {
+  block.querySelectorAll('input, textarea, select').forEach(el => {
     el.addEventListener('input', () => { updateMealTotals(); saveDraft('meal'); });
+    el.addEventListener('change', () => { updateMealTotals(); saveDraft('meal'); });
   });
 
-  // Auto-fill from library when name matches — fills per-unit values, then scales by qty
-  const nameInput = block.querySelector('.mi-name');
-  nameInput.addEventListener('change', () => {
-    const match = (db.mealItemLibrary || []).find(i => i.name === nameInput.value);
-    if (match) {
-      const qty = parseFloat(block.querySelector('.mi-qty').value) || 1;
-      const fill = (cls, val) => {
-        const el = block.querySelector(cls);
-        if (el && val != null) el.value = parseFloat((val * qty).toFixed(2));
-      };
-      fill('.mi-cal', match.calories); fill('.mi-pro', match.protein);
-      // Store unit values on the block for qty scaling later
-      block._unitMacros = { cal: match.calories, pro: match.protein };
-      updateMealTotals(); saveDraft('meal');
+  // Select change: auto-fill macros or show custom name row
+  selInput.addEventListener('change', () => {
+    const val = selInput.value;
+    if (val === '__custom__') {
+      nameRow.style.display = 'block';
+      nameInput.value = '';
+      block.querySelector('.mi-cal').value = '';
+      block.querySelector('.mi-pro').value = '';
+      block._unitMacros = null;
+    } else if (val) {
+      nameRow.style.display = 'none';
+      const match = (db.mealItemLibrary || []).find(i => i.name === val);
+      if (match) {
+        const qty = parseFloat(qtyInput.value) || 1;
+        block.querySelector('.mi-cal').value = match.calories != null ? parseFloat((match.calories * qty).toFixed(2)) : '';
+        block.querySelector('.mi-pro').value = match.protein  != null ? parseFloat((match.protein  * qty).toFixed(2)) : '';
+        block._unitMacros = { cal: match.calories, pro: match.protein };
+      }
+    } else {
+      nameRow.style.display = 'none';
+      block._unitMacros = null;
     }
+    updateMealTotals(); saveDraft('meal');
   });
 
   // Quantity change: rescale macros if unit values are known
-  const qtyInput = block.querySelector('.mi-qty');
   qtyInput.addEventListener('input', () => {
     if (block._unitMacros) {
       const qty = parseFloat(qtyInput.value) || 1;
-      const scale = (cls, val) => {
-        const el = block.querySelector(cls);
-        if (el && val != null) el.value = parseFloat((val * qty).toFixed(2));
-      };
-      scale('.mi-cal', block._unitMacros.cal); scale('.mi-pro', block._unitMacros.pro);
+      block.querySelector('.mi-cal').value = block._unitMacros.cal != null ? parseFloat((block._unitMacros.cal * qty).toFixed(2)) : '';
+      block.querySelector('.mi-pro').value = block._unitMacros.pro != null ? parseFloat((block._unitMacros.pro * qty).toFixed(2)) : '';
     }
     updateMealTotals(); saveDraft('meal');
   });
 
   // Populate from existing data if provided (macros are already effective values)
   if (itemData) {
-    if (itemData.name)             nameInput.value = itemData.name;
-    if (itemData.quantity != null) qtyInput.value  = itemData.quantity;
-    if (itemData.calories != null) block.querySelector('.mi-cal').value  = itemData.calories;
-    if (itemData.protein  != null) block.querySelector('.mi-pro').value  = itemData.protein;
-
+    // Try to find item in library by name
+    const libMatch = (db.mealItemLibrary || []).find(i => i.name === itemData.name);
+    if (libMatch) {
+      selInput.value = itemData.name;
+      nameRow.style.display = 'none';
+    } else if (itemData.name) {
+      selInput.value = '__custom__';
+      nameRow.style.display = 'block';
+      nameInput.value = itemData.name;
+    }
+    if (itemData.quantity != null) qtyInput.value = itemData.quantity;
+    if (itemData.calories != null) block.querySelector('.mi-cal').value = itemData.calories;
+    if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
-    // If unit macros stored, attach them
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   }
 
@@ -2156,7 +2197,10 @@ function saveMeal() {
   const items = [];
   document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
     const num = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
-    const name = block.querySelector('.mi-name')?.value.trim() || '';
+    const miSel = block.querySelector('.mi-select');
+    const name = miSel && miSel.value === '__custom__'
+      ? (block.querySelector('.mi-name')?.value.trim() || '')
+      : (miSel ? miSel.value : (block.querySelector('.mi-name')?.value.trim() || ''));
     const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
     const cal  = num('.mi-cal'), pro = num('.mi-pro');
     const note = block.querySelector('.mi-note')?.value.trim() || null;
@@ -2759,65 +2803,89 @@ function addSheetMealItemBlock(itemData, interactive) {
   block.className = 'exercise-block';
   block.id = blockId;
 
-  const listId = 'smi-list-' + sheetMealItemCount;
-  const libraryOptions = (db.mealItemLibrary || []).map(i => `<option value="${i.name}">`).join('');
   const iStyle = "width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;";
+  const sStyle = "flex:1;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);";
 
   block.innerHTML =
-    `<datalist id="${listId}">${libraryOptions}</datalist>` +
     '<div class="exercise-header">' +
-      `<input type="text" class="mi-name" list="${listId}" placeholder="Item name">` +
+      `<select class="mi-select" style="${sStyle}">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
       `<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
       '<button class="del-btn" title="Remove item">&times;</button>' +
+    '</div>' +
+    '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
+      '<input type="text" class="mi-name" placeholder="Item name" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);">' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div>' +
     '</div>' +
     `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">` +
-      `<input type="number" class="mi-cal"  min="0" inputmode="numeric" style="${iStyle}">` +
-      `<input type="number" class="mi-pro"  min="0" inputmode="decimal" style="${iStyle}">` +
-
+      `<input type="number" class="mi-cal" min="0" inputmode="numeric" style="${iStyle}">` +
+      `<input type="number" class="mi-pro" min="0" inputmode="decimal" style="${iStyle}">` +
     '</div>' +
     '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
       '<textarea class="mi-note" style="height:42px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
     '</div>';
 
+  const selInput  = block.querySelector('.mi-select');
+  const nameRow   = block.querySelector('.mi-custom-name-row');
+  const nameInput = block.querySelector('.mi-name');
+  const qtyInput  = block.querySelector('.mi-qty');
+
   block.querySelector('.del-btn').addEventListener('click', () => {
     block.remove(); updateSheetMealTotals();
   });
-  block.querySelectorAll('input, textarea').forEach(el => {
+  block.querySelectorAll('input, textarea, select').forEach(el => {
     el.addEventListener('input', () => updateSheetMealTotals());
+    el.addEventListener('change', () => updateSheetMealTotals());
   });
 
-  const nameInput = block.querySelector('.mi-name');
-  nameInput.addEventListener('change', () => {
-    const match = (db.mealItemLibrary || []).find(i => i.name === nameInput.value);
-    if (match) {
-      const qty = parseFloat(block.querySelector('.mi-qty').value) || 1;
-      const fill = (cls, val) => { const el = block.querySelector(cls); if (el && val != null) el.value = parseFloat((val * qty).toFixed(2)); };
-      fill('.mi-cal', match.calories); fill('.mi-pro', match.protein);
-      block._unitMacros = { cal: match.calories, pro: match.protein };
-      updateSheetMealTotals();
+  selInput.addEventListener('change', () => {
+    const val = selInput.value;
+    if (val === '__custom__') {
+      nameRow.style.display = 'block';
+      nameInput.value = '';
+      block.querySelector('.mi-cal').value = '';
+      block.querySelector('.mi-pro').value = '';
+      block._unitMacros = null;
+    } else if (val) {
+      nameRow.style.display = 'none';
+      const match = (db.mealItemLibrary || []).find(i => i.name === val);
+      if (match) {
+        const qty = parseFloat(qtyInput.value) || 1;
+        block.querySelector('.mi-cal').value = match.calories != null ? parseFloat((match.calories * qty).toFixed(2)) : '';
+        block.querySelector('.mi-pro').value = match.protein  != null ? parseFloat((match.protein  * qty).toFixed(2)) : '';
+        block._unitMacros = { cal: match.calories, pro: match.protein };
+      }
+    } else {
+      nameRow.style.display = 'none';
+      block._unitMacros = null;
     }
+    updateSheetMealTotals();
   });
 
-  const qtyInput = block.querySelector('.mi-qty');
   qtyInput.addEventListener('input', () => {
     if (block._unitMacros) {
       const qty = parseFloat(qtyInput.value) || 1;
-      const scale = (cls, val) => { const el = block.querySelector(cls); if (el && val != null) el.value = parseFloat((val * qty).toFixed(2)); };
-      scale('.mi-cal', block._unitMacros.cal); scale('.mi-pro', block._unitMacros.pro);
+      block.querySelector('.mi-cal').value = block._unitMacros.cal != null ? parseFloat((block._unitMacros.cal * qty).toFixed(2)) : '';
+      block.querySelector('.mi-pro').value = block._unitMacros.pro != null ? parseFloat((block._unitMacros.pro * qty).toFixed(2)) : '';
     }
     updateSheetMealTotals();
   });
 
   if (itemData) {
-    if (itemData.name)             nameInput.value = itemData.name;
-    if (itemData.quantity != null) qtyInput.value  = itemData.quantity;
-    if (itemData.calories != null) block.querySelector('.mi-cal').value  = itemData.calories;
-    if (itemData.protein  != null) block.querySelector('.mi-pro').value  = itemData.protein;
-
+    const libMatch = (db.mealItemLibrary || []).find(i => i.name === itemData.name);
+    if (libMatch) {
+      selInput.value = itemData.name;
+      nameRow.style.display = 'none';
+    } else if (itemData.name) {
+      selInput.value = '__custom__';
+      nameRow.style.display = 'block';
+      nameInput.value = itemData.name;
+    }
+    if (itemData.quantity != null) qtyInput.value = itemData.quantity;
+    if (itemData.calories != null) block.querySelector('.mi-cal').value = itemData.calories;
+    if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   }
@@ -2879,7 +2947,10 @@ function saveEdit() {
     const items = [];
     document.querySelectorAll('#sheet-meal-items-container .exercise-block').forEach(block => {
       const numB = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
-      const name = block.querySelector('.mi-name')?.value.trim() || '';
+      const miSel = block.querySelector('.mi-select');
+    const name = miSel && miSel.value === '__custom__'
+      ? (block.querySelector('.mi-name')?.value.trim() || '')
+      : (miSel ? miSel.value : (block.querySelector('.mi-name')?.value.trim() || ''));
       const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
       const cal  = numB('.mi-cal'), pro = numB('.mi-pro');
       const note = block.querySelector('.mi-note')?.value.trim() || null;
