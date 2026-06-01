@@ -1508,6 +1508,24 @@ function populateCardioActivityDropdown(selectedVal) {
 function renderHistory() {
   const filter = document.getElementById('history-filter').value;
   const list = document.getElementById('history-list');
+  const exFilterEl = document.getElementById('exercise-filter');
+
+  // Show/hide exercise filter dropdown
+  if (exFilterEl) {
+    if (filter === 'gym') {
+      exFilterEl.style.display = 'block';
+      const usedExercises = [...new Set(
+        db.logs.filter(e => e.type === 'gym').flatMap(e => e.exercises.map(ex => ex.name))
+      )].sort();
+      const currentVal = exFilterEl.value;
+      exFilterEl.innerHTML = '<option value="">All exercises</option>' +
+        usedExercises.map(n => `<option value="${n}" ${n === currentVal ? 'selected' : ''}>${n}</option>`).join('');
+    } else {
+      exFilterEl.style.display = 'none';
+      exFilterEl.value = '';
+    }
+  }
+  const exFilter = (exFilterEl && filter === 'gym') ? exFilterEl.value : '';
 
   // Show entries newest first
   const entries = [...db.logs]
