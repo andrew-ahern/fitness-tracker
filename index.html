@@ -1300,7 +1300,7 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
       const heading = g || 'Misc';
-      html += `<div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">${heading}</div>`;
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
     }
     grouped[g].forEach(({ item, i }) => {
       const name     = typeof item === 'string' ? item : item.name;
@@ -1423,7 +1423,7 @@ function renderMealItemLibrary() {
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
       const heading = g || 'Misc';
-      html += `<div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">${heading}</div>`;
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
     }
     grouped[g].forEach(({ item, i }) => {
       const parts = [];
