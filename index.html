@@ -2475,17 +2475,34 @@ function saveWorkout() {
 
 let currentEditId = null; // ID of the entry currently open in the sheet
 
-function openEntry(id) {
+let currentHighlightExercise = '';
+
+function openEntry(id, highlightExercise) {
   const entry = db.logs.find(e => e.id === id);
   if (!entry) return;
   currentEditId = id;
+  currentHighlightExercise = highlightExercise || '';
 
   const titles = { meal:'Meal', weight:'Weight', gym:'Gym', cardio:'Cardio', rise:'Rise' };
   document.getElementById('sheet-title').textContent = titles[entry.type] || 'Entry';
   document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
+
+  // Highlight matching exercise in view mode
+  if (currentHighlightExercise && entry.type === 'gym') {
+    setTimeout(() => {
+      document.querySelectorAll('#sheet-body .gym-exercise-view').forEach(block => {
+        const nameEl = block.querySelector('.gym-ex-name');
+        if (nameEl && nameEl.textContent.trim() === currentHighlightExercise) {
+          block.style.borderLeft = '3px solid var(--accent)';
+          block.style.paddingLeft = '8px';
+          block.style.marginLeft = '-11px';
+        }
+      });
+    }, 30);
+  }
+
   document.getElementById('sheet-footer-view').style.display = 'flex';
   document.getElementById('sheet-footer-edit').style.display = 'none';
-
   document.getElementById('sheet-overlay').style.display = 'block';
   document.getElementById('edit-sheet').style.display = 'block';
 }
@@ -2496,19 +2513,7 @@ function switchToEditMode() {
   document.getElementById('sheet-body').innerHTML = buildEditForm(entry);
   if (entry.type === 'gym') {
     buildSheetExercises(entry.exercises || []);
-    if (highlightExercise) {
-      setTimeout(() => {
-        const container = document.getElementById('sheet-exercises-container');
-        if (!container) return;
-        container.querySelectorAll('.exercise-block').forEach(block => {
-          const nameEl = block.querySelector('.ex-name');
-          if (nameEl && nameEl.value === highlightExercise) {
-            block.style.borderLeft = '3px solid var(--accent)';
-            block.style.paddingLeft = '8px';
-          }
-        });
-      }, 50);
-    }
+
   }
   if (entry.type === 'meal') buildSheetMealItems(entry.items || []);
   document.getElementById('sheet-footer-view').style.display = 'none';
@@ -2587,8 +2592,8 @@ function buildViewBody(e) {
           <span>${s.reps != null ? s.reps + ' reps' : '—'}</span>
         </div>`
       ).join('');
-      return `<div style="margin-bottom:0.75rem;">
-        <div style="font-weight:500;margin-bottom:4px;">${ex.name}</div>
+      return `<div class="gym-exercise-view" style="margin-bottom:0.75rem;">
+        <div class="gym-ex-name" style="font-weight:500;margin-bottom:4px;">${ex.name}</div>
         ${setsHTML}
       </div>`;
     }).join('');
