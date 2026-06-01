@@ -1702,7 +1702,10 @@ function saveDraft(type) {
           reps:   row.querySelector('.s-reps').value
         });
       });
-      d.exercises.push({ name, sets });
+      const pEls2 = block.querySelectorAll('.ex-param');
+      const params2 = {};
+      pEls2.forEach(el => { const v = el.value.trim(); params2[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v; });
+      d.exercises.push({ name, ...(Object.keys(params2).length ? { params: params2 } : {}), sets });
     });
   } else if (type === 'cardio') {
     d.activityType = getVal('c-type');
@@ -2473,7 +2476,10 @@ function saveWorkout() {
       sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
     });
 
-    if (sets.length > 0) exercises.push({ name, sets });
+    const pEls1 = block.querySelectorAll('.ex-param');
+    const params1 = {};
+    pEls1.forEach(el => { const v = el.value.trim(); params1[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v; });
+    if (sets.length > 0) exercises.push({ name, ...(Object.keys(params1).length ? { params: params1 } : {}), sets });
   });
 
   if (hasIncomplete) {
