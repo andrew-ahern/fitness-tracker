@@ -1285,7 +1285,15 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push({ item, i });
   });
-  const groupKeys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
+  const groupKeys = Object.keys(grouped).sort((a,b) => {
+    if (a === '' && b === '') return 0;
+    if (a === '') return 1; if (b === '') return -1;
+    const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1; if (bi === -1) return -1;
+    return ai - bi;
+  });
 
   const hasMultipleGroups = groupKeys.length > 1 || (groupKeys.length === 1 && groupKeys[0] !== '');
   let html = '';
@@ -1400,7 +1408,15 @@ function renderMealItemLibrary() {
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push({ item, i });
   });
-  const groupKeys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
+  const groupKeys = Object.keys(grouped).sort((a,b) => {
+    if (a === '' && b === '') return 0;
+    if (a === '') return 1; if (b === '') return -1;
+    const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1; if (bi === -1) return -1;
+    return ai - bi;
+  });
 
   const hasMultipleGroupsMeal = groupKeys.length > 1 || (groupKeys.length === 1 && groupKeys[0] !== '');
   let html = '';
@@ -1501,7 +1517,15 @@ function populateCardioActivityDropdown(selectedVal) {
     cGrouped[g].push({ n, selected: n === selectedVal });
   });
   let cOpts = '';
-  Object.keys(cGrouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b)).forEach(g => {
+  Object.keys(cGrouped).sort((a,b) => {
+    if (a === '' && b === '') return 0;
+    if (a === '') return 1; if (b === '') return -1;
+    const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1; if (bi === -1) return -1;
+    return ai - bi;
+  }).forEach(g => {
     const items = cGrouped[g].map(({n,selected}) => `<option value="${n}" ${selected?'selected':''}>${n}</option>`).join('');
     cOpts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
   });
@@ -2089,7 +2113,15 @@ function buildMealItemOptions(selectedName) {
     grouped[g].push(i);
   });
   let opts = '<option value="">-- select item --</option>';
-  const keys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
+  const keys = Object.keys(grouped).sort((a,b) => {
+    if (a === '' && b === '') return 0;
+    if (a === '') return 1; if (b === '') return -1;
+    const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1; if (bi === -1) return -1;
+    return ai - bi;
+  });
   keys.forEach(g => {
     const items = grouped[g].map(i =>
       `<option value="${i.name}" ${i.name === selectedName ? 'selected' : ''}>${i.name}</option>`
