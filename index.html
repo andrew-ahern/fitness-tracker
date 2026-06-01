@@ -4146,7 +4146,7 @@ function renderActivityChart() {
             axis.ticks = ticks;
           },
           ticks: { font: { size: 11 }, color: mutedColor, callback: v => Number.isInteger(v) ? v : null },
-          grid: { color: borderColor }
+          grid: { color: borderColor, z: -1 }
         }
       }
     }
