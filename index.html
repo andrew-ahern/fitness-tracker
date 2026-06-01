@@ -4705,6 +4705,34 @@ function runTests() {
     assertEqual(result.length, input.length);
   });
 
+  // ── Exercise params ──────────────────────────────────────────────
+  test('exercise library items are objects with name field', () => {
+    db.exerciseLibrary.forEach(i => {
+      assert(typeof i === 'object' && i !== null, 'item is not an object');
+      assert('name' in i, 'missing name field');
+    });
+  });
+
+  test('getExerciseLibItem() returns correct item', () => {
+    if (db.exerciseLibrary.length === 0) return; // skip if empty
+    const first = db.exerciseLibrary[0];
+    const found = getExerciseLibItem(first.name);
+    assert(found !== null, 'item not found');
+    assertEqual(found.name, first.name, 'wrong item returned');
+  });
+
+  test('gym exercise params object is stored correctly', () => {
+    const gymEntry = db.logs.find(e => e.type === 'gym');
+    if (!gymEntry) return; // skip if no gym entries
+    gymEntry.exercises.forEach(ex => {
+      assert('name' in ex, 'exercise missing name');
+      assert('sets' in ex, 'exercise missing sets');
+      if (ex.params) {
+        assert(typeof ex.params === 'object', 'params must be an object');
+      }
+    });
+  });
+
   // ── localStorage ───────────────────────────────────────────────
   test('localStorage is available', () => {
     localStorage.setItem('_test', '1');
@@ -4736,6 +4764,7 @@ function showTestScreen() {
   const groups = [
     { heading: 'Utilities',           tests: ['today() returns YYYY-MM-DD format', 'today() returns current local date', 'Monday calculation: Wed → Mon', 'Monday calculation: Sun → Mon'] },
     { heading: 'DB schema',           tests: ['db object has required keys', 'db.settings has required keys', 'db.logs is an array'] },
+    { heading: 'Exercise params',       tests: ['exercise library items are objects with name field', 'getExerciseLibItem() returns correct item', 'gym exercise params object is stored correctly'] },
     { heading: 'Entry creation',      tests: ['weight entry has required fields', 'rise entry has required fields', 'meal entry has required fields', 'gym entry has required fields', 'cardio entry has required fields'] },
     { heading: 'ID uniqueness',       tests: ['log entry IDs are unique'] },
     { heading: 'Export merge logic',  tests: ['export merge: only new entries added', 'export merge: no entries lost'] },
