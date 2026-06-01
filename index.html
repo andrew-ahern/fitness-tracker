@@ -1278,45 +1278,24 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
     return;
   }
   list.innerHTML = arr.map((item, i) => {
-    const name  = typeof item === 'string' ? item : item.name;
-    const group = (item && item.group) ? item.group : '';
-    const tags  = (item && item.tags)  ? item.tags.join(', ') : '';
+    const name     = typeof item === 'string' ? item : item.name;
+    const editable = !item || item.editableInApp !== false;
+    const buttons  = editable ? `
+      <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
+        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === 0 ? '0.2' : '1'}">↑</button>
+      <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
+        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
+      <button onclick="${deleteFn}(${i})"
+        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:0 4px; line-height:1;">&times;</button>` : '';
     return `
-    <div class="card-row" style="flex-wrap:wrap; gap:4px;">
-      <span style="font-size:15px; flex:1; min-width:120px;">${name}</span>
-      <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
-        <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
-          style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === 0 ? '0.2' : '1'}">↑</button>
-        <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
-          style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 6px; line-height:1; opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
-        <button onclick="${deleteFn}(${i})"
-          style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:0 4px; line-height:1;">&times;</button>
-      </div>
-      <div style="width:100%; display:flex; gap:8px; padding-bottom:4px;">
-        <input type="text" placeholder="Group" value="${group}"
-          oninput="updateLibraryItemField('${key}', ${i}, 'group', this.value)"
-          style="flex:1; font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
-        <input type="text" placeholder="Tags (comma-separated)" value="${tags}"
-          oninput="updateLibraryItemField('${key}', ${i}, 'tags', this.value)"
-          style="flex:2; font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;">
-      </div>
+    <div class="card-row">
+      <span style="font-size:15px; flex:1;">${name}</span>
+      <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">${buttons}</div>
     </div>
   `;}).join('');
 }
 
-function updateLibraryItemField(key, index, field, value) {
-  const item = db[key][index];
-  if (typeof item === 'string') {
-    // Migrate plain string to object
-    db[key][index] = { name: item };
-  }
-  if (field === 'tags') {
-    db[key][index][field] = value.split(',').map(t => t.trim()).filter(Boolean);
-  } else {
-    db[key][index][field] = value.trim() || null;
-  }
-  saveDB();
-}
+
 
 function addToLibrary(key, inputId, onUpdate) {
   const input = document.getElementById(inputId);
@@ -1398,13 +1377,10 @@ function renderMealItemLibrary() {
   }
   list.innerHTML = arr.map((item, i) => {
     const parts = [];
-    if (item.calories != null) parts.push(item.calories + ' kcal');
+    if (item.calories != null) parts.push(item.calories + 'kcal');
     if (item.protein  != null) parts.push('P ' + item.protein + 'g');
-
-    const group = item.group || '';
-    const tags  = (item.tags || []).join(', ');
-    return `<div class="card-row" style="flex-wrap:wrap; gap:4px;">
-      <div style="flex:1;min-width:120px;">
+    return `<div class="card-row">
+      <div style="flex:1;min-width:0;">
         <div style="font-size:15px">${item.name}</div>
         ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
       </div>
@@ -1412,14 +1388,6 @@ function renderMealItemLibrary() {
         <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
         <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
         <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>
-      </div>
-      <div style="width:100%;display:flex;gap:8px;padding-bottom:4px;">
-        <input type="text" placeholder="Group" value="${group}"
-          oninput="updateLibraryItemField('mealItemLibrary', ${i}, 'group', this.value)"
-          style="flex:1;font-size:13px;padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;">
-        <input type="text" placeholder="Tags (comma-separated)" value="${tags}"
-          oninput="updateLibraryItemField('mealItemLibrary', ${i}, 'tags', this.value)"
-          style="flex:2;font-size:13px;padding:3px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;">
       </div>
     </div>`;
   }).join('');
