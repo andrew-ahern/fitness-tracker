@@ -1287,10 +1287,13 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
 
+  const hasMultipleGroups = groupKeys.length > 1 || (groupKeys.length === 1 && groupKeys[0] !== '');
   let html = '';
   groupKeys.forEach(g => {
-    const heading = g || 'Misc';
-    html += `<div style="font-size:13px;font-weight:600;color:var(--muted);padding:16px 0 4px 0;text-transform:uppercase;letter-spacing:0.05em;">${heading}</div>`;
+    if (hasMultipleGroups) {
+      const heading = g || 'Misc';
+      html += `<div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:12px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">${heading}</div>`;
+    }
     grouped[g].forEach(({ item, i }) => {
       const name     = typeof item === 'string' ? item : item.name;
       const editable = !item || item.editableInApp !== false;
@@ -1399,10 +1402,13 @@ function renderMealItemLibrary() {
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => a===''?1:b===''?-1:a.localeCompare(b));
 
+  const hasMultipleGroupsMeal = groupKeys.length > 1 || (groupKeys.length === 1 && groupKeys[0] !== '');
   let html = '';
   groupKeys.forEach(g => {
-    const heading = g || 'Misc';
-    html += `<div style="font-size:13px;font-weight:600;color:var(--muted);padding:16px 0 4px 0;text-transform:uppercase;letter-spacing:0.05em;">${heading}</div>`;
+    if (hasMultipleGroupsMeal) {
+      const heading = g || 'Misc';
+      html += `<div style="font-size:13px;font-weight:600;color:var(--muted);margin-top:12px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;">${heading}</div>`;
+    }
     grouped[g].forEach(({ item, i }) => {
       const parts = [];
       if (item.calories != null) parts.push(item.calories + 'kcal');
