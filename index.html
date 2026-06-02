@@ -2606,7 +2606,6 @@ function addSetRow(blockId, setData) {
 
   const noteInput = document.createElement('input');
   noteInput.type = 'text'; noteInput.className = 's-note';
-  noteInput.placeholder = 'note';
   noteInput.value = (setData && setData.note) ? setData.note : '';
   const noteDiv = document.createElement('div'); noteDiv.appendChild(noteInput);
 
