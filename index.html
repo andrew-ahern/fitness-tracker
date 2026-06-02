@@ -1302,7 +1302,7 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
       const heading = g || 'Misc';
-      const mt = isFirstGroup ? '4px' : '40px';
+      const mt = isFirstGroup ? '9px' : '25px';
       html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
       isFirstGroup = false;
     }
@@ -1428,7 +1428,7 @@ function renderMealItemLibrary() {
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
       const heading = g || 'Misc';
-      const mt = isFirstGroupMeal ? '4px' : '40px';
+      const mt = isFirstGroupMeal ? '9px' : '25px';
       html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
       isFirstGroupMeal = false;
     }
