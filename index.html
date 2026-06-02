@@ -411,7 +411,7 @@
     /* Set rows within an exercise */
     .set-row {
       display: grid;
-      grid-template-columns: 28px 2fr 2fr 28px;
+      grid-template-columns: 28px 2fr 2fr 3fr 28px;
       gap: 6px;
       align-items: end;
       margin-bottom: 12px;
@@ -2540,10 +2540,11 @@ function addExerciseBlock(exerciseData, containerId) {
       '</select>' +
       '<button class="del-btn" title="Remove exercise">&times;</button>' +
     '</div>' +
-    '<div class="set-labels" style="display:grid;grid-template-columns:28px 2fr 2fr 28px;gap:6px;margin-bottom:2px;">' +
+    '<div class="set-labels" style="display:grid;grid-template-columns:28px 2fr 2fr 3fr 28px;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label" style="text-align:center">#</div>' +
       '<div class="set-label" style="padding-left:2px">Weight (kg)</div>' +
       '<div class="set-label" style="padding-left:2px">Reps</div>' +
+      '<div class="set-label" style="padding-left:2px">Note</div>' +
       '<div></div>' +
     '</div>' +
     '<div class="sets-container"></div>' +
@@ -2815,6 +2816,7 @@ function buildViewBody(e) {
           <span style="color:var(--muted);min-width:24px">${i + 1}</span>
           <span>${s.weight != null ? fmtWeight(s.weight) + ' kg' : '—'}</span>
           <span>${s.reps != null ? s.reps + ' reps' : '—'}</span>
+          ${s.note ? `<span style="color:var(--muted);font-style:italic">${s.note}</span>` : ''}
         </div>`
       ).join('');
       const paramsHTML = ex.params && Object.keys(ex.params).length
@@ -3131,7 +3133,8 @@ function saveEdit() {
         const reps   = parseInt(row.querySelector('.s-reps').value);
         if (isNaN(weight) && isNaN(reps)) return; // skip empty rows
         if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
-        sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
+        const snote2 = (row.querySelector('.s-note')?.value || '').trim() || null;
+        sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps), ...(snote2 ? { note: snote2 } : {}) });
       });
       const pEls3 = block.querySelectorAll('.ex-param');
       const params3 = {};
