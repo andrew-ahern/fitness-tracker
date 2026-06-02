@@ -624,7 +624,7 @@
               <input type="time" id="c-starttime">
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
             <div class="field">
               <label>Distance (km)</label>
               <input type="number" id="c-dist" step="0.1" min="0" inputmode="decimal">
@@ -632,6 +632,10 @@
             <div class="field">
               <label>Duration (min)</label>
               <input type="number" id="c-dur" min="0" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label>Elevation (m)</label>
+              <input type="number" id="c-elev" min="0" inputmode="numeric">
             </div>
           </div>
           <div class="field-row">
@@ -643,10 +647,6 @@
               <label>Max HR (bpm)</label>
               <input type="number" id="c-hrmax" min="0" inputmode="numeric">
             </div>
-          </div>
-          <div class="field">
-            <label>Elevation gain (m)</label>
-            <input type="number" id="c-elev" min="0" inputmode="numeric">
           </div>
           <div class="field">
             <label>Note (optional)</label>
