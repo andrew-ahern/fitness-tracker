@@ -132,6 +132,7 @@
       border-bottom: 1px solid var(--border);
     }
     .card-row:last-child { border-bottom: none; }
+    .lib-item { padding: 0.3rem 0; }
 
     /* ── Buttons ──────────────────────────────────────────────────── */
     .btn {
@@ -1300,7 +1301,7 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
       const heading = g || 'Misc';
-      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:40px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
     }
     grouped[g].forEach(({ item, i }) => {
       const name     = typeof item === 'string' ? item : item.name;
@@ -1312,7 +1313,7 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
           style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
         <button onclick="${deleteFn}(${i})"
           style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
-      html += `<div class="card-row">
+      html += `<div class="card-row lib-item">
         <span style="font-size:15px;flex:1;">${name}</span>
         <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">${buttons}</div>
       </div>`;
@@ -1423,7 +1424,7 @@ function renderMealItemLibrary() {
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
       const heading = g || 'Misc';
-      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:20px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:40px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
     }
     grouped[g].forEach(({ item, i }) => {
       const parts = [];
@@ -1434,7 +1435,7 @@ function renderMealItemLibrary() {
           <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
           <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
           <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
-      html += `<div class="card-row">
+      html += `<div class="card-row lib-item">
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px">${item.name}</div>
           ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
