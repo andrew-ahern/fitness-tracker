@@ -1358,7 +1358,11 @@ function deleteFromLibrary(key, index, inUseFn, onUpdate) {
   onUpdate();
 }
 
-/* ── Exercise library wrappers ─────────────────────────────────── */
+/* ── Library wrappers ──────────────────────────────────────────────
+   Exercise, cardio, and meal item library management.
+   ────────────────────────────────────────────────────────────────── */
+
+/* ── Exercise library ──────────────────────────────────────────── */
 
 function renderExerciseLibrary() {
   renderLibrary('exerciseLibrary', 'exercise-library-list',
@@ -1394,7 +1398,7 @@ function refreshExerciseDropdowns() {
     .forEach(sel => { sel.innerHTML = buildExerciseOptions(sel.value); });
 }
 
-/* ── Cardio library wrappers ───────────────────────────────────── */
+/* ── Meal item library ─────────────────────────────────────────── */
 
 function renderMealItemLibrary() {
   const list = document.getElementById('meal-item-library-list');
@@ -1484,6 +1488,7 @@ function deleteMealItem(index) {
   deleteFromLibrary('mealItemLibrary', index, null, () => renderMealItemLibrary());
 }
 
+/* ── Cardio library ────────────────────────────────────────────── */
 function renderCardioLibrary() {
   renderLibrary('cardioLibrary', 'cardio-library-list',
     'No activities yet', 'moveCardioActivity', 'deleteCardioActivity');
@@ -4484,6 +4489,11 @@ function loadGithubConfig(event) {
   reader.readAsText(file);
 }
 
+
+/* ════════════════════════════════════════════════════════════════════
+   GITHUB EXPORT / IMPORT
+   ════════════════════════════════════════════════════════════════════ */
+
 async function ghGet(path) {
   const cfg = getGithubConfig();
   if (!cfg) throw new Error('No GitHub config');
@@ -4652,7 +4662,9 @@ async function githubImport() {
 
 
 /* ════════════════════════════════════════════════════════════════════
+   ══════════════════════════════════════════════════════════════════════
    TEST SUITE — accessible via ?test=true
+   All code below this point is test-only and does not run in normal use.
    ════════════════════════════════════════════════════════════════════ */
 
 function runTests() {
