@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitlog-v49';
+const CACHE_NAME = 'fitlog-v50';
 
 self.addEventListener('install', event => {
   self.skipWaiting();

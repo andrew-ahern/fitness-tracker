@@ -2126,8 +2126,9 @@ function saveWeight() {
   const value = parseFloat(getVal('w-value'));
   if (isNaN(value) || value <= 0) { showToast('Please enter a weight'); return; }
 
+  const id = nextId();
   db.logs.push({
-    id: nextId(),
+    id,
     type: 'weight',
     date: getVal('w-date') || today(),
     time: getVal('w-time') || nowTime(),
@@ -2332,8 +2333,9 @@ function saveMeal() {
     return vals.length ? parseFloat(vals.reduce((a,b) => a+b, 0).toFixed(1)) : null;
   };
 
+  const id = nextId();
   db.logs.push({
-    id: nextId(), type: 'meal',
+    id, type: 'meal',
     date: getVal('m-date') || today(),
     time: getVal('m-time') || nowTime(),
     items,
@@ -2341,7 +2343,8 @@ function saveMeal() {
   });
 
   saveDB();
-  addUnsyncedId(id); // mark as unsynced until next GitHub export clearDraft('meal'); showToast('Meal saved ✓');
+  addUnsyncedId(id); // mark as unsynced until next GitHub export
+  clearDraft('meal'); showToast('Meal saved ✓');
   resetMealForm();
   setVal('m-date', today()); setVal('m-time', nowTime());
   // Re-render nutrition charts so today's bar updates immediately
@@ -2364,8 +2367,9 @@ function saveCardio() {
 
   const num = id => { const v = parseFloat(getVal(id)); return isNaN(v) ? null : v; };
 
+  const id = nextId();
   db.logs.push({
-    id: nextId(),
+    id,
     type: 'cardio',
     date: getVal('c-date') || today(),
     startTime: getVal('c-starttime') || nowTime(),
@@ -2396,8 +2400,9 @@ function saveWake() {
   const time = getVal('wk-time');
   if (!time) { showToast('Please enter a rise time'); return; }
 
+  const id = nextId();
   db.logs.push({
-    id: nextId(),
+    id,
     type: 'rise',
     date: getVal('wk-date') || today(),
     time: time
@@ -2656,8 +2661,9 @@ function saveWorkout() {
 
   const dur = parseInt(getVal('wo-duration'));
 
+  const id = nextId();
   db.logs.push({
-    id: nextId(),
+    id,
     type: 'gym',
     date:      getVal('wo-date') || today(),
     startTime: getVal('wo-starttime') || nowTime(),
