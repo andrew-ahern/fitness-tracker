@@ -253,6 +253,17 @@
     }
 
     /* ── Collapsible library sections ────────────────────────────── */
+    /* ── Settings library spacing ──────────────────────────────────
+       Adjust these values to tune spacing in the library lists.
+       ─────────────────────────────────────────────────────────────
+       .lib-details margin-bottom     : space between library sections (Gym / Cardio / Meals)
+       .lib-summary margin-bottom     : space between library heading and first subheading
+       .lib-item padding              : vertical padding of each item row
+       subheading margin-top (first)  : 9px  — space between library heading and first subheading
+       subheading margin-top (others) : 25px — space between last item and next subheading
+       subheading margin-bottom       : 4px  — space between subheading and first item below it
+       h3 margin-top                  : 2rem — space between Settings sections (Targets, Appearance etc.)
+       ──────────────────────────────────────────────────────────── */
     .lib-details {
       margin-bottom: 12px;
     }
@@ -4824,9 +4835,11 @@ function runTests() {
   });
 
   test('gym entry has required fields', () => {
-    const entry = { type:'gym', id: Date.now(), date: today(), startTime:'09:00',
+    const entry = { type:'gym', id: Date.now(), date: today(), startTime:'09:00', endTime:'10:00',
       exercises: [{ name:'Squat', sets:[{weight:100,reps:5}] }] };
     assert(Array.isArray(entry.exercises));
+    assert('endTime' in entry, 'missing endTime');
+    assert(!('duration' in entry), 'should not have duration');
   });
 
   test('cardio entry has required fields', () => {
@@ -4952,6 +4965,32 @@ function runTests() {
     });
   });
 
+  // ── Unsynced ID tracking ─────────────────────────────────────────
+  test('addUnsyncedId and getUnsyncedIds work correctly', () => {
+    const before = getUnsyncedIds().size;
+    const testId = 999999999999;
+    addUnsyncedId(testId);
+    assert(getUnsyncedIds().has(testId), 'ID not found after adding');
+    assert(isEntryEditable(testId), 'entry should be editable');
+    // Clean up
+    const ids = getUnsyncedIds();
+    ids.delete(testId);
+    localStorage.setItem('fitlog_unsynced_ids', JSON.stringify([...ids]));
+  });
+
+  test('clearUnsyncedIds empties the set', () => {
+    addUnsyncedId(888888888888);
+    clearUnsyncedIds();
+    assertEqual(getUnsyncedIds().size, 0, 'unsynced IDs should be empty after clear');
+  });
+
+  test('set note is stored correctly', () => {
+    const set = { weight: 80, reps: 5, note: 'dropset' };
+    assert(set.note === 'dropset');
+    const setNoNote = { weight: 80, reps: 5 };
+    assert(!('note' in setNoNote), 'note should not be present when not set');
+  });
+
   // ── localStorage ───────────────────────────────────────────────
   test('localStorage is available', () => {
     localStorage.setItem('_test', '1');
@@ -4989,6 +5028,7 @@ function showTestScreen() {
     { heading: 'Export merge logic',  tests: ['export merge: only new entries added', 'export merge: no entries lost'] },
     { heading: 'Import merge logic',  tests: ['import merge: append-only, no overwrites', 'import merge: no duplicates'] },
     { heading: 'Chart data',          tests: ['getCalByDay() returns array', 'getCalByDay() entries have date and value', 'getProteinByDay() returns array', 'rollingAverage() returns same length as input', 'rollingMedian() returns same length as input'] },
+    { heading: 'Unsynced ID tracking',  tests: ['addUnsyncedId and getUnsyncedIds work correctly', 'clearUnsyncedIds empties the set', 'set note is stored correctly'] },
     { heading: 'localStorage',        tests: ['localStorage is available', 'saveDB() and loadDB() round-trip'] },
   ];
 
