@@ -934,7 +934,7 @@
               exercises: [{ name, sets: [{ reps, weight?, note? }] }] }
 
    cardio:  { date, startTime, activityType, distance?, duration?,
-              hrAvg?, hrMax?, elevationGain?, perceivedEffort?, note? }
+              hrAvg?, hrMax?, elevationGain?, note? }
 
    rise:    { date, time }
    ════════════════════════════════════════════════════════════════════ */
@@ -1161,14 +1161,14 @@ function exportData() {
   const cardioHeaders = [
     'id','date','start_time','activity_type',
     'distance_km','duration_min','hr_avg_bpm','hr_max_bpm',
-    'elevation_gain_m','perceived_effort','note'
+    'elevation_gain_m','note'
   ];
   const cardioRows = db.logs
     .filter(e => e.type === 'cardio')
     .map(e => [
       e.id, e.date, e.startTime ?? '', e.activityType,
       e.distance ?? '', e.duration ?? '', e.hrAvg ?? '', e.hrMax ?? '',
-      e.elevationGain ?? '', e.perceivedEffort ?? '',
+      e.elevationGain ?? '',
       e.note ?? ''
     ]);
   folder.file('cardio.csv', toCSV(cardioHeaders, cardioRows));
