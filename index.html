@@ -590,8 +590,8 @@
             </div>
           </div>
           <div class="field">
-            <label>Duration (min)</label>
-            <input type="number" id="wo-duration" min="0" inputmode="numeric">
+            <label>End time</label>
+            <input type="time" id="wo-endtime">
           </div>
           <div class="field">
             <label>Note (optional)</label>
@@ -930,7 +930,7 @@
 
    weight:  { date, time, value }
 
-   gym:     { date, startTime, duration?, note?,
+   gym:     { date, startTime, endTime?, note?,
               exercises: [{ name, sets: [{ reps, weight?, note? }] }] }
 
    cardio:  { date, startTime, activityType, distance?, duration?,
@@ -1135,20 +1135,20 @@ function exportData() {
   // 4. Workouts CSV — flattened to one row per set
   //    Workout-level fields repeat on each set row for easy filtering in Excel/Python
   const gymHeaders = [
-    'gym_id','date','start_time','duration_min','gym_note',
+    'gym_id','date','start_time','end_time','gym_note',
     'exercise','set_number','reps','weight_kg','set_note'
   ];
   const gymRows = [];
   db.logs.filter(e => e.type === 'gym').forEach(w => {
     if (!w.exercises || w.exercises.length === 0) {
       // Workout with no exercises — still record the session
-      gymRows.push([w.id, w.date, w.startTime ?? '', w.duration ?? '', w.note ?? '',
+      gymRows.push([w.id, w.date, w.startTime ?? '', w.endTime ?? '', w.note ?? '',
                         '', '', '', '', '']);
     } else {
       w.exercises.forEach(ex => {
         (ex.sets || []).forEach((s, i) => {
           gymRows.push([
-            w.id, w.date, w.startTime ?? '', w.duration ?? '', w.note ?? '',
+            w.id, w.date, w.startTime ?? '', w.endTime ?? '', w.note ?? '',
             ex.name, i + 1, s.reps ?? '', s.weight != null ? fmtWeight(s.weight) : '', s.note ?? ''
           ]);
         });
@@ -1659,13 +1659,15 @@ function renderHistoryEntry(e, exFilter) {
   } else if (e.type === 'gym') {
     const exNames = (e.exercises || []).map(ex => ex.name).join(', ');
     const gymParts = [];
-    if (e.duration) gymParts.push(e.duration + 'min');
+    if (e.startTime && e.endTime) gymParts.push(e.startTime + '–' + e.endTime);
+    else if (e.startTime) gymParts.push(e.startTime);
     if (exNames)    gymParts.push(exNames);
     detail = gymParts.join(' · ');
   } else if (e.type === 'cardio') {
     const parts = [e.activityType];
     if (e.distance) parts.push(e.distance + ' km');
-    if (e.duration) parts.push(e.duration + ' min');
+    if (e.startTime && e.endTime) parts.push(e.startTime + '–' + e.endTime);
+    else if (e.startTime) parts.push(e.startTime);
     if (e.hrAvg)    parts.push('HR ' + e.hrAvg + ' bpm');
     detail = parts.join(' · ');
   } else if (e.type === 'rise') {
@@ -1796,7 +1798,7 @@ function saveDraft(type) {
   } else if (type === 'gym') {
     d.date      = getVal('wo-date');
     d.startTime = getVal('wo-starttime');
-    d.duration  = getVal('wo-duration');
+    d.endTime   = getVal('wo-endtime');
     d.note      = getVal('wo-note');
     d.exercises = [];
     document.querySelectorAll('#exercises-container .exercise-block').forEach(block => {
@@ -1891,7 +1893,7 @@ function restoreDraft(type) {
     updateMealTotals();
   } else if (type === 'gym') {
     setVal('wo-date', d.date); setVal('wo-starttime', d.startTime);
-    setVal('wo-duration', d.duration); setVal('wo-note', d.note);
+    setVal('wo-endtime', d.endTime); setVal('wo-note', d.note);
     if (d.exercises && d.exercises.length > 0) {
       document.getElementById('exercises-container').innerHTML = '';
       exerciseCount = 0;
@@ -2613,7 +2615,7 @@ function resetGymForm() {
   /* Clear the gym form for a fresh entry. */
   setVal('wo-date', today());
   setVal('wo-starttime', nowTime());
-  setVal('wo-duration', '');
+  setVal('wo-endtime', '');
   setVal('wo-note', '');
   document.getElementById('exercises-container').innerHTML = '';
   exerciseCount = 0;
@@ -2659,7 +2661,7 @@ function saveWorkout() {
     return;
   }
 
-  const dur = parseInt(getVal('wo-duration'));
+  const endTime = getVal('wo-endtime') || null;
 
   const id = nextId();
   db.logs.push({
@@ -2667,7 +2669,7 @@ function saveWorkout() {
     type: 'gym',
     date:      getVal('wo-date') || today(),
     startTime: getVal('wo-starttime') || nowTime(),
-    duration:  isNaN(dur) ? null : dur,
+    endTime:   endTime,
     note:      getVal('wo-note') || null,
     exercises: exercises
   });
@@ -2798,7 +2800,7 @@ function buildViewBody(e) {
       ${row('Start', e.startTime)}
       ${row('Activity', e.activityType)}
       ${row('Distance', e.distance  != null ? e.distance  + ' km'  : null)}
-      ${row('Duration', e.duration  != null ? e.duration  + ' min' : null)}
+      ${row('End time', e.endTime || null)}
       ${row('Avg HR',   e.hrAvg     != null ? e.hrAvg     + ' bpm' : null)}
       ${row('Max HR',   e.hrMax     != null ? e.hrMax     + ' bpm' : null)}
       ${row('Elevation',e.elevationGain != null ? e.elevationGain + ' m' : null)}
@@ -2832,7 +2834,7 @@ function buildViewBody(e) {
     return `<div class="card">
       ${row('Date', e.date)}
       ${row('Start', e.startTime)}
-      ${row('Duration', e.duration != null ? e.duration + ' min' : null)}
+      ${row('End time', e.endTime || null)}
       ${row('Note', e.note)}
     </div>
     ${exHTML ? `<div class="card">${exHTML}</div>` : ''}`;
@@ -2887,7 +2889,7 @@ function buildEditForm(e) {
     return `<div class="field"><label>Activity</label><select id="e-acttype">${actOpts}</select></div>` +
       row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
       row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
-           numField('e-dur',  'Duration (min)', e.duration, '1')) +
+           timeField('e-endtime', 'End time', e.endTime)) +
       row2(numField('e-hravg', 'Avg HR (bpm)', e.hrAvg, '1'),
            numField('e-hrmax', 'Max HR (bpm)', e.hrMax, '1')) +
       numField('e-elev', 'Elevation (m)', e.elevationGain, '1') +
@@ -2896,7 +2898,7 @@ function buildEditForm(e) {
 
   if (e.type === 'gym') {
     return row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
-      numField('e-dur', 'Duration (min)', e.duration, '1') +
+      timeField('e-endtime', 'End time', e.endTime) +
       textField('e-note', 'Note', e.note) +
       `<div id="sheet-exercises-container" style="margin-top:0.5rem;"></div>
        <button class="add-exercise-btn" onclick="addExerciseBlock(null, 'sheet-exercises-container')">+ Add exercise</button>`;
