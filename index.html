@@ -870,7 +870,7 @@
     <div id="sheet-body"></div>
     <!-- View mode footer -->
     <div id="sheet-footer-view" style="display:flex; gap:8px; margin-top:1rem;">
-      <button class="btn btn-primary" style="flex:1" onclick="switchToEditMode()">Edit</button>
+      <button id="sheet-edit-btn" class="btn btn-primary" style="flex:1" onclick="switchToEditMode()">Edit</button>
       <button class="btn btn-danger" style="flex:1" onclick="deleteCurrentEntry()">Delete</button>
     </div>
     <!-- Edit mode footer -->
@@ -941,6 +941,40 @@
 
 const STORAGE_KEY = 'fitlog_v1';
 const EXERCISE_GROUP_ORDER = ['Push', 'Pull', 'Delts', 'Legs', 'Core'];
+
+/* ── Unsynced entry tracking ────────────────────────────────────────
+   UNSYNCED_IDS is a Set of entry IDs created since the last GitHub
+   export. Entries in this set are editable; all others are read-only.
+   The set is cleared on successful export. It is unaffected by import.
+   If localStorage is cleared, the set is wiped — after reimporting
+   from GitHub all entries are correctly treated as read-only.
+   ─────────────────────────────────────────────────────────────────── */
+const UNSYNCED_KEY = 'fitlog_unsynced_ids';
+
+function getUnsyncedIds() {
+  /* Return a Set of entry IDs created since the last export. */
+  try {
+    const raw = localStorage.getItem(UNSYNCED_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch(e) { return new Set(); }
+}
+
+function addUnsyncedId(id) {
+  /* Mark an entry as unsynced (called when a new entry is saved). */
+  const ids = getUnsyncedIds();
+  ids.add(id);
+  localStorage.setItem(UNSYNCED_KEY, JSON.stringify([...ids]));
+}
+
+function clearUnsyncedIds() {
+  /* Called on successful GitHub export — all entries are now synced. */
+  localStorage.removeItem(UNSYNCED_KEY);
+}
+
+function isEntryEditable(id) {
+  /* An entry is editable only if it has never been exported to GitHub. */
+  return getUnsyncedIds().has(id);
+}
 let exerciseCount = 0; // unique IDs for exercise blocks
 let mealItemCount = 0;  // unique IDs for meal item blocks
 const SCHEMA_VERSION = 1;
@@ -2101,6 +2135,7 @@ function saveWeight() {
   });
 
   saveDB();
+  addUnsyncedId(id); // mark as unsynced until next GitHub export
   clearDraft('weight');
   showToast('Weight saved ✓');
   setVal('w-value', '');
@@ -2305,7 +2340,8 @@ function saveMeal() {
     totals: { calories: sum('calories'), protein: sum('protein') }
   });
 
-  saveDB(); clearDraft('meal'); showToast('Meal saved ✓');
+  saveDB();
+  addUnsyncedId(id); // mark as unsynced until next GitHub export clearDraft('meal'); showToast('Meal saved ✓');
   resetMealForm();
   setVal('m-date', today()); setVal('m-time', nowTime());
   // Re-render nutrition charts so today's bar updates immediately
@@ -2344,6 +2380,7 @@ function saveCardio() {
   });
 
   saveDB();
+  addUnsyncedId(id); // mark as unsynced until next GitHub export
   clearDraft('cardio');
   showToast('Activity saved ✓');
 
@@ -2367,6 +2404,7 @@ function saveWake() {
   });
 
   saveDB();
+  addUnsyncedId(id); // mark as unsynced until next GitHub export
   clearDraft('rise');
   showToast('Rise time saved ✓');
 }
@@ -2631,6 +2669,7 @@ function saveWorkout() {
   // Clear the draft
 
   saveDB();
+  addUnsyncedId(id); // mark as unsynced until next GitHub export
 
   resetGymForm();
 
@@ -2674,6 +2713,10 @@ function openEntry(id, highlightExercise) {
       });
     }, 30);
   }
+
+  // Show/hide edit button based on whether entry has been exported to GitHub
+  const editBtn = document.getElementById('sheet-edit-btn');
+  if (editBtn) editBtn.style.display = isEntryEditable(id) ? 'inline-flex' : 'none';
 
   document.getElementById('sheet-footer-view').style.display = 'flex';
   document.getElementById('sheet-footer-edit').style.display = 'none';
@@ -4597,6 +4640,7 @@ async function githubExport() {
 
     const now = new Date().toISOString();
     localStorage.setItem('gh_last_export', now);
+    clearUnsyncedIds(); // all entries now synced to GitHub
     updateGithubExportStatus();
     if (!anyChange) {
       showToast('Export complete \u2713 (no changes made)');
