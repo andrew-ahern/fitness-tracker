@@ -2604,7 +2604,13 @@ function addSetRow(blockId, setData) {
     container.querySelectorAll('.set-num').forEach((el, i) => { el.textContent = i + 1; });
   });
 
-  row.appendChild(nDiv); row.appendChild(wDiv); row.appendChild(rDiv); row.appendChild(delBtn);
+  const noteInput = document.createElement('input');
+  noteInput.type = 'text'; noteInput.className = 's-note';
+  noteInput.placeholder = 'note';
+  noteInput.value = (setData && setData.note) ? setData.note : '';
+  const noteDiv = document.createElement('div'); noteDiv.appendChild(noteInput);
+
+  row.appendChild(nDiv); row.appendChild(wDiv); row.appendChild(rDiv); row.appendChild(noteDiv); row.appendChild(delBtn);
   container.appendChild(row);
 }
 
