@@ -1298,10 +1298,13 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
 
   const hasMultipleGroups = groupKeys.length > 1 || (groupKeys.length === 1 && groupKeys[0] !== '');
   let html = '';
+  let isFirstGroup = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
       const heading = g || 'Misc';
-      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:40px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      const mt = isFirstGroup ? '4px' : '40px';
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      isFirstGroup = false;
     }
     grouped[g].forEach(({ item, i }) => {
       const name     = typeof item === 'string' ? item : item.name;
@@ -1421,10 +1424,13 @@ function renderMealItemLibrary() {
 
   const hasMultipleGroupsMeal = groupKeys.length > 1 || (groupKeys.length === 1 && groupKeys[0] !== '');
   let html = '';
+  let isFirstGroupMeal = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
       const heading = g || 'Misc';
-      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:40px;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      const mt = isFirstGroupMeal ? '4px' : '40px';
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      isFirstGroupMeal = false;
     }
     grouped[g].forEach(({ item, i }) => {
       const parts = [];
