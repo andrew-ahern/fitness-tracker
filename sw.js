@@ -1,10 +1,9 @@
-const CACHE_NAME = 'fitlog-v53';
+const CACHE_NAME = 'fitlog-v54';
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -36,7 +35,6 @@ self.addEventListener('fetch', event => {
         }
         return response;
       }).catch(() => {
-        // Offline and not in cache — return a minimal offline response
         return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
       });
     })
