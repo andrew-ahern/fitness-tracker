@@ -2,131 +2,230 @@
   {
     "name": "Bench press",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "dumbbell", "smith machine"], "default": "barbell"},
-      {"name": "incline", "type": "number", "unit": "deg", "default": 0}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "dumbbell",
+          "smith machine"
+        ],
+        "default": "barbell"
+      },
+      {
+        "name": "incline",
+        "type": "number",
+        "unit": "deg",
+        "default": 0
+      }
     ],
     "group": "Push",
-    "tags": ["chest", "triceps", "delts"],
     "editableInApp": false
   },
   {
     "name": "Overhead press",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "dumbbell", "smith machine"], "default": "barbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "dumbbell",
+          "smith machine"
+        ],
+        "default": "barbell"
+      }
     ],
     "group": "Delts",
-    "tags": ["delts", "triceps"],
     "editableInApp": false
   },
   {
     "name": "Row",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "dumbbell", "cable", "machine - chest supported", "machine - seated"], "default": "barbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "dumbbell",
+          "cable",
+          "machine - chest supported",
+          "machine - seated"
+        ],
+        "default": "barbell"
+      }
     ],
     "group": "Pull",
-    "tags": ["back", "biceps"],
     "editableInApp": false
   },
   {
     "name": "Pull-up",
     "params": [
-      {"name": "grip", "type": "select", "options": ["overhand", "underhand", "neutral"], "default": "overhand"}
+      {
+        "name": "grip",
+        "type": "select",
+        "options": [
+          "overhand",
+          "underhand",
+          "neutral"
+        ],
+        "default": "overhand"
+      }
     ],
     "group": "Pull",
-    "tags": ["back", "biceps"],
     "editableInApp": false
   },
   {
     "name": "Lat pulldown",
     "params": [
-      {"name": "grip", "type": "select", "options": ["overhand", "underhand", "neutral"], "default": "overhand"}
+      {
+        "name": "grip",
+        "type": "select",
+        "options": [
+          "overhand",
+          "underhand",
+          "neutral"
+        ],
+        "default": "overhand"
+      }
     ],
     "group": "Pull",
-    "tags": ["back", "biceps"],
     "editableInApp": false
   },
   {
     "name": "Bicep curl",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "dumbbell", "cable", "machine"], "default": "dumbbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "dumbbell",
+          "cable",
+          "machine"
+        ],
+        "default": "dumbbell"
+      }
     ],
     "group": "Pull",
-    "tags": ["biceps"],
     "editableInApp": false
   },
   {
     "name": "Tricep pushdown",
     "params": [
-      {"name": "attachment", "type": "select", "options": ["rope", "bar", "single handle"], "default": "rope"}
+      {
+        "name": "attachment",
+        "type": "select",
+        "options": [
+          "rope",
+          "bar",
+          "single handle"
+        ],
+        "default": "rope"
+      }
     ],
     "group": "Push",
-    "tags": ["triceps"],
     "editableInApp": false
   },
   {
     "name": "Squat",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "smith machine", "hack squat"], "default": "barbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "smith machine",
+          "hack squat"
+        ],
+        "default": "barbell"
+      }
     ],
     "group": "Legs",
-    "tags": ["quads", "glutes", "hamstrings"],
     "editableInApp": false
   },
   {
     "name": "Deadlift",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "dumbbell", "trap bar"], "default": "barbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "dumbbell",
+          "trap bar"
+        ],
+        "default": "barbell"
+      }
     ],
     "group": "Legs",
-    "tags": ["hamstrings", "glutes", "back"],
     "editableInApp": false
   },
   {
     "name": "Romanian deadlift",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["barbell", "dumbbell", "cable"], "default": "barbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "barbell",
+          "dumbbell",
+          "cable"
+        ],
+        "default": "barbell"
+      }
     ],
     "group": "Legs",
-    "tags": ["hamstrings", "glutes"],
     "editableInApp": false
   },
   {
     "name": "Leg press",
     "params": [],
     "group": "Legs",
-    "tags": ["quads", "glutes"],
     "editableInApp": false
   },
   {
     "name": "Leg curl",
     "params": [
-      {"name": "type", "type": "select", "options": ["lying", "seated"], "default": "lying"}
+      {
+        "name": "type",
+        "type": "select",
+        "options": [
+          "lying",
+          "seated"
+        ],
+        "default": "lying"
+      }
     ],
     "group": "Legs",
-    "tags": ["hamstrings"],
     "editableInApp": false
   },
   {
     "name": "Calf raise",
     "params": [
-      {"name": "type", "type": "select", "options": ["standing", "seated"], "default": "standing"}
+      {
+        "name": "type",
+        "type": "select",
+        "options": [
+          "standing",
+          "seated"
+        ],
+        "default": "standing"
+      }
     ],
     "group": "Legs",
-    "tags": ["calves"],
     "editableInApp": false
   },
   {
     "name": "Dip",
     "params": [],
     "group": "Push",
-    "tags": ["chest", "triceps"],
     "editableInApp": false
   },
   {
     "name": "Plank",
     "params": [],
     "group": "Core",
-    "tags": ["core"],
     "editableInApp": false
   }
 ]

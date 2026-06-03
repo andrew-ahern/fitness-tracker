@@ -5077,7 +5077,7 @@ function showTestScreen() {
    Sets per default muscle tag for selected week
    ════════════════════════════════════════════════════════════════════ */
 
-const MUSCLE_DEFAULT_TAGS = ['chest', 'back', 'legs', 'triceps', 'biceps', 'delts'];
+const MUSCLE_DEFAULT_GROUPS = ['chest', 'back', 'delts', 'triceps', 'biceps', 'legs', 'core'];
 
 let muscleChartInstance = null;
 let muscleSelectedWeek  = null;
@@ -5124,9 +5124,9 @@ function getMuscleSetCounts(weekMonday) {
     if (entryTime < weekStart || entryTime >= weekEnd) return;
     e.exercises.forEach(ex => {
       const lib = db.exerciseLibrary.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
-      const tags = (lib && lib.tags) ? lib.tags.map(t => t.toLowerCase().trim()) : [];
+      const group = (lib && lib.group) ? lib.group.toLowerCase().trim() : null;
       const setCount = (ex.sets || []).length;
-      tags.forEach(tag => { counts[tag] = (counts[tag] || 0) + setCount; });
+      if (group) counts[group] = (counts[group] || 0) + setCount;
     });
   });
   return counts;
@@ -5159,7 +5159,7 @@ function renderMuscleChart() {
 
   const weekMonday = muscleSelectedWeek || getCurrentWeekMonday();
   const counts = getMuscleSetCounts(weekMonday);
-  const data   = MUSCLE_DEFAULT_TAGS.map(t => counts[t] || 0);
+  const data   = MUSCLE_DEFAULT_GROUPS.map(t => counts[t] || 0);
   const yMax   = Math.max(...data, 1) + 2;
 
   if (data.every(v => v === 0)) {
@@ -5176,7 +5176,7 @@ function renderMuscleChart() {
 
   muscleChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'bar',
-    data: { labels: MUSCLE_DEFAULT_TAGS, datasets: [{ data, backgroundColor: accentColor, borderColor: accentColor, borderWidth: 1, borderRadius: 3 }] },
+    data: { labels: MUSCLE_DEFAULT_GROUPS, datasets: [{ data, backgroundColor: accentColor, borderColor: accentColor, borderWidth: 1, borderRadius: 3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: {
