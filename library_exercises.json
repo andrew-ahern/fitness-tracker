@@ -2,7 +2,16 @@
   {
     "name": "Bench press",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["Dumbbell", "Barbell", "Smith machine"], "default": "Barbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "Dumbbell",
+          "Barbell",
+          "Smith machine"
+        ],
+        "default": "Dumbbell"
+      }
     ],
     "group": "Chest",
     "editableInApp": false
@@ -10,7 +19,15 @@
   {
     "name": "Chest press machine",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["Flat, selectorized", "Incline, plate-loaded"], "default": "Flat, selectorized"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "Flat, selectorized",
+          "Incline, plate-loaded"
+        ],
+        "default": "Flat, selectorized"
+      }
     ],
     "group": "Chest",
     "editableInApp": false
@@ -18,7 +35,16 @@
   {
     "name": "Chest fly",
     "params": [
-      {"name": "equipment", "type": "select", "options": ["Pec deck", "Dumbbell", "Cable"], "default": "Dumbbell"}
+      {
+        "name": "equipment",
+        "type": "select",
+        "options": [
+          "Pec deck",
+          "Dumbbell",
+          "Cable"
+        ],
+        "default": "Pec deck"
+      }
     ],
     "group": "Chest",
     "editableInApp": false
