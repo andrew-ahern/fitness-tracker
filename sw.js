@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitlog-v52';
+const CACHE_NAME = 'fitlog-v53';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -28,15 +28,16 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(
     caches.match(event.request).then(cached => {
-      // Return cached version immediately if available
       if (cached) return cached;
-      // Otherwise fetch from network and cache the response
       return fetch(event.request).then(response => {
         if (response && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
+      }).catch(() => {
+        // Offline and not in cache — return a minimal offline response
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
       });
     })
   );
