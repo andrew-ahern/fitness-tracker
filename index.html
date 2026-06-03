@@ -1377,7 +1377,7 @@ function addToLibrary(key, inputId, onUpdate) {
   const name = input.value.trim();
   if (!name) return;
   if (db[key].some(i => (typeof i === 'string' ? i : i.name) === name)) { showToast('Already in library'); return; }
-  db[key].push({ name, group: null, tags: [] });
+  db[key].push({ name, group: null });
   saveDB();
   onUpdate();
   input.value = '';
@@ -1512,8 +1512,7 @@ function addMealItem() {
     name,
     calories: num('new-meal-item-calories'),
     protein:  num('new-meal-item-protein'),
-    group: null,
-    tags: []
+    group: null
   });
   saveDB();
   renderMealItemLibrary();
@@ -5074,7 +5073,7 @@ function showTestScreen() {
 
 /* ════════════════════════════════════════════════════════════════════
    MUSCLE VOLUME CHART
-   Sets per default muscle tag for selected week
+   Sets per muscle group for selected week
    ════════════════════════════════════════════════════════════════════ */
 
 const MUSCLE_DEFAULT_GROUPS = ['chest', 'back', 'delts', 'triceps', 'biceps', 'legs', 'core'];
