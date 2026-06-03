@@ -2,230 +2,37 @@
   {
     "name": "Bench press",
     "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "dumbbell",
-          "smith machine"
-        ],
-        "default": "barbell"
-      },
-      {
-        "name": "incline",
-        "type": "number",
-        "unit": "deg",
-        "default": 0
-      }
+      {"name": "equipment", "type": "select", "options": ["Dumbbell", "Barbell", "Smith machine"], "default": "Barbell"}
     ],
-    "group": "Push",
+    "group": "Chest",
     "editableInApp": false
   },
   {
-    "name": "Overhead press",
+    "name": "Chest press machine",
     "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "dumbbell",
-          "smith machine"
-        ],
-        "default": "barbell"
-      }
+      {"name": "equipment", "type": "select", "options": ["Flat, selectorized", "Incline, plate-loaded"], "default": "Flat, selectorized"}
     ],
-    "group": "Delts",
+    "group": "Chest",
     "editableInApp": false
   },
   {
-    "name": "Row",
+    "name": "Chest fly",
     "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "dumbbell",
-          "cable",
-          "machine - chest supported",
-          "machine - seated"
-        ],
-        "default": "barbell"
-      }
+      {"name": "equipment", "type": "select", "options": ["Pec deck", "Dumbbell", "Cable"], "default": "Dumbbell"}
     ],
-    "group": "Pull",
+    "group": "Chest",
     "editableInApp": false
   },
   {
-    "name": "Pull-up",
-    "params": [
-      {
-        "name": "grip",
-        "type": "select",
-        "options": [
-          "overhand",
-          "underhand",
-          "neutral"
-        ],
-        "default": "overhand"
-      }
-    ],
-    "group": "Pull",
-    "editableInApp": false
-  },
-  {
-    "name": "Lat pulldown",
-    "params": [
-      {
-        "name": "grip",
-        "type": "select",
-        "options": [
-          "overhand",
-          "underhand",
-          "neutral"
-        ],
-        "default": "overhand"
-      }
-    ],
-    "group": "Pull",
-    "editableInApp": false
-  },
-  {
-    "name": "Bicep curl",
-    "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "dumbbell",
-          "cable",
-          "machine"
-        ],
-        "default": "dumbbell"
-      }
-    ],
-    "group": "Pull",
-    "editableInApp": false
-  },
-  {
-    "name": "Tricep pushdown",
-    "params": [
-      {
-        "name": "attachment",
-        "type": "select",
-        "options": [
-          "rope",
-          "bar",
-          "single handle"
-        ],
-        "default": "rope"
-      }
-    ],
-    "group": "Push",
-    "editableInApp": false
-  },
-  {
-    "name": "Squat",
-    "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "smith machine",
-          "hack squat"
-        ],
-        "default": "barbell"
-      }
-    ],
-    "group": "Legs",
-    "editableInApp": false
-  },
-  {
-    "name": "Deadlift",
-    "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "dumbbell",
-          "trap bar"
-        ],
-        "default": "barbell"
-      }
-    ],
-    "group": "Legs",
-    "editableInApp": false
-  },
-  {
-    "name": "Romanian deadlift",
-    "params": [
-      {
-        "name": "equipment",
-        "type": "select",
-        "options": [
-          "barbell",
-          "dumbbell",
-          "cable"
-        ],
-        "default": "barbell"
-      }
-    ],
-    "group": "Legs",
-    "editableInApp": false
-  },
-  {
-    "name": "Leg press",
+    "name": "Chest dip",
     "params": [],
-    "group": "Legs",
+    "group": "Chest",
     "editableInApp": false
   },
   {
-    "name": "Leg curl",
-    "params": [
-      {
-        "name": "type",
-        "type": "select",
-        "options": [
-          "lying",
-          "seated"
-        ],
-        "default": "lying"
-      }
-    ],
-    "group": "Legs",
-    "editableInApp": false
-  },
-  {
-    "name": "Calf raise",
-    "params": [
-      {
-        "name": "type",
-        "type": "select",
-        "options": [
-          "standing",
-          "seated"
-        ],
-        "default": "standing"
-      }
-    ],
-    "group": "Legs",
-    "editableInApp": false
-  },
-  {
-    "name": "Dip",
+    "name": "Push-up",
     "params": [],
-    "group": "Push",
-    "editableInApp": false
-  },
-  {
-    "name": "Plank",
-    "params": [],
-    "group": "Core",
+    "group": "Chest",
     "editableInApp": false
   }
 ]
