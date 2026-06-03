@@ -3,14 +3,18 @@
     "name": "Bench press",
     "params": [
       {
-        "name": "equipment",
+        "name": "variant",
         "type": "select",
         "options": [
           "Dumbbell",
           "Barbell",
           "Smith machine"
-        ],
-        "default": "Dumbbell"
+        ]
+      },
+      {
+        "name": "incline",
+        "type": "number",
+        "unit": "deg"
       }
     ],
     "group": "Chest",
@@ -20,13 +24,12 @@
     "name": "Chest press machine",
     "params": [
       {
-        "name": "equipment",
+        "name": "variant",
         "type": "select",
         "options": [
           "Flat, selectorized",
           "Incline, plate-loaded"
-        ],
-        "default": "Flat, selectorized"
+        ]
       }
     ],
     "group": "Chest",
@@ -36,14 +39,13 @@
     "name": "Chest fly",
     "params": [
       {
-        "name": "equipment",
+        "name": "variant",
         "type": "select",
         "options": [
           "Pec deck",
           "Dumbbell",
           "Cable"
-        ],
-        "default": "Pec deck"
+        ]
       }
     ],
     "group": "Chest",
@@ -59,6 +61,507 @@
     "name": "Push-up",
     "params": [],
     "group": "Chest",
+    "editableInApp": false
+  },
+  {
+    "name": "Skull crusher",
+    "params": [],
+    "group": "Triceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Pushdown",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Straight bar",
+          "V bar",
+          "EZ bar",
+          "Rope",
+          "Single-arm",
+          "Underhand"
+        ]
+      }
+    ],
+    "group": "Triceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Triceps dip",
+    "params": [],
+    "group": "Triceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Overhead triceps extension",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Straight bar",
+          "Rope"
+        ]
+      }
+    ],
+    "group": "Triceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Close-grip bench press",
+    "params": [],
+    "group": "Triceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Diamond push-up",
+    "params": [],
+    "group": "Triceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Pull-up",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Wide grip",
+          "Narrow grip"
+        ]
+      }
+    ],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Lat pull-down",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Wide grip",
+          "Narrow grip",
+          "V handle",
+          "Underhand grip",
+          "Diverging machine"
+        ]
+      }
+    ],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Chin-up",
+    "params": [],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Row",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          {
+            "value": "Barbell",
+            "subOptions": [
+              "Overhand",
+              "Underhand"
+            ]
+          },
+          {
+            "value": "Dumbbell, single-arm",
+            "subOptions": []
+          },
+          {
+            "value": "Cable",
+            "subOptions": [
+              "Straight bar, wide",
+              "Straight bar, narrow",
+              "Neutral, wide",
+              "Neutral, narrow",
+              "V handle"
+            ]
+          },
+          {
+            "value": "Chest-supported, selectorized",
+            "subOptions": [
+              "Neutral",
+              "Overhand"
+            ]
+          },
+          {
+            "value": "Chest-supported, plate-loaded",
+            "subOptions": [
+              "Neutral",
+              "Overhand"
+            ]
+          }
+        ]
+      }
+    ],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Shrug",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          {
+            "value": "Standard",
+            "subOptions": [
+              "Barbell",
+              "Dumbbell",
+              "Hex bar"
+            ]
+          },
+          {
+            "value": "Kelso",
+            "subOptions": [
+              "Barbell",
+              "Dumbbell"
+            ]
+          },
+          {
+            "value": "Power",
+            "subOptions": [
+              "Barbell",
+              "Dumbbell",
+              "Hex bar"
+            ]
+          }
+        ]
+      }
+    ],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Straight arm pushdown",
+    "params": [],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Landmine row",
+    "params": [],
+    "group": "Back",
+    "editableInApp": false
+  },
+  {
+    "name": "Curl",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          {
+            "value": "Dumbbell",
+            "subOptions": [
+              "Standing",
+              "Seated, incline"
+            ]
+          },
+          {
+            "value": "Barbell",
+            "subOptions": []
+          },
+          {
+            "value": "EZ bar",
+            "subOptions": []
+          },
+          {
+            "value": "Cable",
+            "subOptions": [
+              "Straight bar",
+              "EZ bar",
+              "V bar",
+              "Rope"
+            ]
+          }
+        ]
+      }
+    ],
+    "group": "Biceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Hammer curl",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Standing",
+          "Seated, incline"
+        ]
+      }
+    ],
+    "group": "Biceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Preacher curl",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Dumbbell, single-arm",
+          "Hammer, single-arm",
+          "EZ bar"
+        ]
+      }
+    ],
+    "group": "Biceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Preacher curl machine",
+    "params": [],
+    "group": "Biceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Concentration curl",
+    "params": [],
+    "group": "Biceps",
+    "editableInApp": false
+  },
+  {
+    "name": "Lateral raise",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Cable, single-arm",
+          "Dumbbell, single-arm",
+          "Dumbbell, bilateral"
+        ]
+      }
+    ],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Lateral raise machine",
+    "params": [],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Overhead press",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Dumbbell",
+          "Barbell"
+        ]
+      }
+    ],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Overhead press machine",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Selectorized",
+          "Plate-loaded"
+        ]
+      }
+    ],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Landmine press",
+    "params": [],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Upright row",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Dumbbell",
+          "Cable"
+        ]
+      }
+    ],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Rear delt fly",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Reverse pec deck",
+          "Dumbbell, bent-over"
+        ]
+      }
+    ],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Face pull",
+    "params": [],
+    "group": "Delts",
+    "editableInApp": false
+  },
+  {
+    "name": "Squat",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Hack squat machine",
+          "Goblet"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Bulgarian split squat",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Dumbbell"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Leg press",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Plate-loaded",
+          "Selectorized"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Leg extension",
+    "params": [],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Romanian deadlift",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Dumbbell"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Deadlift",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Hex bar"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Leg curl",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Lying",
+          "Seated"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Back extension",
+    "params": [],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Hip thrust",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Machine"
+        ]
+      }
+    ],
+    "group": "Legs",
+    "editableInApp": false
+  },
+  {
+    "name": "Calf raise machine",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Seated, selectorized",
+          "Standing, plate-loaded"
+        ]
+      }
+    ],
+    "group": "Legs",
     "editableInApp": false
   }
 ]
