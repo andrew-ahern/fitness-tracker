@@ -2659,7 +2659,8 @@ function saveWorkout() {
       const reps   = parseInt(row.querySelector('.s-reps').value);
       if (isNaN(weight) && isNaN(reps)) return; // skip entirely empty rows
       if (isNaN(weight) || isNaN(reps) || reps < 1 || !Number.isInteger(reps)) { hasIncomplete = true; return; }
-      sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps) });
+      const snote = (row.querySelector('.s-note')?.value || '').trim() || null;
+      sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps), ...(snote ? { note: snote } : {}) });
     });
 
     const pEls1 = block.querySelectorAll('.ex-param');
