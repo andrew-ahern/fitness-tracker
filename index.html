@@ -20,8 +20,8 @@
       --border:     #e2e0d8;
       --text:       #1a1917;
       --muted:      #7a7870;
-      --accent:     #1a73e8;        /* deep green — calm, health-oriented */
-      --accent-lt:  #d8ede3;
+      --accent:     #c0392b;        /* red — test */
+      --accent-lt:  #fde8e6;
       --danger:     #c0392b;
       --warn:       #e67e22;
       --radius:     10px;
@@ -35,8 +35,8 @@
         --border:    #2e2d29;
         --text:      #f0ede6;
         --muted:     #8a8880;
-        --accent:    #52b788;
-        --accent-lt: #1a3328;
+        --accent:    #e74c3c;
+        --accent-lt: #4a1010;
         --danger:    #e05c4b;
         --warn:      #f0932b;
     }
@@ -5429,13 +5429,14 @@ function renderMuscleChart() {
           const match = text.match(/const CACHE_NAME = '(.+?)'/);
           if (!match) return;
           const latest = match[1];
-          const stored = sessionStorage.getItem('sw_version');
+          const stored = localStorage.getItem('sw_version');
           if (stored && stored !== latest) {
-            // Version changed — clear caches and hard reload
+            // Version changed — clear caches, store new version, hard reload
+            localStorage.setItem('sw_version', latest);
             caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
               .then(() => window.location.reload(true));
           } else {
-            sessionStorage.setItem('sw_version', latest);
+            localStorage.setItem('sw_version', latest);
           }
         }).catch(() => {});
     }
