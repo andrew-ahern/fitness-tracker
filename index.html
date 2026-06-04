@@ -4614,7 +4614,8 @@ async function ghGet(path) {
   const cfg = getGithubConfig();
   if (!cfg) throw new Error('No GitHub config');
   const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + path, {
-    headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+    headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' },
+    cache: 'no-store'
   });
   if (res.status === 401) throw new Error('Invalid token — reload your config file');
   if (res.status === 403) throw new Error('Access denied — check your token has repo permissions');
