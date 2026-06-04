@@ -3,72 +3,84 @@
     "name": "Eggs (2)",
     "calories": 140,
     "protein": 12,
-    "group": "Protein"
+    "group": "Protein",
+    "active": true
   },
   {
     "name": "Oats (80g)",
     "calories": 310,
     "protein": 10,
-    "group": "Carbs"
+    "group": "Carbs",
+    "active": true
   },
   {
     "name": "Chicken breast (150g)",
     "calories": 247,
     "protein": 46,
-    "group": "Protein"
+    "group": "Protein",
+    "active": true
   },
   {
     "name": "Rice (200g cooked)",
     "calories": 260,
     "protein": 5,
-    "group": "Carbs"
+    "group": "Carbs",
+    "active": true
   },
   {
     "name": "Whey protein shake",
     "calories": 130,
     "protein": 25,
-    "group": "Protein"
+    "group": "Protein",
+    "active": true
   },
   {
     "name": "Greek yogurt (150g)",
     "calories": 130,
     "protein": 15,
-    "group": "Protein"
+    "group": "Protein",
+    "active": true
   },
   {
     "name": "Banana",
     "calories": 90,
     "protein": 1,
-    "group": "Fruit"
+    "group": "Fruit",
+    "active": true
   },
   {
     "name": "Apple",
     "calories": 80,
     "protein": 0,
-    "group": "Fruit"
+    "group": "Fruit",
+    "active": true
   },
   {
     "name": "Bread (2 slices)",
     "calories": 160,
     "protein": 6,
-    "group": "Carbs"
+    "group": "Carbs",
+    "active": true
   },
   {
     "name": "Peanut butter (2 tbsp)",
     "calories": 190,
     "protein": 8,
-    "group": "Fats"
+    "group": "Fats",
+    "active": true
   },
   {
     "name": "Salmon (150g)",
     "calories": 280,
     "protein": 40,
-    "group": "Protein"
+    "group": "Protein",
+    "active": true
   },
   {
     "name": "Almonds (30g)",
     "calories": 170,
     "protein": 6,
-    "group": "Snacks"
+    "group": "Snacks",
+    "active": true
   }
 ]

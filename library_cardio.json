@@ -1,8 +1,10 @@
 [
   {
-    "name": "Cycle"
+    "name": "Cycle",
+    "active": true
   },
   {
-    "name": "Run"
+    "name": "Run",
+    "active": true
   }
 ]

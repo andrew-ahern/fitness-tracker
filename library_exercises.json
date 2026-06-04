@@ -18,7 +18,7 @@
       }
     ],
     "group": "Chest",
-    "active": false
+    "active": true
   },
   {
     "name": "Chest press machine",
@@ -32,7 +32,8 @@
         ]
       }
     ],
-    "group": "Chest"
+    "group": "Chest",
+    "active": true
   },
   {
     "name": "Chest fly",
@@ -47,22 +48,26 @@
         ]
       }
     ],
-    "group": "Chest"
+    "group": "Chest",
+    "active": true
   },
   {
     "name": "Chest dip",
     "params": [],
-    "group": "Chest"
+    "group": "Chest",
+    "active": true
   },
   {
     "name": "Push-up",
     "params": [],
-    "group": "Chest"
+    "group": "Chest",
+    "active": true
   },
   {
     "name": "Skull crusher",
     "params": [],
-    "group": "Triceps"
+    "group": "Triceps",
+    "active": true
   },
   {
     "name": "Pushdown",
@@ -80,12 +85,14 @@
         ]
       }
     ],
-    "group": "Triceps"
+    "group": "Triceps",
+    "active": true
   },
   {
     "name": "Triceps dip",
     "params": [],
-    "group": "Triceps"
+    "group": "Triceps",
+    "active": true
   },
   {
     "name": "Overhead triceps extension",
@@ -99,17 +106,20 @@
         ]
       }
     ],
-    "group": "Triceps"
+    "group": "Triceps",
+    "active": true
   },
   {
     "name": "Close-grip bench press",
     "params": [],
-    "group": "Triceps"
+    "group": "Triceps",
+    "active": true
   },
   {
     "name": "Diamond push-up",
     "params": [],
-    "group": "Triceps"
+    "group": "Triceps",
+    "active": true
   },
   {
     "name": "Pull-up",
@@ -123,7 +133,8 @@
         ]
       }
     ],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Lat pull-down",
@@ -142,12 +153,14 @@
         ]
       }
     ],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Chin-up",
     "params": [],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Row",
@@ -196,7 +209,8 @@
         ]
       }
     ],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Shrug",
@@ -231,17 +245,20 @@
         ]
       }
     ],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Straight arm pushdown",
     "params": [],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Landmine row",
     "params": [],
-    "group": "Back"
+    "group": "Back",
+    "active": true
   },
   {
     "name": "Curl",
@@ -277,7 +294,8 @@
         ]
       }
     ],
-    "group": "Biceps"
+    "group": "Biceps",
+    "active": true
   },
   {
     "name": "Hammer curl",
@@ -291,7 +309,8 @@
         ]
       }
     ],
-    "group": "Biceps"
+    "group": "Biceps",
+    "active": true
   },
   {
     "name": "Preacher curl",
@@ -306,17 +325,20 @@
         ]
       }
     ],
-    "group": "Biceps"
+    "group": "Biceps",
+    "active": true
   },
   {
     "name": "Preacher curl machine",
     "params": [],
-    "group": "Biceps"
+    "group": "Biceps",
+    "active": true
   },
   {
     "name": "Concentration curl",
     "params": [],
-    "group": "Biceps"
+    "group": "Biceps",
+    "active": true
   },
   {
     "name": "Lateral raise",
@@ -331,12 +353,14 @@
         ]
       }
     ],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Lateral raise machine",
     "params": [],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Overhead press",
@@ -350,7 +374,8 @@
         ]
       }
     ],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Overhead press machine",
@@ -364,12 +389,14 @@
         ]
       }
     ],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Landmine press",
     "params": [],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Upright row",
@@ -384,7 +411,8 @@
         ]
       }
     ],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Rear delt fly",
@@ -398,12 +426,14 @@
         ]
       }
     ],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Face pull",
     "params": [],
-    "group": "Delts"
+    "group": "Delts",
+    "active": true
   },
   {
     "name": "Squat",
@@ -418,7 +448,8 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Bulgarian split squat",
@@ -432,7 +463,8 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Leg press",
@@ -446,12 +478,14 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Leg extension",
     "params": [],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Romanian deadlift",
@@ -465,7 +499,8 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Deadlift",
@@ -479,7 +514,8 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Leg curl",
@@ -493,12 +529,14 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Back extension",
     "params": [],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Hip thrust",
@@ -512,7 +550,8 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   },
   {
     "name": "Calf raise machine",
@@ -526,6 +565,7 @@
         ]
       }
     ],
-    "group": "Legs"
+    "group": "Legs",
+    "active": true
   }
 ]
