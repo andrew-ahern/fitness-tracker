@@ -2595,9 +2595,13 @@ function renderExerciseParams(block, exerciseName, existingParams) {
 
       // If selected option has subOptions, render a second dropdown
       const updateSubOptions = () => {
-        // Remove any existing sub-select
-        const existing = wrapper.querySelector('.ex-param-sub');
-        if (existing) existing.parentElement.remove();
+        // Remove any existing sub-select wrapper (sibling of wrapper)
+        let next = wrapper.nextElementSibling;
+        while (next && next.querySelector('.ex-param-sub')) {
+          const toRemove = next;
+          next = next.nextElementSibling;
+          toRemove.remove();
+        }
         const selectedOpt = param.options.find(o => (typeof o === 'object' ? o.value : o) === sel.value);
         const subOpts = (selectedOpt && typeof selectedOpt === 'object') ? selectedOpt.subOptions : [];
         if (subOpts && subOpts.length > 0) {
