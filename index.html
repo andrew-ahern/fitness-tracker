@@ -2093,7 +2093,12 @@ if (new URLSearchParams(window.location.search).get('test') === 'true') {
   loadDB();
   showTestScreen();
 } else {
-  console.log('Fitness Tracker — SW cache: fitlog-v70');
+  // Log current SW version dynamically from the active SW script URL
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      if (reg.active) console.log('Fitness Tracker —', reg.active.scriptURL.split('?')[0].split('/').pop());
+    });
+  }
   loadDB();
   rebuildCombinedLibraries(); // build combined arrays from whatever is in db
   renderAll();
