@@ -1396,7 +1396,7 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   let isFirstGroup = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
-      const heading = g || 'Misc';
+      const heading = g || 'Newly added';
       const mt = isFirstGroup ? '9px' : '25px';
       html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
       isFirstGroup = false;
@@ -1532,7 +1532,7 @@ function renderMealItemLibrary() {
   let isFirstGroupMeal = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
-      const heading = g || 'Misc';
+      const heading = g || 'Newly added';
       const mt = isFirstGroupMeal ? '9px' : '25px';
       html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
       isFirstGroupMeal = false;
@@ -1640,7 +1640,7 @@ function populateCardioActivityDropdown(selectedVal) {
     return ai - bi;
   }).forEach(g => {
     const items = cGrouped[g].map(({n,selected}) => `<option value="${n}" ${selected?'selected':''}>${n}</option>`).join('');
-    const cLabel = g || 'Misc';
+    const cLabel = g || 'Newly added';
     cOpts += `<optgroup label="${cLabel}">${items}</optgroup>`;
   });
   sel.innerHTML = cOpts;
@@ -1878,9 +1878,17 @@ function saveDraft(type) {
           reps:   row.querySelector('.s-reps').value
         });
       });
-      const pEls2 = block.querySelectorAll('.ex-param');
+      const pEls2 = block.querySelectorAll('.ex-param, .ex-param-sub');
       const params2 = {};
-      pEls2.forEach(el => { const v = el.value.trim(); params2[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v; });
+      pEls2.forEach(el => {
+        const v = el.value.trim();
+        if (el.classList.contains('ex-param-sub')) {
+          const parentKey = el.dataset.param.replace('_sub', '');
+          if (params2[parentKey] != null) params2[parentKey] = { value: params2[parentKey], subOption: v };
+        } else {
+          params2[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v;
+        }
+      });
       d.exercises.push({ name, ...(Object.keys(params2).length ? { params: params2 } : {}), sets });
     });
   } else if (type === 'cardio') {
@@ -2254,7 +2262,7 @@ function buildMealItemOptions(selectedName) {
     const items = grouped[g].map(i =>
       `<option value="${i.name}" ${i.name === selectedName ? 'selected' : ''}>${i.name}</option>`
     ).join('');
-    const label = g || 'Misc';
+    const label = g || 'Newly added';
     opts += `<optgroup label="${label}">${items}</optgroup>`;
   });
   opts += `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Other (enter manually)</option>`;
@@ -2529,7 +2537,7 @@ function buildExerciseOptions(selectedName) {
   });
   exGroupKeys.forEach(g => {
     const items = exGrouped[g].map(({name,selected}) => `<option value="${name}" ${selected?'selected':''}>${name}</option>`).join('');
-    const label = g || 'Misc';
+    const label = g || 'Newly added';
     opts += `<optgroup label="${label}">${items}</optgroup>`;
   });
   return `<option value="">— select exercise —</option>${opts}`;
@@ -2573,13 +2581,45 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       sel.className = 'ex-param';
       sel.dataset.param = param.name;
       sel.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;';
+
+      // Handle both flat strings and nested {value, subOptions} objects
       param.options.forEach(opt => {
+        const optVal = (typeof opt === 'object') ? opt.value : opt;
         const o = document.createElement('option');
-        o.value = opt; o.textContent = opt;
-        if (opt === val) o.selected = true;
+        o.value = optVal; o.textContent = optVal;
+        const savedVal = (typeof val === 'object') ? val.value : val;
+        if (optVal === savedVal) o.selected = true;
         sel.appendChild(o);
       });
       wrapper.appendChild(sel);
+
+      // If selected option has subOptions, render a second dropdown
+      const updateSubOptions = () => {
+        // Remove any existing sub-select
+        const existing = wrapper.querySelector('.ex-param-sub');
+        if (existing) existing.parentElement.remove();
+        const selectedOpt = param.options.find(o => (typeof o === 'object' ? o.value : o) === sel.value);
+        const subOpts = (selectedOpt && typeof selectedOpt === 'object') ? selectedOpt.subOptions : [];
+        if (subOpts && subOpts.length > 0) {
+          const subWrapper = document.createElement('div');
+          subWrapper.style.cssText = 'display:flex; align-items:center; gap:4px; font-size:13px;';
+          const subSel = document.createElement('select');
+          subSel.className = 'ex-param-sub';
+          subSel.dataset.param = param.name + '_sub';
+          subSel.style.cssText = sel.style.cssText;
+          subOpts.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s; o.textContent = s;
+            const savedSub = (typeof val === 'object') ? val.subOption : null;
+            if (s === savedSub) o.selected = true;
+            subSel.appendChild(o);
+          });
+          subWrapper.appendChild(subSel);
+          wrapper.after(subWrapper);
+        }
+      };
+      sel.addEventListener('change', updateSubOptions);
+      updateSubOptions();
     } else if (param.type === 'number') {
       const inp = document.createElement('input');
       inp.type = 'number'; inp.className = 'ex-param';
@@ -2732,9 +2772,20 @@ function saveWorkout() {
       sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps), ...(snote ? { note: snote } : {}) });
     });
 
-    const pEls1 = block.querySelectorAll('.ex-param');
+    const pEls1 = block.querySelectorAll('.ex-param, .ex-param-sub');
     const params1 = {};
-    pEls1.forEach(el => { const v = el.value.trim(); params1[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v; });
+    pEls1.forEach(el => {
+      const v = el.value.trim();
+      if (el.classList.contains('ex-param-sub')) {
+        // Store subOption nested in parent param
+        const parentKey = el.dataset.param.replace('_sub', '');
+        if (params1[parentKey] != null) {
+          params1[parentKey] = { value: params1[parentKey], subOption: v };
+        }
+      } else {
+        params1[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v;
+      }
+    });
     if (sets.length > 0) exercises.push({ name, ...(Object.keys(params1).length ? { params: params1 } : {}), sets });
   });
 
@@ -2908,7 +2959,11 @@ function buildViewBody(e) {
         ? '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">' +
           Object.entries(ex.params)
             .filter(([k,v]) => v != null && v !== '')
-            .map(([k,v]) => typeof v === 'number' ? v + '°' : v)
+            .map(([k,v]) => {
+              if (typeof v === 'number') return v + '°';
+              if (typeof v === 'object' && v.value) return v.subOption ? v.value + ', ' + v.subOption : v.value;
+              return v;
+            })
             .join(', ') + '</div>'
         : '';
       return `<div class="gym-exercise-view" style="margin-bottom:0.75rem;">
@@ -3221,9 +3276,17 @@ function saveEdit() {
         const snote2 = (row.querySelector('.s-note')?.value || '').trim() || null;
         sets.push({ weight: parseFloat(weight.toFixed(2)), reps: Math.round(reps), ...(snote2 ? { note: snote2 } : {}) });
       });
-      const pEls3 = block.querySelectorAll('.ex-param');
+      const pEls3 = block.querySelectorAll('.ex-param, .ex-param-sub');
       const params3 = {};
-      pEls3.forEach(el => { const v = el.value.trim(); params3[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v; });
+      pEls3.forEach(el => {
+        const v = el.value.trim();
+        if (el.classList.contains('ex-param-sub')) {
+          const parentKey = el.dataset.param.replace('_sub', '');
+          if (params3[parentKey] != null) params3[parentKey] = { value: params3[parentKey], subOption: v };
+        } else {
+          params3[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v;
+        }
+      });
       if (sets.length > 0) exercises.push({ name, ...(Object.keys(params3).length ? { params: params3 } : {}), sets });
     });
 
