@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ft-v74';
+const CACHE_NAME = 'ft-v76';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -45,4 +45,7 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data && event.data.type === 'GET_VERSION') {
+    event.ports[0].postMessage(CACHE_NAME);
+  }
 });

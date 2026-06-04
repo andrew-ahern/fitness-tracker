@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Fitness Tracker">
-  <title>✓✓✓ Fitness Tracker</title>
+  <title>Fitness Tracker</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -2093,10 +2093,14 @@ if (new URLSearchParams(window.location.search).get('test') === 'true') {
   loadDB();
   showTestScreen();
 } else {
-  // Log current SW version dynamically from the active SW script URL
+  // Log current SW version dynamically
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(reg => {
-      if (reg.active) console.log('Fitness Tracker —', reg.active.scriptURL.split('?')[0].split('/').pop());
+      if (reg.active) {
+        const chan = new MessageChannel();
+        chan.port1.onmessage = e => console.log('Fitness Tracker —', e.data);
+        reg.active.postMessage({ type: 'GET_VERSION' }, [chan.port2]);
+      }
     });
   }
   loadDB();
