@@ -5311,15 +5311,16 @@ function renderMuscleChart() {
     navigator.serviceWorker.register('./sw.js').then(reg => {
       // Check for updates every time the app is opened
       reg.update();
+      // Reload when the new SW takes control
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
       // When a new SW is waiting, reload to activate it
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // New version available — reload silently
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-              window.location.reload();
-            });
+          if (newWorker.state === 'installed') {
+            // New version available — skip waiting and reload
             newWorker.postMessage({ type: 'SKIP_WAITING' });
           }
         });

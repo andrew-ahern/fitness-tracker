@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitlog-v64';
+const CACHE_NAME = 'fitlog-v65';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -15,11 +15,13 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    Promise.all([
+      caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      ),
+      self.clients.claim()
+    ])
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
