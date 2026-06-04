@@ -920,9 +920,15 @@
        proteinTarget: null,    // daily protein target (g)
        darkMode: false       // explicit dark mode toggle
      },
-     exerciseLibrary: [       // user's list of known exercise names
-       "Pull-ups", "Bench press", ...
-     ],
+     libraryExercises: [],         // loaded from app repo JSON on every load
+     libraryCardioActivities: [],    // loaded from app repo JSON on every load
+     libraryMealItems: [],           // loaded from app repo JSON on every load
+     userAddedExercises: [],         // added by user via Settings
+     userAddedCardioActivities: [],  // added by user via Settings
+     userAddedMealItems: [],         // added by user via Settings
+     exercises: [],                  // combined: libraryExercises + userAddedExercises
+     cardioActivities: [],           // combined: libraryCardioActivities + userAddedCardioActivities
+     mealItems: [],                  // combined: libraryMealItems + userAddedMealItems
      logs: [                  // all log entries, any type, in creation order
        {
          id: 1734012345678,   // unique ID = timestamp of creation (ms)
@@ -1005,16 +1011,32 @@ let db = {
     weightTarget: null,
     riseTarget: null
   },
-  exerciseLibrary: [
-    'Pull-ups', 'Push-ups', 'Bench press', 'Squat', 'Deadlift', 'Overhead press'
-  ],
-  mealItemLibrary: [],
-  cardioLibrary: ['Cycle', 'Run'],
+  libraryExercises: [],
+  libraryCardioActivities: [],
+  libraryMealItems: [],
+  userAddedExercises: [],
+  userAddedCardioActivities: [],
+  userAddedMealItems: [],
+  exercises: [],
+  cardioActivities: [],
+  mealItems: [],
   logs: [],
   draft: null,
   drafts: {}
 };
 
+
+/* ── Combined library rebuild ──────────────────────────────────── */
+
+function rebuildCombinedLibraries() {
+  /* Rebuild the unified library arrays from library + user-added items.
+     Called after any library change (load, user add/delete).
+     db.exercises, db.cardioActivities, db.mealItems are the single
+     source of truth for all read operations (dropdowns, Settings, charts). */
+  db.exercises        = [...(db.libraryExercises        || []), ...(db.userAddedExercises        || [])];
+  db.cardioActivities = [...(db.libraryCardioActivities || []), ...(db.userAddedCardioActivities || [])];
+  db.mealItems        = [...(db.libraryMealItems        || []), ...(db.userAddedMealItems        || [])];
+}
 
 /* ── Storage: load & save ──────────────────────────────────────── */
 
@@ -1031,13 +1053,18 @@ function loadDB() {
         db = parsed;
         // Patch in any fields added in later versions that may be missing
         // from data saved before those fields existed
-        if (!db.cardioLibrary)          db.cardioLibrary = ['Cycle', 'Run'];
-
-
-        if (!db.drafts)                  db.drafts = {};
-        if (!db.settings.darkMode)      db.settings.darkMode = false;
-        if ('draft' in db)               delete db.draft;
-        if (!db.mealItemLibrary)         db.mealItemLibrary = [];
+        if (!db.userAddedCardioActivities) db.userAddedCardioActivities = [];
+        if (!db.userAddedExercises)        db.userAddedExercises = [];
+        if (!db.userAddedMealItems)        db.userAddedMealItems = [];
+        if (!db.libraryExercises)          db.libraryExercises = [];
+        if (!db.libraryCardioActivities)   db.libraryCardioActivities = [];
+        if (!db.libraryMealItems)          db.libraryMealItems = [];
+        if (!db.exercises)                 db.exercises = [];
+        if (!db.cardioActivities)          db.cardioActivities = [];
+        if (!db.mealItems)                 db.mealItems = [];
+        if (!db.drafts)                    db.drafts = {};
+        if (!db.settings.darkMode)         db.settings.darkMode = false;
+        if ('draft' in db)                 delete db.draft;
         // Migrate flat meal entries to multi-item format
         db.logs.forEach(e => {
           if (e.type === 'meal' && !e.items) {
@@ -1068,8 +1095,10 @@ function loadDB() {
 }
 
 async function loadDefaultLibraries() {
-  /* Fetch default libraries from the app repo on first install.
-     Only runs if localStorage was empty (fresh install or after clear). */
+  /* Fetch library JSON files from the app repo on every load.
+     These always reflect the app repo — they are not user data.
+     On success, rebuilds combined libraries and re-renders.
+     On failure (offline), uses SW-cached versions or leaves arrays empty. */
   const BASE = 'https://andrew-ahern.github.io/fitness-tracker/';
   try {
     const [exRes, cardRes, mealRes] = await Promise.all([
@@ -1077,14 +1106,16 @@ async function loadDefaultLibraries() {
       fetch(BASE + 'library_cardio.json'),
       fetch(BASE + 'library_meals.json'),
     ]);
-    if (exRes.ok)   db.exerciseLibrary  = await exRes.json();
-    if (cardRes.ok) db.cardioLibrary    = await cardRes.json();
-    if (mealRes.ok) db.mealItemLibrary  = await mealRes.json();
+    if (exRes.ok)   db.libraryExercises        = await exRes.json();
+    if (cardRes.ok) db.libraryCardioActivities = await cardRes.json();
+    if (mealRes.ok) db.libraryMealItems        = await mealRes.json();
+    rebuildCombinedLibraries();
     saveDB();
     renderAll();
   } catch(e) {
-    // Offline on first load — defaults stay as empty arrays, user can add later
-    console.warn('Could not fetch default libraries:', e.message);
+    // Could not fetch — use whatever is already in db.library* (SW cache or empty)
+    rebuildCombinedLibraries();
+    console.warn('Could not fetch libraries:', e.message);
   }
 }
 
@@ -1268,8 +1299,17 @@ function importData(event) {
         return;
       }
       db = imported;
+      // Ensure new keys exist (backward compat with old backups)
+      if (!db.userAddedExercises)        db.userAddedExercises = [];
+      if (!db.userAddedCardioActivities) db.userAddedCardioActivities = [];
+      if (!db.userAddedMealItems)        db.userAddedMealItems = [];
+      if (!db.libraryExercises)          db.libraryExercises = [];
+      if (!db.libraryCardioActivities)   db.libraryCardioActivities = [];
+      if (!db.libraryMealItems)          db.libraryMealItems = [];
+      rebuildCombinedLibraries();
       saveDB();
       loadDB();
+      rebuildCombinedLibraries();
       renderAll();
       showToast('Import successful ✓');
     } catch (err) {
@@ -1379,6 +1419,7 @@ function addToLibrary(key, inputId, onUpdate) {
   if (db[key].some(i => (typeof i === 'string' ? i : i.name) === name)) { showToast('Already in library'); return; }
   db[key].push({ name, group: null });
   saveDB();
+  rebuildCombinedLibraries();
   onUpdate();
   input.value = '';
   showToast('Added: ' + name);
@@ -1390,6 +1431,7 @@ function moveInLibrary(key, index, direction, onUpdate) {
   if (target < 0 || target >= arr.length) return;
   [arr[index], arr[target]] = [arr[target], arr[index]];
   saveDB();
+  rebuildCombinedLibraries();
   onUpdate();
 }
 
@@ -1400,6 +1442,7 @@ function deleteFromLibrary(key, index, inUseFn, onUpdate) {
   }
   db[key].splice(index, 1);
   saveDB();
+  rebuildCombinedLibraries();
   onUpdate();
 }
 
@@ -1410,26 +1453,26 @@ function deleteFromLibrary(key, index, inUseFn, onUpdate) {
 /* ── Exercise library ──────────────────────────────────────────── */
 
 function renderExerciseLibrary() {
-  renderLibrary('exerciseLibrary', 'exercise-library-list',
+  renderLibrary('userAddedExercises', 'exercise-library-list',
     'No exercises yet', 'moveExercise', 'deleteExercise');
 }
 
 function addExercise() {
-  addToLibrary('exerciseLibrary', 'new-exercise-name', () => {
+  addToLibrary('userAddedExercises', 'new-exercise-name', () => {
     renderExerciseLibrary();
     refreshExerciseDropdowns();
   });
 }
 
 function moveExercise(index, direction) {
-  moveInLibrary('exerciseLibrary', index, direction, () => {
+  moveInLibrary('userAddedExercises', index, direction, () => {
     renderExerciseLibrary();
     refreshExerciseDropdowns();
   });
 }
 
 function deleteExercise(index) {
-  deleteFromLibrary('exerciseLibrary', index,
+  deleteFromLibrary('userAddedExercises', index,
     name => db.logs.some(e =>
       e.type === 'gym' && e.exercises && e.exercises.some(ex => ex.name === name)
     ),
@@ -1448,7 +1491,7 @@ function refreshExerciseDropdowns() {
 function renderMealItemLibrary() {
   const list = document.getElementById('meal-item-library-list');
   if (!list) return;
-  const arr = db.mealItemLibrary || [];
+  const arr = db.userAddedMealItems || []; // Settings shows user-added only
   const n = arr.length;
   if (n === 0) {
     list.innerHTML = '<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">No items yet</div>';
@@ -1506,18 +1549,19 @@ function addMealItem() {
   const name = document.getElementById('new-meal-item-name').value.trim();
   if (!name) { showToast('Please enter a name'); return; }
   const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
-  if ((db.mealItemLibrary || []).some(i => i.name === name)) { showToast('Already in library'); return; }
-  if (!db.mealItemLibrary) db.mealItemLibrary = [];
-  db.mealItemLibrary.push({
+  if ((db.mealItems || []).some(i => i.name === name)) { showToast('Already in library'); return; }
+  if (!db.userAddedMealItems) db.userAddedMealItems = [];
+  db.userAddedMealItems.push({
     name,
     calories: num('new-meal-item-calories'),
     protein:  num('new-meal-item-protein'),
     group: null
   });
   saveDB();
+  rebuildCombinedLibraries();
   renderMealItemLibrary();
   // Refresh all existing meal item datalists in the log form
-  const opts = (db.mealItemLibrary || []).map(i => '<option value="' + i.name + '">').join('');
+  const opts = (db.mealItems || []).map(i => '<option value="' + i.name + '">').join('');
   document.querySelectorAll('[id^="mi-list-"]').forEach(dl => { dl.innerHTML = opts; });
   ['new-meal-item-name','new-meal-item-calories','new-meal-item-protein']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -1525,35 +1569,35 @@ function addMealItem() {
 }
 
 function moveMealItem(index, direction) {
-  moveInLibrary('mealItemLibrary', index, direction, () => renderMealItemLibrary());
+  moveInLibrary('userAddedMealItems', index, direction, () => renderMealItemLibrary());
 }
 
 function deleteMealItem(index) {
-  deleteFromLibrary('mealItemLibrary', index, null, () => renderMealItemLibrary());
+  deleteFromLibrary('userAddedMealItems', index, null, () => renderMealItemLibrary());
 }
 
 /* ── Cardio library ────────────────────────────────────────────── */
 function renderCardioLibrary() {
-  renderLibrary('cardioLibrary', 'cardio-library-list',
+  renderLibrary('userAddedCardioActivities', 'cardio-library-list',
     'No activities yet', 'moveCardioActivity', 'deleteCardioActivity');
 }
 
 function addCardioActivity() {
-  addToLibrary('cardioLibrary', 'new-cardio-name', () => {
+  addToLibrary('userAddedCardioActivities', 'new-cardio-name', () => {
     renderCardioLibrary();
     populateCardioActivityDropdown();
   });
 }
 
 function moveCardioActivity(index, direction) {
-  moveInLibrary('cardioLibrary', index, direction, () => {
+  moveInLibrary('userAddedCardioActivities', index, direction, () => {
     renderCardioLibrary();
     populateCardioActivityDropdown();
   });
 }
 
 function deleteCardioActivity(index) {
-  deleteFromLibrary('cardioLibrary', index,
+  deleteFromLibrary('userAddedCardioActivities', index,
     name => db.logs.some(e => e.type === 'cardio' && e.activityType === name),
     () => {
       renderCardioLibrary();
@@ -1566,7 +1610,7 @@ function populateCardioActivityDropdown(selectedVal) {
   const sel = document.getElementById('c-type');
   if (!sel) return;
   const cGrouped = {};
-  db.cardioLibrary.forEach(i => {
+  db.cardioActivities.forEach(i => {
     const n = typeof i === 'string' ? i : i.name;
     const g = (i && i.group) ? i.group : '';
     if (!cGrouped[g]) cGrouped[g] = [];
@@ -2048,10 +2092,10 @@ if (new URLSearchParams(window.location.search).get('test') === 'true') {
   loadDB();
   showTestScreen();
 } else {
-  const isFirstLoad = !localStorage.getItem(STORAGE_KEY);
   loadDB();
+  rebuildCombinedLibraries(); // build combined arrays from whatever is in db
   renderAll();
-  if (isFirstLoad) loadDefaultLibraries();
+  loadDefaultLibraries(); // fetch fresh libraries from app repo on every load
 }
 
 
@@ -2167,7 +2211,7 @@ function saveWeight() {
 
 function buildMealItemOptions(selectedName) {
   const grouped = {};
-  (db.mealItemLibrary || []).forEach(i => {
+  (db.mealItems || []).forEach(i => {
     const g = (i && i.group) ? i.group : '';
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push(i);
@@ -2201,7 +2245,7 @@ function addMealItemBlock(itemData, interactive) {
   block.id = blockId;
 
   const listId = 'mi-list-' + mealItemCount;
-  const libraryOptions = (db.mealItemLibrary || []).map(i => `<option value="${i.name}">`).join('');
+  const libraryOptions = (db.mealItems || []).map(i => `<option value="${i.name}">`).join('');
 
   const inputStyle = 'width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;';
   const selStyle   = 'flex:1;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
@@ -2254,7 +2298,7 @@ function addMealItemBlock(itemData, interactive) {
       block._unitMacros = null;
     } else if (val) {
       nameRow.style.display = 'none';
-      const match = (db.mealItemLibrary || []).find(i => i.name === val);
+      const match = (db.mealItems || []).find(i => i.name === val);
       if (match) {
         const qty = parseFloat(qtyInput.value) || 1;
         block.querySelector('.mi-cal').value = match.calories != null ? parseFloat((match.calories * qty).toFixed(2)) : '';
@@ -2281,7 +2325,7 @@ function addMealItemBlock(itemData, interactive) {
   // Populate from existing data if provided (macros are already effective values)
   if (itemData) {
     // Try to find item in library by name
-    const libMatch = (db.mealItemLibrary || []).find(i => i.name === itemData.name);
+    const libMatch = (db.mealItems || []).find(i => i.name === itemData.name);
     if (libMatch) {
       selInput.value = itemData.name;
       nameRow.style.display = 'none';
@@ -2439,11 +2483,11 @@ function saveWake() {
 function buildExerciseOptions(selectedName) {
   /* Build the <option> list fresh from the current library each time,
      so exercises added in Settings are immediately available here. */
-  if (db.exerciseLibrary.length === 0) {
+  if (db.exercises.length === 0) {
     return '<option value="">— add exercises in Settings first —</option>';
   }
   const exGrouped = {};
-  db.exerciseLibrary.forEach(i => {
+  db.exercises.forEach(i => {
     const name = typeof i === 'string' ? i : i.name;
     const g = (i && i.group) ? i.group : '';
     if (!exGrouped[g]) exGrouped[g] = [];
@@ -2467,7 +2511,7 @@ function buildExerciseOptions(selectedName) {
 }
 
 function getExerciseLibItem(name) {
-  return db.exerciseLibrary.find(i => (typeof i === 'string' ? i : i.name) === name) || null;
+  return db.exercises.find(i => (typeof i === 'string' ? i : i.name) === name) || null;
 }
 
 function renderExerciseParams(block, exerciseName, existingParams) {
@@ -2903,7 +2947,7 @@ function buildEditForm(e) {
   }
 
   if (e.type === 'cardio') {
-    const actOpts = (db.cardioLibrary || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
+    const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
     return `<div class="field"><label>Activity</label><select id="e-acttype">${actOpts}</select></div>` +
       row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
       row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
@@ -3000,7 +3044,7 @@ function addSheetMealItemBlock(itemData, interactive) {
       block._unitMacros = null;
     } else if (val) {
       nameRow.style.display = 'none';
-      const match = (db.mealItemLibrary || []).find(i => i.name === val);
+      const match = (db.mealItems || []).find(i => i.name === val);
       if (match) {
         const qty = parseFloat(qtyInput.value) || 1;
         block.querySelector('.mi-cal').value = match.calories != null ? parseFloat((match.calories * qty).toFixed(2)) : '';
@@ -3024,7 +3068,7 @@ function addSheetMealItemBlock(itemData, interactive) {
   });
 
   if (itemData) {
-    const libMatch = (db.mealItemLibrary || []).find(i => i.name === itemData.name);
+    const libMatch = (db.mealItems || []).find(i => i.name === itemData.name);
     if (libMatch) {
       selInput.value = itemData.name;
       nameRow.style.display = 'none';
@@ -4632,37 +4676,48 @@ async function githubExport() {
     const newLogs = db.logs.filter(e => !existingIds.has(e.id));
     const mergedLogs = [...(ghLogs || []), ...newLogs].sort((a, b) => a.id - b.id);
 
-    // Fetch current GitHub state to detect changes
-    const { content: ghEx,   sha: exSha   } = await ghGetJSON('library_exercises.json');
-    const { content: ghCard, sha: cardSha  } = await ghGetJSON('library_cardio.json');
-    const { content: ghMeal, sha: mealSha  } = await ghGetJSON('library_meals.json');
+    // Fetch current GitHub state
+    const { content: ghUserLibs, sha: userLibsSha } = await ghGetJSON('user-libraries.json');
     const { content: ghSettings, sha: settingsSha } = await ghGetJSON('settings.json');
 
-    // Merge libraries by name (append-only both directions)
-    function mergeLibraryByName(ghLib, localLib) {
+    // Merge user-added libraries (append-only both directions)
+    function mergeByName(ghLib, localLib) {
       const ghNames    = new Set((ghLib    || []).map(i => typeof i === 'string' ? i : i.name));
       const localNames = new Set((localLib || []).map(i => typeof i === 'string' ? i : i.name));
       const newFromLocal = (localLib || []).filter(i => !ghNames.has(typeof i === 'string' ? i : i.name));
       const newFromGh    = (ghLib    || []).filter(i => !localNames.has(typeof i === 'string' ? i : i.name));
       return { merged: [...(ghLib || []), ...newFromLocal], newFromLocal, newFromGh };
     }
-    const exMerge   = mergeLibraryByName(ghEx,   db.exerciseLibrary);
-    const cardMerge = mergeLibraryByName(ghCard, db.cardioLibrary);
-    const mealMerge = mergeLibraryByName(ghMeal, db.mealItemLibrary);
+    const ghEx   = ghUserLibs ? ghUserLibs.exercises        || [] : [];
+    const ghCard = ghUserLibs ? ghUserLibs.cardioActivities  || [] : [];
+    const ghMeal = ghUserLibs ? ghUserLibs.mealItems         || [] : [];
+    const exMerge   = mergeByName(ghEx,   db.userAddedExercises);
+    const cardMerge = mergeByName(ghCard, db.userAddedCardioActivities);
+    const mealMerge = mergeByName(ghMeal, db.userAddedMealItems);
     const settingsChanged = JSON.stringify(ghSettings) !== JSON.stringify(db.settings);
-    const anyChange = newLogs.length > 0 || exMerge.newFromLocal.length > 0 ||
-      cardMerge.newFromLocal.length > 0 || mealMerge.newFromLocal.length > 0 || settingsChanged;
+
+    // Build merged user-libraries object
+    const mergedUserLibs = {
+      exercises:        exMerge.merged,
+      cardioActivities: cardMerge.merged,
+      mealItems:        mealMerge.merged
+    };
+    const userLibsChanged = exMerge.newFromLocal.length > 0 ||
+      cardMerge.newFromLocal.length > 0 || mealMerge.newFromLocal.length > 0;
+    const anyChange = newLogs.length > 0 || userLibsChanged || settingsChanged;
 
     if (anyChange) {
       await ghPutJSON('fitness-tracker-backup.json', mergedLogs, logsSha);
-      if (exMerge.newFromLocal.length)   await ghPutJSON('library_exercises.json', exMerge.merged,   exSha);
-      if (cardMerge.newFromLocal.length) await ghPutJSON('library_cardio.json',    cardMerge.merged,  cardSha);
-      if (mealMerge.newFromLocal.length) await ghPutJSON('library_meals.json',     mealMerge.merged,  mealSha);
-      if (settingsChanged)               await ghPutJSON('settings.json',           db.settings,       settingsSha);
-      if (exMerge.newFromGh.length)   { db.exerciseLibrary  = [...db.exerciseLibrary,  ...exMerge.newFromGh]; }
-      if (cardMerge.newFromGh.length) { db.cardioLibrary    = [...db.cardioLibrary,    ...cardMerge.newFromGh]; }
-      if (mealMerge.newFromGh.length) { db.mealItemLibrary  = [...db.mealItemLibrary,  ...mealMerge.newFromGh]; }
-      if (exMerge.newFromGh.length || cardMerge.newFromGh.length || mealMerge.newFromGh.length) saveDB();
+      if (userLibsChanged) await ghPutJSON('user-libraries.json', mergedUserLibs, userLibsSha);
+      if (settingsChanged) await ghPutJSON('settings.json', db.settings, settingsSha);
+      // Merge new items from GitHub into local user-added arrays
+      if (exMerge.newFromGh.length)   { db.userAddedExercises        = [...db.userAddedExercises,        ...exMerge.newFromGh]; }
+      if (cardMerge.newFromGh.length) { db.userAddedCardioActivities = [...db.userAddedCardioActivities, ...cardMerge.newFromGh]; }
+      if (mealMerge.newFromGh.length) { db.userAddedMealItems        = [...db.userAddedMealItems,        ...mealMerge.newFromGh]; }
+      if (exMerge.newFromGh.length || cardMerge.newFromGh.length || mealMerge.newFromGh.length) {
+        rebuildCombinedLibraries();
+        saveDB();
+      }
     }
 
     const now = new Date().toISOString();
@@ -4705,17 +4760,22 @@ async function githubImport() {
       importedCount = newLogs.length;
     }
 
-    const { content: ghEx }   = await ghGetJSON('library_exercises.json');
-    const { content: ghCard } = await ghGetJSON('library_cardio.json');
-    const { content: ghMeal } = await ghGetJSON('library_meals.json');
-    // Merge libraries by name (append-only)
-    if (ghEx)   { const localNames = new Set(db.exerciseLibrary.map(i => typeof i === 'string' ? i : i.name));  db.exerciseLibrary  = [...db.exerciseLibrary,  ...(ghEx  ||[]).filter(i=>!localNames.has(typeof i === 'string' ? i : i.name))]; }
-    if (ghCard) { const localNames = new Set(db.cardioLibrary.map(i => typeof i === 'string' ? i : i.name));    db.cardioLibrary    = [...db.cardioLibrary,    ...(ghCard||[]).filter(i=>!localNames.has(typeof i === 'string' ? i : i.name))]; }
-    if (ghMeal) { const localNames = new Set(db.mealItemLibrary.map(i => typeof i === 'string' ? i : i.name)); db.mealItemLibrary = [...db.mealItemLibrary, ...(ghMeal||[]).filter(i=>!localNames.has(typeof i === 'string' ? i : i.name))]; }
+    // Import user-added libraries (append-only by name)
+    const { content: ghUserLibs } = await ghGetJSON('user-libraries.json');
+    if (ghUserLibs) {
+      const mergeByName = (ghLib, localLib) => {
+        const localNames = new Set((localLib || []).map(i => typeof i === 'string' ? i : i.name));
+        return [...(localLib || []), ...(ghLib || []).filter(i => !localNames.has(typeof i === 'string' ? i : i.name))];
+      };
+      db.userAddedExercises        = mergeByName(ghUserLibs.exercises,        db.userAddedExercises);
+      db.userAddedCardioActivities = mergeByName(ghUserLibs.cardioActivities, db.userAddedCardioActivities);
+      db.userAddedMealItems        = mergeByName(ghUserLibs.mealItems,        db.userAddedMealItems);
+    }
 
     const { content: ghSettings } = await ghGetJSON('settings.json');
     if (ghSettings) db.settings = { ...db.settings, ...ghSettings };
 
+    rebuildCombinedLibraries();
     saveDB();
     renderAll();
 
@@ -4796,9 +4856,9 @@ function runTests() {
   test('db object has required keys', () => {
     assert('logs'           in db, 'missing logs');
     assert('settings'       in db, 'missing settings');
-    assert('exerciseLibrary' in db, 'missing exerciseLibrary');
-    assert('cardioLibrary'  in db, 'missing cardioLibrary');
-    assert('mealItemLibrary' in db, 'missing mealItemLibrary');
+    assert('userAddedExercises' in db, 'missing exerciseLibrary');
+    assert('userAddedCardioActivities'  in db, 'missing cardioLibrary');
+    assert('userAddedMealItems' in db, 'missing mealItemLibrary');
     assert('meta'           in db, 'missing meta');
   });
 
@@ -4937,17 +4997,63 @@ function runTests() {
     assertEqual(result.length, input.length);
   });
 
+  // ── Combined library rebuild ─────────────────────────────────────
+  test('rebuildCombinedLibraries builds correct union for exercises', () => {
+    const origLib     = db.libraryExercises;
+    const origUser    = db.userAddedExercises;
+    const origCombined = db.exercises;
+    // Set test values
+    db.libraryExercises     = [{ name: 'Bench press', params: [], group: 'Chest', editableInApp: false }];
+    db.userAddedExercises   = [{ name: 'My exercise', group: null }];
+    rebuildCombinedLibraries();
+    assertEqual(db.exercises.length, 2, 'exercises should have 2 items');
+    assert(db.exercises.some(i => i.name === 'Bench press'), 'library item missing');
+    assert(db.exercises.some(i => i.name === 'My exercise'), 'user-added item missing');
+    // Restore
+    db.libraryExercises   = origLib;
+    db.userAddedExercises = origUser;
+    db.exercises          = origCombined;
+  });
+
+  test('rebuildCombinedLibraries builds correct union for meal items', () => {
+    const origLib  = db.libraryMealItems;
+    const origUser = db.userAddedMealItems;
+    const origCombined = db.mealItems;
+    db.libraryMealItems   = [{ name: 'Eggs', calories: 140, protein: 12, group: 'Protein', editableInApp: false }];
+    db.userAddedMealItems = [{ name: 'Custom food', calories: 100, protein: 5, group: null }];
+    rebuildCombinedLibraries();
+    assertEqual(db.mealItems.length, 2, 'mealItems should have 2 items');
+    assert(db.mealItems.some(i => i.name === 'Eggs'), 'library meal item missing');
+    assert(db.mealItems.some(i => i.name === 'Custom food'), 'user-added meal item missing');
+    // Restore
+    db.libraryMealItems   = origLib;
+    db.userAddedMealItems = origUser;
+    db.mealItems          = origCombined;
+  });
+
+  test('rebuildCombinedLibraries: combined length equals sum of parts', () => {
+    const origEx   = db.libraryExercises;
+    const origUser = db.userAddedExercises;
+    db.libraryExercises   = [{ name: 'A' }, { name: 'B' }];
+    db.userAddedExercises = [{ name: 'C' }];
+    rebuildCombinedLibraries();
+    assertEqual(db.exercises.length, db.libraryExercises.length + db.userAddedExercises.length, 'combined length mismatch');
+    db.libraryExercises   = origEx;
+    db.userAddedExercises = origUser;
+    rebuildCombinedLibraries();
+  });
+
   // ── Exercise params ──────────────────────────────────────────────
   test('exercise library items are objects with name field', () => {
-    db.exerciseLibrary.forEach(i => {
+    db.exercises.forEach(i => {
       assert(typeof i === 'object' && i !== null, 'item is not an object');
       assert('name' in i, 'missing name field');
     });
   });
 
   test('getExerciseLibItem() returns correct item', () => {
-    if (db.exerciseLibrary.length === 0) return; // skip if empty
-    const first = db.exerciseLibrary[0];
+    if (db.userAddedExercises.length === 0) return; // skip if empty
+    const first = db.userAddedExercises[0];
     const found = getExerciseLibItem(first.name);
     assert(found !== null, 'item not found');
     assertEqual(found.name, first.name, 'wrong item returned');
@@ -5022,6 +5128,7 @@ function showTestScreen() {
   const groups = [
     { heading: 'Utilities',           tests: ['today() returns YYYY-MM-DD format', 'today() returns current local date', 'Monday calculation: Wed → Mon', 'Monday calculation: Sun → Mon'] },
     { heading: 'DB schema',           tests: ['db object has required keys', 'db.settings has required keys', 'db.logs is an array'] },
+    { heading: 'Combined library rebuild', tests: ['rebuildCombinedLibraries builds correct union for exercises', 'rebuildCombinedLibraries builds correct union for meal items', 'rebuildCombinedLibraries: combined length equals sum of parts'] },
     { heading: 'Exercise params',       tests: ['exercise library items are objects with name field', 'getExerciseLibItem() returns correct item', 'gym exercise params object is stored correctly'] },
     { heading: 'Entry creation',      tests: ['weight entry has required fields', 'rise entry has required fields', 'meal entry has required fields', 'gym entry has required fields', 'cardio entry has required fields'] },
     { heading: 'ID uniqueness',       tests: ['log entry IDs are unique'] },
@@ -5123,7 +5230,7 @@ function getMuscleSetCounts(weekMonday) {
     const entryTime = new Date(ey, emo-1, ed, h, m);
     if (entryTime < weekStart || entryTime >= weekEnd) return;
     e.exercises.forEach(ex => {
-      const lib = db.exerciseLibrary.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
+      const lib = db.userAddedExercises.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
       const group = (lib && lib.group) ? lib.group.toLowerCase().trim() : null;
       const setCount = (ex.sets || []).length;
       if (group) counts[group] = (counts[group] || 0) + setCount;
