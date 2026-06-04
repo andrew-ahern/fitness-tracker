@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ft-v98';
+const CACHE_NAME = 'ft-v96';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -10,7 +10,6 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       // Fetch all app shell files fresh from network, bypassing any HTTP cache
@@ -19,7 +18,7 @@ self.addEventListener('install', event => {
           fetch(url, { cache: 'no-store' }).then(res => cache.put(url, res))
         )
       );
-    })
+    }).then(() => self.skipWaiting()) // skip waiting only after cache is populated
   );
 });
 
