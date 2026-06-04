@@ -4781,7 +4781,6 @@ async function githubImport() {
 
     rebuildCombinedLibraries();
     saveDB();
-    console.log('After import saveDB — userAddedExercises:', db.userAddedExercises.length, 'exercises:', db.exercises.length);
     renderAll();
 
     const now = new Date().toISOString();
