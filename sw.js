@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fitlog-v67';
+const CACHE_NAME = 'fitlog-v68';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
