@@ -18,7 +18,7 @@
       }
     ],
     "group": "Chest",
-    "active": false
+    "active": true
   },
   {
     "name": "Chest press machine",
@@ -160,7 +160,7 @@
     "name": "Chin-up",
     "params": [],
     "group": "Back",
-    "active": false
+    "active": true
   },
   {
     "name": "Row",
