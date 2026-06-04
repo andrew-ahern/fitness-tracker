@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ft-v97';
+const CACHE_NAME = 'ft-v84';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -36,6 +36,8 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  // If request has cache: no-store, bypass SW cache and go to network
+  if (event.request.cache === 'no-store') return;
 
   event.respondWith(
     caches.match(event.request).then(cached => {
