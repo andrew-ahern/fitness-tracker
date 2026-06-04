@@ -1627,7 +1627,8 @@ function populateCardioActivityDropdown(selectedVal) {
     return ai - bi;
   }).forEach(g => {
     const items = cGrouped[g].map(({n,selected}) => `<option value="${n}" ${selected?'selected':''}>${n}</option>`).join('');
-    cOpts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
+    const cLabel = g || 'Misc';
+    cOpts += `<optgroup label="${cLabel}">${items}</optgroup>`;
   });
   sel.innerHTML = cOpts;
 }
@@ -2505,7 +2506,8 @@ function buildExerciseOptions(selectedName) {
   });
   exGroupKeys.forEach(g => {
     const items = exGrouped[g].map(({name,selected}) => `<option value="${name}" ${selected?'selected':''}>${name}</option>`).join('');
-    opts += g ? `<optgroup label="${g}">${items}</optgroup>` : items;
+    const label = g || 'Misc';
+    opts += `<optgroup label="${label}">${items}</optgroup>`;
   });
   return `<option value="">— select exercise —</option>${opts}`;
 }
