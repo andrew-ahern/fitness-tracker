@@ -5309,8 +5309,8 @@ function renderMuscleChart() {
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then(reg => {
-      // Check for updates every time the app is opened
-      reg.update();
+      // Check for updates only when online
+      if (navigator.onLine) reg.update().catch(() => {});
       // Reload when the new SW takes control
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
