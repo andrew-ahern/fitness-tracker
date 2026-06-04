@@ -147,7 +147,9 @@
           "Narrow grip",
           "V handle",
           "Underhand grip",
-          "Diverging machine"
+          "Diverging machine",
+          "MAG, wide",
+          "MAG, narrow"
         ]
       }
     ],
@@ -185,7 +187,9 @@
               "Straight bar, narrow",
               "Neutral, wide",
               "Neutral, narrow",
-              "V handle"
+              "V handle",
+              "MAG, wide",
+              "MAG, narrow"
             ]
           },
           {
