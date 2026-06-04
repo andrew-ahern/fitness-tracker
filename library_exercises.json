@@ -17,8 +17,7 @@
         "unit": "deg"
       }
     ],
-    "group": "Chest",
-    "editableInApp": false
+    "group": "Chest"
   },
   {
     "name": "Chest press machine",
@@ -32,8 +31,7 @@
         ]
       }
     ],
-    "group": "Chest",
-    "editableInApp": false
+    "group": "Chest"
   },
   {
     "name": "Chest fly",
@@ -48,26 +46,22 @@
         ]
       }
     ],
-    "group": "Chest",
-    "editableInApp": false
+    "group": "Chest"
   },
   {
     "name": "Chest dip",
     "params": [],
-    "group": "Chest",
-    "editableInApp": false
+    "group": "Chest"
   },
   {
     "name": "Push-up",
     "params": [],
-    "group": "Chest",
-    "editableInApp": false
+    "group": "Chest"
   },
   {
     "name": "Skull crusher",
     "params": [],
-    "group": "Triceps",
-    "editableInApp": false
+    "group": "Triceps"
   },
   {
     "name": "Pushdown",
@@ -85,14 +79,12 @@
         ]
       }
     ],
-    "group": "Triceps",
-    "editableInApp": false
+    "group": "Triceps"
   },
   {
     "name": "Triceps dip",
     "params": [],
-    "group": "Triceps",
-    "editableInApp": false
+    "group": "Triceps"
   },
   {
     "name": "Overhead triceps extension",
@@ -106,20 +98,17 @@
         ]
       }
     ],
-    "group": "Triceps",
-    "editableInApp": false
+    "group": "Triceps"
   },
   {
     "name": "Close-grip bench press",
     "params": [],
-    "group": "Triceps",
-    "editableInApp": false
+    "group": "Triceps"
   },
   {
     "name": "Diamond push-up",
     "params": [],
-    "group": "Triceps",
-    "editableInApp": false
+    "group": "Triceps"
   },
   {
     "name": "Pull-up",
@@ -133,8 +122,7 @@
         ]
       }
     ],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Lat pull-down",
@@ -153,14 +141,12 @@
         ]
       }
     ],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Chin-up",
     "params": [],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Row",
@@ -209,8 +195,7 @@
         ]
       }
     ],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Shrug",
@@ -245,20 +230,17 @@
         ]
       }
     ],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Straight arm pushdown",
     "params": [],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Landmine row",
     "params": [],
-    "group": "Back",
-    "editableInApp": false
+    "group": "Back"
   },
   {
     "name": "Curl",
@@ -294,8 +276,7 @@
         ]
       }
     ],
-    "group": "Biceps",
-    "editableInApp": false
+    "group": "Biceps"
   },
   {
     "name": "Hammer curl",
@@ -309,8 +290,7 @@
         ]
       }
     ],
-    "group": "Biceps",
-    "editableInApp": false
+    "group": "Biceps"
   },
   {
     "name": "Preacher curl",
@@ -325,20 +305,17 @@
         ]
       }
     ],
-    "group": "Biceps",
-    "editableInApp": false
+    "group": "Biceps"
   },
   {
     "name": "Preacher curl machine",
     "params": [],
-    "group": "Biceps",
-    "editableInApp": false
+    "group": "Biceps"
   },
   {
     "name": "Concentration curl",
     "params": [],
-    "group": "Biceps",
-    "editableInApp": false
+    "group": "Biceps"
   },
   {
     "name": "Lateral raise",
@@ -353,14 +330,12 @@
         ]
       }
     ],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Lateral raise machine",
     "params": [],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Overhead press",
@@ -374,8 +349,7 @@
         ]
       }
     ],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Overhead press machine",
@@ -389,14 +363,12 @@
         ]
       }
     ],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Landmine press",
     "params": [],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Upright row",
@@ -411,8 +383,7 @@
         ]
       }
     ],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Rear delt fly",
@@ -426,14 +397,12 @@
         ]
       }
     ],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Face pull",
     "params": [],
-    "group": "Delts",
-    "editableInApp": false
+    "group": "Delts"
   },
   {
     "name": "Squat",
@@ -448,8 +417,7 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Bulgarian split squat",
@@ -463,8 +431,7 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Leg press",
@@ -478,14 +445,12 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Leg extension",
     "params": [],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Romanian deadlift",
@@ -499,8 +464,7 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Deadlift",
@@ -514,8 +478,7 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Leg curl",
@@ -529,14 +492,12 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Back extension",
     "params": [],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Hip thrust",
@@ -550,8 +511,7 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   },
   {
     "name": "Calf raise machine",
@@ -565,7 +525,6 @@
         ]
       }
     ],
-    "group": "Legs",
-    "editableInApp": false
+    "group": "Legs"
   }
 ]
