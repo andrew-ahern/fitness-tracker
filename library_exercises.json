@@ -107,7 +107,7 @@
       }
     ],
     "group": "Triceps",
-    "active": true
+    "active": false
   },
   {
     "name": "Close-grip bench press",
@@ -160,7 +160,7 @@
     "name": "Chin-up",
     "params": [],
     "group": "Back",
-    "active": true
+    "active": false
   },
   {
     "name": "Row",
@@ -210,7 +210,7 @@
       }
     ],
     "group": "Back",
-    "active": true
+    "active": false
   },
   {
     "name": "Shrug",
