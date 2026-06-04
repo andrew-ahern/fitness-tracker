@@ -1356,20 +1356,30 @@ function saveSettings() {
 
 
 function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
+  /* key is the combined array (e.g. 'exercises') for display.
+     Move/delete operations use the userAdded counterpart.
+     Index passed to moveFn/deleteFn is the index within the userAdded array. */
+  const userAddedKey = key === 'exercises'        ? 'userAddedExercises'
+                     : key === 'cardioActivities'  ? 'userAddedCardioActivities'
+                     : key;
   const list = document.getElementById(listId);
   const arr = db[key];
-  const n = arr.length;
-  if (n === 0) {
+  const userAddedArr = db[userAddedKey] || [];
+  const n = userAddedArr.length;
+  if (arr.length === 0) {
     list.innerHTML = `<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">${emptyMsg}</div>`;
     return;
   }
 
   // Group items by group field
   const grouped = {};
-  arr.forEach((item, i) => {
+  arr.forEach((item) => {
     const g = (item && item.group) ? item.group : '';
     if (!grouped[g]) grouped[g] = [];
-    grouped[g].push({ item, i });
+    // Find index within userAdded array for editable items
+    const name = typeof item === 'string' ? item : item.name;
+    const userAddedIdx = userAddedArr.findIndex(u => (typeof u === 'string' ? u : u.name) === name);
+    grouped[g].push({ item, i: userAddedIdx });
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => {
     if (a === '' && b === '') return 0;
@@ -1499,10 +1509,13 @@ function renderMealItemLibrary() {
   }
   // Group by item.group
   const grouped = {};
-  arr.forEach((item, i) => {
+  const userAddedMeal = db.userAddedMealItems || [];
+  arr.forEach((item) => {
     const g = (item && item.group) ? item.group : '';
     if (!grouped[g]) grouped[g] = [];
-    grouped[g].push({ item, i });
+    const name = typeof item === 'string' ? item : item.name;
+    const uIdx = userAddedMeal.findIndex(u => (typeof u === 'string' ? u : u.name) === name);
+    grouped[g].push({ item, i: uIdx });
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => {
     if (a === '' && b === '') return 0;
