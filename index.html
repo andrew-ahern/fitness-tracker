@@ -1385,8 +1385,9 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
     grouped[g].push({ item, i: userAddedIdx });
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => {
-    if (a === '' && b === '') return 0;
-    if (a === '') return 1; if (b === '') return -1;
+    if (a === b) return 0;
+    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
+    if (!a) return 1; if (!b) return -1;
     const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
@@ -1399,7 +1400,7 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   let isFirstGroup = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
-      const heading = g || 'Newly added';
+      const heading = g === 'newlyAdded' ? 'Newly added' : g;
       const mt = isFirstGroup ? '9px' : '25px';
       html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
       isFirstGroup = false;
@@ -1430,7 +1431,7 @@ function addToLibrary(key, inputId, onUpdate) {
   const name = input.value.trim();
   if (!name) return;
   if (db[key].some(i => (typeof i === 'string' ? i : i.name) === name)) { showToast('Already in library'); return; }
-  db[key].push({ name, group: null });
+  db[key].push({ name, group: 'newlyAdded' });
   saveDB();
   rebuildCombinedLibraries();
   onUpdate();
@@ -1521,8 +1522,9 @@ function renderMealItemLibrary() {
     grouped[g].push({ item, i: uIdx });
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => {
-    if (a === '' && b === '') return 0;
-    if (a === '') return 1; if (b === '') return -1;
+    if (a === b) return 0;
+    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
+    if (!a) return 1; if (!b) return -1;
     const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
@@ -1535,7 +1537,7 @@ function renderMealItemLibrary() {
   let isFirstGroupMeal = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
-      const heading = g || 'Newly added';
+      const heading = g === 'newlyAdded' ? 'Newly added' : g;
       const mt = isFirstGroupMeal ? '9px' : '25px';
       html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
       isFirstGroupMeal = false;
@@ -1571,7 +1573,7 @@ function addMealItem() {
     name,
     calories: num('new-meal-item-calories'),
     protein:  num('new-meal-item-protein'),
-    group: null
+    group: 'newlyAdded'
   });
   saveDB();
   rebuildCombinedLibraries();
@@ -1634,8 +1636,9 @@ function populateCardioActivityDropdown(selectedVal) {
   });
   let cOpts = '';
   Object.keys(cGrouped).sort((a,b) => {
-    if (a === '' && b === '') return 0;
-    if (a === '') return 1; if (b === '') return -1;
+    if (a === b) return 0;
+    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
+    if (!a) return 1; if (!b) return -1;
     const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
@@ -1643,8 +1646,9 @@ function populateCardioActivityDropdown(selectedVal) {
     return ai - bi;
   }).forEach(g => {
     const items = cGrouped[g].map(({n,selected}) => `<option value="${n}" ${selected?'selected':''}>${n}</option>`).join('');
-    const cLabel = g || 'Newly added';
-    cOpts += `<optgroup label="${cLabel}">${items}</optgroup>`;
+    const cLabel = g === 'newlyAdded' ? 'Newly added' : g;
+    if (cLabel) cOpts += `<optgroup label="${cLabel}">${items}</optgroup>`;
+    else cOpts += items;
   });
   sel.innerHTML = cOpts;
 }
@@ -2253,8 +2257,9 @@ function buildMealItemOptions(selectedName) {
   });
   let opts = '<option value="">-- select item --</option>';
   const keys = Object.keys(grouped).sort((a,b) => {
-    if (a === '' && b === '') return 0;
-    if (a === '') return 1; if (b === '') return -1;
+    if (a === b) return 0;
+    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
+    if (!a) return 1; if (!b) return -1;
     const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
@@ -2265,8 +2270,9 @@ function buildMealItemOptions(selectedName) {
     const items = grouped[g].map(i =>
       `<option value="${i.name}" ${i.name === selectedName ? 'selected' : ''}>${i.name}</option>`
     ).join('');
-    const label = g || 'Newly added';
-    opts += `<optgroup label="${label}">${items}</optgroup>`;
+    const label = g === 'newlyAdded' ? 'Newly added' : g;
+    if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
+    else opts += items;
   });
   opts += `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Other (enter manually)</option>`;
   return opts;
@@ -2531,7 +2537,8 @@ function buildExerciseOptions(selectedName) {
   let opts = '';
   const exGroupOrder = EXERCISE_GROUP_ORDER;
   const exGroupKeys = Object.keys(exGrouped).sort((a,b) => {
-    if (a === '') return 1; if (b === '') return -1;
+    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
+    if (!a) return 1; if (!b) return -1;
     const ai = exGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = exGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
@@ -2540,8 +2547,9 @@ function buildExerciseOptions(selectedName) {
   });
   exGroupKeys.forEach(g => {
     const items = exGrouped[g].map(({name,selected}) => `<option value="${name}" ${selected?'selected':''}>${name}</option>`).join('');
-    const label = g || 'Newly added';
-    opts += `<optgroup label="${label}">${items}</optgroup>`;
+    const label = g === 'newlyAdded' ? 'Newly added' : g;
+    if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
+    else opts += items;
   });
   return `<option value="">— select exercise —</option>${opts}`;
 }
