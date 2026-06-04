@@ -1055,6 +1055,10 @@ function loadDB() {
         // from data saved before those fields existed
         if (!db.userAddedCardioActivities) db.userAddedCardioActivities = [];
         if (!db.userAddedExercises)        db.userAddedExercises = [];
+        // Migrate: set group to 'newlyAdded' for user-added items with null group
+        ['userAddedExercises','userAddedCardioActivities','userAddedMealItems'].forEach(key => {
+          (db[key] || []).forEach(item => { if (!item.group) item.group = 'newlyAdded'; });
+        });
         if (!db.userAddedMealItems)        db.userAddedMealItems = [];
         if (!db.libraryExercises)          db.libraryExercises = [];
         if (!db.libraryCardioActivities)   db.libraryCardioActivities = [];
