@@ -5156,6 +5156,27 @@ function runTests() {
     rebuildCombinedLibraries();
   });
 
+  // ── SubOptions param storage ─────────────────────────────────────
+  test('subOptions param stored as {value, subOption} object', () => {
+    const params = { variant: { value: 'Cable', subOption: 'V handle' } };
+    assert(typeof params.variant === 'object', 'variant should be an object');
+    assertEqual(params.variant.value, 'Cable', 'value should be Cable');
+    assertEqual(params.variant.subOption, 'V handle', 'subOption should be V handle');
+  });
+
+  test('flat param stored as string', () => {
+    const params = { variant: 'Dumbbell' };
+    assert(typeof params.variant === 'string', 'flat variant should be a string');
+  });
+
+  test('history display handles nested param', () => {
+    const param = { value: 'Cable', subOption: 'V handle' };
+    const display = typeof param === 'object' && param.value
+      ? (param.subOption ? param.value + ', ' + param.subOption : param.value)
+      : param;
+    assertEqual(display, 'Cable, V handle', 'nested param display incorrect');
+  });
+
   // ── Exercise params ──────────────────────────────────────────────
   test('exercise library items are objects with name field', () => {
     db.exercises.forEach(i => {
@@ -5242,6 +5263,7 @@ function showTestScreen() {
     { heading: 'Utilities',           tests: ['today() returns YYYY-MM-DD format', 'today() returns current local date', 'Monday calculation: Wed → Mon', 'Monday calculation: Sun → Mon'] },
     { heading: 'DB schema',           tests: ['db object has required keys', 'db.settings has required keys', 'db.logs is an array'] },
     { heading: 'Combined library rebuild', tests: ['rebuildCombinedLibraries builds correct union for exercises', 'rebuildCombinedLibraries builds correct union for meal items', 'rebuildCombinedLibraries: combined length equals sum of parts'] },
+    { heading: 'SubOptions param storage', tests: ['subOptions param stored as {value, subOption} object', 'flat param stored as string', 'history display handles nested param'] },
     { heading: 'Exercise params',       tests: ['exercise library items are objects with name field', 'getExerciseLibItem() returns correct item', 'gym exercise params object is stored correctly'] },
     { heading: 'Entry creation',      tests: ['weight entry has required fields', 'rise entry has required fields', 'meal entry has required fields', 'gym entry has required fields', 'cardio entry has required fields'] },
     { heading: 'ID uniqueness',       tests: ['log entry IDs are unique'] },
