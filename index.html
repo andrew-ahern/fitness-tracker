@@ -2623,7 +2623,6 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         }
       };
       sel.addEventListener('change', updateSubOptions);
-      updateSubOptions();
     } else if (param.type === 'number') {
       const inp = document.createElement('input');
       inp.type = 'number'; inp.className = 'ex-param';
@@ -2640,6 +2639,11 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       }
     }
     paramsDiv.appendChild(wrapper);
+    // Call updateSubOptions after wrapper is in DOM so wrapper.after() works
+    if (param.type === 'select') {
+      const selEl = wrapper.querySelector('select.ex-param');
+      if (selEl) selEl.dispatchEvent(new Event('change'));
+    }
   });
 }
 
