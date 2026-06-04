@@ -2093,6 +2093,7 @@ if (new URLSearchParams(window.location.search).get('test') === 'true') {
   loadDB();
   showTestScreen();
 } else {
+  console.log('Fitness Tracker — SW cache: fitlog-v70');
   loadDB();
   rebuildCombinedLibraries(); // build combined arrays from whatever is in db
   renderAll();
