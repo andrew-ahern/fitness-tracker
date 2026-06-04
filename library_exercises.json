@@ -17,7 +17,8 @@
         "unit": "deg"
       }
     ],
-    "group": "Chest"
+    "group": "Chest",
+    "active": false
   },
   {
     "name": "Chest press machine",
