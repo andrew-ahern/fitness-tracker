@@ -107,7 +107,7 @@
       }
     ],
     "group": "Triceps",
-    "active": false
+    "active": true
   },
   {
     "name": "Close-grip bench press",
@@ -210,7 +210,7 @@
       }
     ],
     "group": "Back",
-    "active": false
+    "active": true
   },
   {
     "name": "Shrug",
