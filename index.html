@@ -1453,7 +1453,7 @@ function deleteFromLibrary(key, index, inUseFn, onUpdate) {
 /* ── Exercise library ──────────────────────────────────────────── */
 
 function renderExerciseLibrary() {
-  renderLibrary('userAddedExercises', 'exercise-library-list',
+  renderLibrary('exercises', 'exercise-library-list',
     'No exercises yet', 'moveExercise', 'deleteExercise');
 }
 
@@ -1491,7 +1491,7 @@ function refreshExerciseDropdowns() {
 function renderMealItemLibrary() {
   const list = document.getElementById('meal-item-library-list');
   if (!list) return;
-  const arr = db.userAddedMealItems || []; // Settings shows user-added only
+  const arr = db.mealItems || [];
   const n = arr.length;
   if (n === 0) {
     list.innerHTML = '<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">No items yet</div>';
@@ -1578,7 +1578,7 @@ function deleteMealItem(index) {
 
 /* ── Cardio library ────────────────────────────────────────────── */
 function renderCardioLibrary() {
-  renderLibrary('userAddedCardioActivities', 'cardio-library-list',
+  renderLibrary('cardioActivities', 'cardio-library-list',
     'No activities yet', 'moveCardioActivity', 'deleteCardioActivity');
 }
 
