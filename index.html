@@ -179,8 +179,8 @@
     .field select,
     .field textarea {
       width: 100%;
-      height: 40px;
-      padding: 8px 12px;
+      height: 32px;
+      padding: 5px 12px;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -194,7 +194,7 @@
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
     select {
       box-sizing: border-box;
-      height: 40px;
+      height: 32px;
     }
     textarea { box-sizing: border-box; }
     .field input:focus,
@@ -2302,13 +2302,13 @@ function addMealItemBlock(itemData, interactive) {
   const libraryOptions = (db.mealItems || []).map(i => `<option value="${i.name}">`).join('');
 
   const inputStyle = 'width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;';
-  const selStyle   = 'flex:1;height:40px;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
+  const selStyle   = 'flex:1;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
 
   block.innerHTML =
     '<div class="exercise-header">' +
       `<select class="mi-select" style="${selStyle}">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
-      '<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">' +
+      '<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
     '</div>' +
     '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
@@ -2652,7 +2652,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       inp.type = 'number'; inp.className = 'ex-param';
       inp.dataset.param = param.name;
       inp.value = val != null ? val : '';
-      inp.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; width:70px;';
+      inp.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; width:70px;';
       inp.inputMode = 'decimal';
       wrapper.appendChild(inp);
       if (param.unit) {
@@ -3110,13 +3110,13 @@ function addSheetMealItemBlock(itemData, interactive) {
   block.id = blockId;
 
   const iStyle = "width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;";
-  const sStyle = "flex:1;height:40px;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);";
+  const sStyle = "flex:1;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);";
 
   block.innerHTML =
     '<div class="exercise-header">' +
       `<select class="mi-select" style="${sStyle}">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
-      `<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
+      `<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
       '<button class="del-btn" title="Remove item">&times;</button>' +
     '</div>' +
     '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
