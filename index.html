@@ -2078,8 +2078,8 @@ function showToast(msg, duration) {
 }
 
 function fmtWeight(w) {
-  /* Format a weight value to always show 2 decimal places. */
-  return parseFloat(w).toFixed(2);
+  /* Display weight as entered — no forced decimal places. */
+  return parseFloat(w).toString();
 }
 
 function nextId() {
@@ -2971,11 +2971,11 @@ function buildViewBody(e) {
   if (e.type === 'gym') {
     const exHTML = (e.exercises || []).map(ex => {
       const setsHTML = ex.sets.map((s, i) =>
-        `<div style="display:flex;gap:12px;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border);">
-          <span style="color:var(--muted);min-width:24px">${i + 1}</span>
+        `<div style="display:grid;grid-template-columns:24px 80px 70px 1fr;gap:8px;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border);align-items:start;">
+          <span style="color:var(--muted)">${i + 1}</span>
           <span>${s.weight != null ? fmtWeight(s.weight) + ' kg' : '—'}</span>
           <span>${s.reps != null ? s.reps + ' reps' : '—'}</span>
-          ${s.note ? `<span style="color:var(--muted);font-style:italic">${s.note}</span>` : ''}
+          <span style="color:var(--muted);font-style:italic;word-break:break-word;">${s.note || ''}</span>
         </div>`
       ).join('');
       const paramsHTML = ex.params && Object.keys(ex.params).length
@@ -3054,7 +3054,7 @@ function buildEditForm(e) {
     return `<div class="field"><label>Activity</label><select id="e-acttype">${actOpts}</select></div>` +
       row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
       row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
-           timeField('e-endtime', 'End time', e.endTime)) +
+           timeField('e-endtime', 'End', e.endTime)) +
       row2(numField('e-hravg', 'Avg HR (bpm)', e.hrAvg, '1'),
            numField('e-hrmax', 'Max HR (bpm)', e.hrMax, '1')) +
       numField('e-elev', 'Elevation (m)', e.elevationGain, '1') +
@@ -3063,7 +3063,7 @@ function buildEditForm(e) {
 
   if (e.type === 'gym') {
     return row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
-      timeField('e-endtime', 'End time', e.endTime) +
+      timeField('e-endtime', 'End', e.endTime) +
       textField('e-note', 'Note', e.note) +
       `<div id="sheet-exercises-container" style="margin-top:0.5rem;"></div>
        <button class="add-exercise-btn" onclick="addExerciseBlock(null, 'sheet-exercises-container')">+ Add exercise</button>`;
@@ -3268,6 +3268,7 @@ function saveEdit() {
   else if (entry.type === 'cardio') {
     entry.date           = str('e-date') || entry.date;
     entry.startTime      = str('e-time') || entry.startTime;
+    entry.endTime        = str('e-endtime') || null;
     entry.activityType   = document.getElementById('e-acttype')?.value || entry.activityType;
     entry.distance       = num('e-dist');
     entry.duration       = num('e-dur');
@@ -3281,6 +3282,7 @@ function saveEdit() {
   else if (entry.type === 'gym') {
     entry.date      = str('e-date') || entry.date;
     entry.startTime = str('e-time') || entry.startTime;
+    entry.endTime   = str('e-endtime') || null;
     entry.duration  = num('e-dur');
     entry.note      = str('e-note');
 
