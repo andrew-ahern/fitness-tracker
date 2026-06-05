@@ -175,35 +175,46 @@
       color: var(--muted);
       margin-bottom: 4px;
     }
-    .field input,
-    .field select,
-    .field textarea {
-      width: 100%;
-      height: 32px;
-      padding: 5px 12px;
+    .field input, .field select, .field textarea { width: 100%; }
+
+
+    /* ── Field type classes ────────────────────────────────────────── */
+    /* All field types share base appearance; width set by container.   */
+    .field-date,
+    .field-time,
+    .field-number,
+    .field-text,
+    .field-select {
+      box-sizing: border-box;
+      height: 36px;
+      padding: 5px 10px;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       font-family: inherit;
-      font-size: 16px;  /* 16px prevents iOS zoom on focus */
+      font-size: 16px;
       color: var(--text);
     }
-    .field textarea { min-height: 0; height: 32px; resize: vertical; }
+    .field-date:focus,
+    .field-time:focus,
+    .field-number:focus,
+    .field-text:focus,
+    .field-select:focus { outline: none; border-color: var(--accent); }
 
-    /* ── Global input height ──────────────────────────────────────── */
-    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-    select {
+    .field-textarea {
       box-sizing: border-box;
-      height: 32px;
+      width: 100%;
+      height: 36px;
+      padding: 5px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+      color: var(--text);
+      resize: vertical;
     }
-    textarea { box-sizing: border-box; }
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
+    .field-textarea:focus { outline: none; border-color: var(--accent); }
 
     /* ── Toast notification ───────────────────────────────────────── */
     #toast {
@@ -417,17 +428,7 @@
     .exercise-header select,
     .exercise-header input[type=text] {
       flex: 1;
-      height: 32px;
-      padding: 5px 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 16px;
-      color: var(--text);
     }
-    .exercise-header select:focus,
-    .exercise-header input[type=text]:focus { outline: none; border-color: var(--accent); }
 
     /* Set rows within an exercise */
     .set-row {
@@ -557,15 +558,15 @@
           <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
             <div class="field">
               <label>Weight (kg)</label>
-              <input type="number" id="w-value" step="0.1" min="0" inputmode="decimal">
+              <input type="number" id="w-value" class="field-number" step="0.1" min="0" inputmode="decimal">
             </div>
             <div class="field">
               <label>Date</label>
-              <input type="date" id="w-date">
+              <input type="date" id="w-date" class="field-date">
             </div>
             <div class="field">
               <label>Time</label>
-              <input type="time" id="w-time">
+              <input type="time" id="w-time" class="field-time">
             </div>
           </div>
           <button class="btn btn-primary btn-full" onclick="saveWeight()">Save</button>
@@ -578,8 +579,8 @@
         <!-- Date + time -->
         <div class="card" style="margin-bottom:0.75rem;">
           <div class="field-row">
-            <div class="field"><label>Date</label><input type="date" id="m-date"></div>
-            <div class="field"><label>Time</label><input type="time" id="m-time"></div>
+            <div class="field"><label>Date</label><input type="date" id="m-date" class="field-date"></div>
+            <div class="field"><label>Time</label><input type="time" id="m-time" class="field-time"></div>
           </div>
         </div>
         <!-- Meal items -->
@@ -603,20 +604,20 @@
           <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
             <div class="field">
               <label>Date</label>
-              <input type="date" id="wo-date">
+              <input type="date" id="wo-date" class="field-date">
             </div>
             <div class="field">
               <label>Start</label>
-              <input type="time" id="wo-starttime">
+              <input type="time" id="wo-starttime" class="field-time">
             </div>
             <div class="field">
               <label>End</label>
-              <input type="time" id="wo-endtime">
+              <input type="time" id="wo-endtime" class="field-time">
             </div>
           </div>
           <div class="field">
             <label>Note</label>
-            <textarea id="wo-note"></textarea>
+            <textarea id="wo-note" class="field-textarea"></textarea>
           </div>
         </div>
 
@@ -633,45 +634,45 @@
         <div class="card">
           <div class="field">
             <label>Activity</label>
-            <select id="c-type"></select>
+            <select id="c-type" class="field-select"></select>
           </div>
           <div class="field-row">
             <div class="field">
               <label>Date</label>
-              <input type="date" id="c-date">
+              <input type="date" id="c-date" class="field-date">
             </div>
             <div class="field">
               <label>Start time</label>
-              <input type="time" id="c-starttime">
+              <input type="time" id="c-starttime" class="field-time">
             </div>
           </div>
           <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
             <div class="field">
               <label>Distance (km)</label>
-              <input type="number" id="c-dist" step="0.1" min="0" inputmode="decimal">
+              <input type="number" id="c-dist" class="field-number" step="0.1" min="0" inputmode="decimal">
             </div>
             <div class="field">
               <label>Duration (min)</label>
-              <input type="number" id="c-dur" min="0" inputmode="numeric">
+              <input type="number" id="c-dur" class="field-number" min="0" inputmode="numeric">
             </div>
             <div class="field">
               <label>Elevation (m)</label>
-              <input type="number" id="c-elev" min="0" inputmode="numeric">
+              <input type="number" id="c-elev" class="field-number" min="0" inputmode="numeric">
             </div>
           </div>
           <div class="field-row">
             <div class="field">
               <label>Avg HR (bpm)</label>
-              <input type="number" id="c-hravg" min="0" inputmode="numeric">
+              <input type="number" id="c-hravg" class="field-number" min="0" inputmode="numeric">
             </div>
             <div class="field">
               <label>Max HR (bpm)</label>
-              <input type="number" id="c-hrmax" min="0" inputmode="numeric">
+              <input type="number" id="c-hrmax" class="field-number" min="0" inputmode="numeric">
             </div>
           </div>
           <div class="field">
             <label>Note (optional)</label>
-            <textarea id="c-note"></textarea>
+            <textarea id="c-note" class="field-textarea"></textarea>
           </div>
           <button class="btn btn-primary btn-full" onclick="saveCardio()">Save</button>
           <div id="draft-status-cardio" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-cardio"></span><button id="draft-clear-cardio" onclick="clearDraftAndForm('cardio')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
@@ -684,11 +685,11 @@
           <div class="field-row">
             <div class="field">
               <label>Rise time</label>
-              <input type="time" id="wk-time">
+              <input type="time" id="wk-time" class="field-time">
             </div>
             <div class="field">
               <label>Date</label>
-              <input type="date" id="wk-date">
+              <input type="date" id="wk-date" class="field-date">
             </div>
           </div>
           <button class="btn btn-primary btn-full" onclick="saveWake()">Save</button>
@@ -2303,28 +2304,27 @@ function addMealItemBlock(itemData, interactive) {
   const listId = 'mi-list-' + mealItemCount;
   const libraryOptions = (db.mealItems || []).map(i => `<option value="${i.name}">`).join('');
 
-  const inputStyle = 'width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;';
-  const selStyle   = 'flex:1;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
+  // Using CSS field-type classes instead of inline styles
 
   block.innerHTML =
     '<div class="exercise-header">' +
-      `<select class="mi-select" style="${selStyle}">${buildMealItemOptions('')}</select>` +
+      `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
-      '<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">' +
+      '<input type="number" class="mi-qty field-number" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;text-align:center;">' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
     '</div>' +
     '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
-      '<input type="text" class="mi-name" placeholder="Item name" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);">' +
+      '<input type="text" class="mi-name field-text" placeholder="Item name">' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
-      `<input type="number" class="mi-cal" min="0" inputmode="numeric" style="${inputStyle}">` +
-      `<input type="number" class="mi-pro" min="0" inputmode="decimal" style="${inputStyle}">` +
+      '<input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;">' +
+      '<input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;">' +
     '</div>' +
-    '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
-      '<textarea class="mi-note" style="height:32px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
+    '<div class="field"><label style="font-size:12px;color:var(--muted)">Note</label>' +
+      '<textarea class="mi-note field-textarea"></textarea>' +
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
@@ -2606,7 +2606,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       const sel = document.createElement('select');
       sel.className = 'ex-param';
       sel.dataset.param = param.name;
-      sel.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit;';
+      sel.className += ' field-select';
 
       // Handle both flat strings and nested {value, subOptions} objects
       param.options.forEach(opt => {
@@ -2636,7 +2636,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
           const subSel = document.createElement('select');
           subSel.className = 'ex-param-sub';
           subSel.dataset.param = param.name + '_sub';
-          subSel.style.cssText = sel.style.cssText;
+          subSel.className += ' field-select';
           subOpts.forEach(s => {
             const o = document.createElement('option');
             o.value = s; o.textContent = s;
@@ -2654,7 +2654,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       inp.type = 'number'; inp.className = 'ex-param';
       inp.dataset.param = param.name;
       inp.value = val != null ? val : '';
-      inp.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit; width:70px;';
+      inp.className += ' field-number'; inp.style.width = '70px';
       inp.inputMode = 'decimal';
       wrapper.appendChild(inp);
       if (param.unit) {
@@ -3111,28 +3111,27 @@ function addSheetMealItemBlock(itemData, interactive) {
   block.className = 'exercise-block';
   block.id = blockId;
 
-  const iStyle = "width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;";
-  const sStyle = "flex:1;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);";
+  // CSS field-type classes used instead of inline styles
 
   block.innerHTML =
     '<div class="exercise-header">' +
-      `<select class="mi-select" style="${sStyle}">${buildMealItemOptions('')}</select>` +
+      `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
-      `<input type="number" class="mi-qty" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;height:32px;padding:5px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;">` +
+      '<input type="number" class="mi-qty field-number" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;text-align:center;">' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
     '</div>' +
     '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
-      '<input type="text" class="mi-name" placeholder="Item name" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);">' +
+      '<input type="text" class="mi-name field-text" placeholder="Item name">' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div>' +
     '</div>' +
-    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">` +
-      `<input type="number" class="mi-cal" min="0" inputmode="numeric" style="${iStyle}">` +
-      `<input type="number" class="mi-pro" min="0" inputmode="decimal" style="${iStyle}">` +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">' +
+      '<input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;">' +
+      '<input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;">' +
     '</div>' +
-    '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
-      '<textarea class="mi-note" style="height:32px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
+    '<div class="field"><label style="font-size:12px;color:var(--muted)">Note</label>' +
+      '<textarea class="mi-note field-textarea"></textarea>' +
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
