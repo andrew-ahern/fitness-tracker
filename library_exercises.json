@@ -43,6 +43,7 @@
         "type": "select",
         "options": [
           "Pec deck",
+          "Machine",
           "Dumbbell",
           "Cable"
         ]
