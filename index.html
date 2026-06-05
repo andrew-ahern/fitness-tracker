@@ -2627,7 +2627,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         if (optVal === savedVal) o.selected = true;
         sel.appendChild(o);
       });
-      sel.style.maxWidth = '180px';
+      sel.style.width = '50vw';
+      sel.style.maxWidth = '50vw';
       fieldRow.appendChild(sel);
 
       // If selected option has subOptions, render second dropdown on same line
@@ -2640,7 +2641,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
           const subSel = document.createElement('select');
           subSel.className = 'ex-param-sub field-select';
           subSel.dataset.param = param.name + '_sub';
-          subSel.style.maxWidth = '180px';
+          subSel.style.width = '50vw';
+          subSel.style.maxWidth = '50vw';
           subOpts.forEach(s => {
             const o = document.createElement('option');
             o.value = s; o.textContent = s;
