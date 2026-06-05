@@ -436,15 +436,15 @@
       flex: 1;
     }
     .param-field-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 6px;
-      align-items: flex-end;
+      align-items: end;
       width: 100%;
     }
-    .param-field-row select {
-      flex: 1;
+    .param-field-row select,
+    .param-field-row input {
       min-width: 0;
-      overflow: hidden;
     }
 
     /* Set rows within an exercise */
@@ -2629,7 +2629,6 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       const sel = document.createElement('select');
       sel.className = 'ex-param field-select';
       sel.dataset.param = param.name;
-      sel.style.flex = '1';
 
       param.options.forEach(opt => {
         const optVal = (typeof opt === 'object') ? opt.value : opt;
@@ -2651,13 +2650,12 @@ function renderExerciseParams(block, exerciseName, existingParams) {
           // Empty label for sub column
           const emptyLabel = document.createElement('span');
           emptyLabel.className = 'sub-label';
-          emptyLabel.style.flex = '1';
+
           labelRow.appendChild(emptyLabel);
 
           const subSel = document.createElement('select');
           subSel.className = 'ex-param-sub field-select';
           subSel.dataset.param = param.name + '_sub';
-          subSel.style.flex = '1';
           subOpts.forEach(s => {
             const o = document.createElement('option');
             o.value = s; o.textContent = s;
@@ -2677,7 +2675,6 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       inp.dataset.param = param.name;
       inp.value = val != null ? val : '';
       inp.inputMode = 'decimal';
-      inp.style.flex = '1';
       fieldRow.appendChild(inp);
       if (param.unit) {
         const unit = document.createElement('span');
