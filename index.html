@@ -179,6 +179,7 @@
     .field select,
     .field textarea {
       width: 100%;
+      height: 44px;
       padding: 10px 12px;
       background: var(--bg);
       border: 1px solid var(--border);
@@ -187,7 +188,7 @@
       font-size: 16px;  /* 16px prevents iOS zoom on focus */
       color: var(--text);
     }
-    .field textarea { min-height: 0; height: 42px; resize: vertical; }
+    .field textarea { min-height: 0; height: 42px !important; resize: vertical; }
     .field input:focus,
     .field select:focus,
     .field textarea:focus {
