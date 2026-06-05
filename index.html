@@ -186,6 +186,8 @@
     .field-text,
     .field-select {
       box-sizing: border-box;
+      width: 100%;
+      min-width: 0;
       padding: 5px 10px;
       background: var(--bg);
       border: 1px solid var(--border);
@@ -2325,9 +2327,9 @@ function addMealItemBlock(itemData, interactive) {
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div><div class="set-label">Note</div>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:6px;">' +
-      '<input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;">' +
-      '<input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;">' +
-      '<input type="text" class="mi-note field-text">' +
+      '<div><input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;"></div>' +
+      '<div><input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;"></div>' +
+      '<div><input type="text" class="mi-note field-text"></div>' +
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
@@ -3134,9 +3136,9 @@ function addSheetMealItemBlock(itemData, interactive) {
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div><div class="set-label">Note</div>' +
     '</div>' +
     '<div style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:6px;">' +
-      '<input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;">' +
-      '<input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;">' +
-      '<input type="text" class="mi-note field-text">' +
+      '<div><input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;"></div>' +
+      '<div><input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;"></div>' +
+      '<div><input type="text" class="mi-note field-text"></div>' +
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
