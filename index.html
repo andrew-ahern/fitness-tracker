@@ -179,8 +179,8 @@
     .field select,
     .field textarea {
       width: 100%;
-      height: 44px;
-      padding: 10px 12px;
+      height: 40px;
+      padding: 8px 12px;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -188,7 +188,15 @@
       font-size: 16px;  /* 16px prevents iOS zoom on focus */
       color: var(--text);
     }
-    .field textarea { min-height: 0; height: 42px !important; resize: vertical; }
+    .field textarea { min-height: 0; height: 42px; resize: vertical; }
+
+    /* ── Global input height ──────────────────────────────────────── */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select {
+      box-sizing: border-box;
+      height: 40px;
+    }
+    textarea { box-sizing: border-box; }
     .field input:focus,
     .field select:focus,
     .field textarea:focus {
@@ -2294,7 +2302,7 @@ function addMealItemBlock(itemData, interactive) {
   const libraryOptions = (db.mealItems || []).map(i => `<option value="${i.name}">`).join('');
 
   const inputStyle = 'width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;';
-  const selStyle   = 'flex:1;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
+  const selStyle   = 'flex:1;height:40px;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);';
 
   block.innerHTML =
     '<div class="exercise-header">' +
@@ -3102,7 +3110,7 @@ function addSheetMealItemBlock(itemData, interactive) {
   block.id = blockId;
 
   const iStyle = "width:100%;max-width:60px;min-width:0;padding:8px 4px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);text-align:center;";
-  const sStyle = "flex:1;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);";
+  const sStyle = "flex:1;height:40px;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);";
 
   block.innerHTML =
     '<div class="exercise-header">' +
