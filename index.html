@@ -2607,29 +2607,30 @@ function renderExerciseParams(block, exerciseName, existingParams) {
   const params = (libItem && libItem.params) ? libItem.params : [];
   if (params.length === 0) return;
 
+  // Build a single label row and a single field row for all params
+  const labelRow = document.createElement('div');
+  labelRow.className = 'param-field-row';
+  labelRow.style.marginBottom = '4px';
+
+  const fieldRow = document.createElement('div');
+  fieldRow.className = 'param-field-row';
+
   params.forEach(param => {
     const val = existingParams && existingParams[param.name] != null
       ? existingParams[param.name] : param.default;
 
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'margin-bottom:6px; width:100%;';
-
-    const label = document.createElement('label');
-    label.textContent = param.type === 'select' ? 'Variant' : param.name.charAt(0).toUpperCase() + param.name.slice(1);
-    label.style.cssText = 'font-size:14px;color:var(--muted);display:block;margin-bottom:4px;';
-    wrapper.appendChild(label);
-
-    const fieldRow = document.createElement('div');
-    fieldRow.className = 'param-field-row';
-    wrapper.appendChild(fieldRow);
+    // Label cell
+    const labelCell = document.createElement('label');
+    labelCell.textContent = param.type === 'select' ? 'Variant' : param.name.charAt(0).toUpperCase() + param.name.slice(1);
+    labelCell.style.cssText = 'font-size:14px;color:var(--muted);flex:1;';
+    labelRow.appendChild(labelCell);
 
     if (param.type === 'select') {
       const sel = document.createElement('select');
-      sel.className = 'ex-param';
+      sel.className = 'ex-param field-select';
       sel.dataset.param = param.name;
-      sel.className += ' field-select';
+      sel.style.flex = '1';
 
-      // Handle both flat strings and nested {value, subOptions} objects
       param.options.forEach(opt => {
         const optVal = (typeof opt === 'object') ? opt.value : opt;
         const o = document.createElement('option');
@@ -2638,20 +2639,25 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         if (optVal === savedVal) o.selected = true;
         sel.appendChild(o);
       });
-
       fieldRow.appendChild(sel);
 
-      // If selected option has subOptions, render second dropdown on same line
+      // SubOptions: add to fieldRow on same line, with empty label cell
       const updateSubOptions = () => {
-        // Remove any existing sub-select from fieldRow
         fieldRow.querySelectorAll('.ex-param-sub').forEach(el => el.remove());
+        labelRow.querySelectorAll('.sub-label').forEach(el => el.remove());
         const selectedOpt = param.options.find(o => (typeof o === 'object' ? o.value : o) === sel.value);
         const subOpts = (selectedOpt && typeof selectedOpt === 'object') ? selectedOpt.subOptions : [];
         if (subOpts && subOpts.length > 0) {
+          // Empty label for sub column
+          const emptyLabel = document.createElement('span');
+          emptyLabel.className = 'sub-label';
+          emptyLabel.style.flex = '1';
+          labelRow.appendChild(emptyLabel);
+
           const subSel = document.createElement('select');
           subSel.className = 'ex-param-sub field-select';
           subSel.dataset.param = param.name + '_sub';
-
+          subSel.style.flex = '1';
           subOpts.forEach(s => {
             const o = document.createElement('option');
             o.value = s; o.textContent = s;
@@ -2663,29 +2669,30 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         }
       };
       sel.addEventListener('change', updateSubOptions);
+
     } else if (param.type === 'number') {
       const inp = document.createElement('input');
-      inp.type = 'number'; inp.className = 'ex-param';
+      inp.type = 'number';
+      inp.className = 'ex-param field-number';
       inp.dataset.param = param.name;
       inp.value = val != null ? val : '';
-      inp.className += ' field-number';
       inp.inputMode = 'decimal';
+      inp.style.flex = '1';
       fieldRow.appendChild(inp);
       if (param.unit) {
         const unit = document.createElement('span');
         unit.textContent = param.unit === 'deg' ? '°' : param.unit;
-        unit.style.color = 'var(--muted)';
+        unit.style.cssText = 'color:var(--muted);align-self:center;';
         fieldRow.appendChild(unit);
       }
     }
-    paramsDiv.appendChild(wrapper);
-    // Call updateSubOptions after wrapper is in DOM so wrapper.after() works
-    if (param.type === 'select') {
-      const selEl = wrapper.querySelector('select.ex-param');
-      if (selEl) selEl.dispatchEvent(new Event('change'));
-    }
-
   });
+
+  paramsDiv.appendChild(labelRow);
+  paramsDiv.appendChild(fieldRow);
+
+  // Trigger subOptions render for select params
+  fieldRow.querySelectorAll('select.ex-param').forEach(sel => sel.dispatchEvent(new Event('change')));
 }
 
 function addExerciseBlock(exerciseData, containerId) {
