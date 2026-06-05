@@ -2608,9 +2608,10 @@ function renderExerciseParams(block, exerciseName, existingParams) {
     label.style.cssText = 'font-size:14px;color:var(--muted);display:block;margin-bottom:4px;';
     wrapper.appendChild(label);
 
-    const fieldRow = document.createElement('div');
-    fieldRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px;';
-    wrapper.appendChild(fieldRow);
+    const fieldRow = wrapper;
+    fieldRow.style.display = 'flex';
+    fieldRow.style.gap = '6px';
+    fieldRow.style.alignItems = 'flex-end';
 
     if (param.type === 'select') {
       const sel = document.createElement('select');
@@ -2628,6 +2629,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         sel.appendChild(o);
       });
 
+      sel.style.flex = '1';
+      sel.style.overflow = 'hidden';
       fieldRow.appendChild(sel);
 
       // If selected option has subOptions, render second dropdown on same line
@@ -2648,6 +2651,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
             if (s === savedSub) o.selected = true;
             subSel.appendChild(o);
           });
+          subSel.style.flex = '1';
+          subSel.style.overflow = 'hidden';
           fieldRow.appendChild(subSel);
         }
       };
