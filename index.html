@@ -544,11 +544,11 @@
       <!-- ── WEIGHT FORM ─────────────────────────────────────────── -->
       <div id="form-weight" class="log-form">
         <div class="card">
-          <div class="field">
-            <label>Weight (kg)</label>
-            <input type="number" id="w-value" step="0.1" min="0" inputmode="decimal">
-          </div>
-          <div class="field-row">
+          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="field">
+              <label>Weight (kg)</label>
+              <input type="number" id="w-value" step="0.1" min="0" inputmode="decimal">
+            </div>
             <div class="field">
               <label>Date</label>
               <input type="date" id="w-date">
@@ -605,7 +605,7 @@
             </div>
           </div>
           <div class="field">
-            <label>Note (optional)</label>
+            <label>Note</label>
             <textarea id="wo-note"></textarea>
           </div>
         </div>
@@ -673,12 +673,12 @@
         <div class="card">
           <div class="field-row">
             <div class="field">
-              <label>Date</label>
-              <input type="date" id="wk-date">
-            </div>
-            <div class="field">
               <label>Rise time</label>
               <input type="time" id="wk-time">
+            </div>
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="wk-date">
             </div>
           </div>
           <button class="btn btn-primary btn-full" onclick="saveWake()">Save</button>
@@ -2595,7 +2595,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       const sel = document.createElement('select');
       sel.className = 'ex-param';
       sel.dataset.param = param.name;
-      sel.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;';
+      sel.style.cssText = 'font-size:13px; padding:3px 6px; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text); font-family:inherit;';
 
       // Handle both flat strings and nested {value, subOptions} objects
       param.options.forEach(opt => {
@@ -2924,7 +2924,7 @@ function buildViewBody(e) {
   }
 
   if (e.type === 'rise') {
-    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}</div>`;
+    return `<div class="card">${row('Date', e.date)}${row('Rise time', e.time)}</div>`;
   }
 
   if (e.type === 'meal') {
@@ -2960,7 +2960,7 @@ function buildViewBody(e) {
       ${row('Start', e.startTime)}
       ${row('Activity', e.activityType)}
       ${row('Distance', e.distance  != null ? e.distance  + ' km'  : null)}
-      ${row('End time', e.endTime || null)}
+      ${row('End', e.endTime || null)}
       ${row('Avg HR',   e.hrAvg     != null ? e.hrAvg     + ' bpm' : null)}
       ${row('Max HR',   e.hrMax     != null ? e.hrMax     + ' bpm' : null)}
       ${row('Elevation',e.elevationGain != null ? e.elevationGain + ' m' : null)}
@@ -2999,7 +2999,7 @@ function buildViewBody(e) {
     return `<div class="card">
       ${row('Date', e.date)}
       ${row('Start', e.startTime)}
-      ${row('End time', e.endTime || null)}
+      ${row('End', e.endTime || null)}
       ${row('Note', e.note)}
     </div>
     ${exHTML ? `<div class="card">${exHTML}</div>` : ''}`;
