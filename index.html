@@ -188,7 +188,7 @@
       font-size: 16px;  /* 16px prevents iOS zoom on focus */
       color: var(--text);
     }
-    .field textarea { min-height: 0; height: 42px; resize: vertical; }
+    .field textarea { min-height: 0; height: 32px; resize: vertical; }
 
     /* ── Global input height ──────────────────────────────────────── */
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -417,6 +417,7 @@
     .exercise-header select,
     .exercise-header input[type=text] {
       flex: 1;
+      height: auto;
       padding: 8px 10px;
       background: var(--bg);
       border: 1px solid var(--border);
@@ -2322,7 +2323,7 @@ function addMealItemBlock(itemData, interactive) {
       `<input type="number" class="mi-pro" min="0" inputmode="decimal" style="${inputStyle}">` +
     '</div>' +
     '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
-      '<textarea class="mi-note" style="height:42px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
+      '<textarea class="mi-note" style="height:32px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
@@ -3130,7 +3131,7 @@ function addSheetMealItemBlock(itemData, interactive) {
       `<input type="number" class="mi-pro" min="0" inputmode="decimal" style="${iStyle}">` +
     '</div>' +
     '<div class="field"><label style="font-size:12px;color:var(--muted)">Note (optional)</label>' +
-      '<textarea class="mi-note" style="height:42px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
+      '<textarea class="mi-note" style="height:32px;resize:vertical;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:16px;color:var(--text);padding:8px 10px;"></textarea>' +
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
