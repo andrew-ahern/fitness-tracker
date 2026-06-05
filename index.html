@@ -2596,7 +2596,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
   if (!paramsDiv) {
     paramsDiv = document.createElement('div');
     paramsDiv.className = 'ex-params';
-    paramsDiv.style.cssText = 'margin:6px 0 8px 0;';
+    paramsDiv.style.cssText = 'margin:0 0 0.85rem 0;';
     // Insert params after the exercise select wrapper div
     const header = block.querySelector('[style*="position:relative"]') || block.querySelector('.field');
     header.after(paramsDiv);
