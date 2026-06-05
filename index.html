@@ -417,8 +417,8 @@
     .exercise-header select,
     .exercise-header input[type=text] {
       flex: 1;
-      height: auto;
-      padding: 8px 10px;
+      height: 32px;
+      padding: 5px 10px;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -2021,6 +2021,7 @@ function clearDraftAndForm(type) {
     resetGymForm();
   } else if (type === 'cardio') {
     ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note'].forEach(id => setVal(id, ''));
+    const cNote = document.getElementById('c-note'); if (cNote) cNote.style.height = '';
     refreshDateTime('cardio');
   } else if (type === 'rise') {
     refreshDateTime('rise');
@@ -2774,7 +2775,7 @@ function resetGymForm() {
   setVal('wo-date', today());
   setVal('wo-starttime', nowTime());
   setVal('wo-endtime', '');
-  setVal('wo-note', '');
+  setVal('wo-note', ''); const woNote = document.getElementById('wo-note'); if (woNote) woNote.style.height = '';
   document.getElementById('exercises-container').innerHTML = '';
   exerciseCount = 0;
   addExerciseBlock();
