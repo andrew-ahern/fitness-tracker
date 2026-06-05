@@ -2313,7 +2313,7 @@ function addMealItemBlock(itemData, interactive) {
   // Using CSS field-type classes instead of inline styles
 
   block.innerHTML =
-    '<div class="field"><label>Item</label></div>' +
+    '<label style="font-size:14px;color:var(--muted);display:block;margin-bottom:4px;">Item</label>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
@@ -2601,11 +2601,11 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       ? existingParams[param.name] : param.default;
 
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:flex; align-items:center; gap:4px; font-size:13px;';
+    wrapper.style.cssText = 'margin-bottom:6px;';
 
     const label = document.createElement('label');
     label.textContent = param.type === 'select' ? 'Variant' : param.name.charAt(0).toUpperCase() + param.name.slice(1);
-    label.style.cssText = 'color:var(--muted); font-size:13px;';
+    label.style.cssText = 'font-size:14px;color:var(--muted);display:block;margin-bottom:4px;';
     wrapper.appendChild(label);
 
     if (param.type === 'select') {
@@ -2957,8 +2957,7 @@ function buildViewBody(e) {
       return `<div class="card-row">
         <div>
           <div style="font-size:15px;font-weight:500">${item.name || 'Item ' + (i+1)}${qtyStr}</div>
-          <div style="font-size:13px;color:var(--muted)">${parts.join(' · ')}</div>
-          ${item.note ? `<div style="font-size:12px;color:var(--muted)">Note: ${item.note}</div>` : ''}
+          <div style="font-size:13px;color:var(--muted)">${[...parts, ...(item.note ? [item.note] : [])].join(' · ')}</div>
         </div>
       </div>`;
     }).join('');
@@ -3122,7 +3121,7 @@ function addSheetMealItemBlock(itemData, interactive) {
   // CSS field-type classes used instead of inline styles
 
   block.innerHTML =
-    '<div class="field"><label>Item</label></div>' +
+    '<label style="font-size:14px;color:var(--muted);display:block;margin-bottom:4px;">Item</label>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
