@@ -2584,7 +2584,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
     paramsDiv = document.createElement('div');
     paramsDiv.className = 'ex-params';
     paramsDiv.style.cssText = 'margin:6px 0 8px 0; display:flex; flex-wrap:wrap; gap:8px;';
-    const header = block.querySelector('.exercise-header');
+    // Insert params after the exercise select wrapper div
+    const header = block.querySelector('[style*="position:relative"]') || block.querySelector('.field');
     header.after(paramsDiv);
   }
   paramsDiv.innerHTML = '';
