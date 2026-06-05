@@ -2609,7 +2609,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
     wrapper.appendChild(label);
 
     const fieldRow = document.createElement('div');
-    fieldRow.style.cssText = 'display:flex;gap:6px;align-items:flex-end;';
+    fieldRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:end;';
     wrapper.appendChild(fieldRow);
 
     if (param.type === 'select') {
@@ -2627,8 +2627,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         if (optVal === savedVal) o.selected = true;
         sel.appendChild(o);
       });
-      sel.style.width = '50%';
-      sel.style.boxSizing = 'border-box';
+
       fieldRow.appendChild(sel);
 
       // If selected option has subOptions, render second dropdown on same line
@@ -2641,8 +2640,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
           const subSel = document.createElement('select');
           subSel.className = 'ex-param-sub field-select';
           subSel.dataset.param = param.name + '_sub';
-          subSel.style.width = '50%';
-          subSel.style.boxSizing = 'border-box';
+
           subOpts.forEach(s => {
             const o = document.createElement('option');
             o.value = s; o.textContent = s;
@@ -2659,7 +2657,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       inp.type = 'number'; inp.className = 'ex-param';
       inp.dataset.param = param.name;
       inp.value = val != null ? val : '';
-      inp.className += ' field-number'; inp.style.width = '50%'; inp.style.boxSizing = 'border-box';
+      inp.className += ' field-number';
       inp.inputMode = 'decimal';
       fieldRow.appendChild(inp);
       if (param.unit) {
