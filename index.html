@@ -2608,6 +2608,10 @@ function renderExerciseParams(block, exerciseName, existingParams) {
     label.style.cssText = 'font-size:14px;color:var(--muted);display:block;margin-bottom:4px;';
     wrapper.appendChild(label);
 
+    const fieldRow = document.createElement('div');
+    fieldRow.style.cssText = 'display:flex;gap:6px;align-items:flex-end;';
+    wrapper.appendChild(fieldRow);
+
     if (param.type === 'select') {
       const sel = document.createElement('select');
       sel.className = 'ex-param';
@@ -2623,26 +2627,20 @@ function renderExerciseParams(block, exerciseName, existingParams) {
         if (optVal === savedVal) o.selected = true;
         sel.appendChild(o);
       });
-      wrapper.appendChild(sel);
+      sel.style.maxWidth = '180px';
+      fieldRow.appendChild(sel);
 
-      // If selected option has subOptions, render a second dropdown
+      // If selected option has subOptions, render second dropdown on same line
       const updateSubOptions = () => {
-        // Remove any existing sub-select wrapper (sibling of wrapper)
-        let next = wrapper.nextElementSibling;
-        while (next && next.querySelector('.ex-param-sub')) {
-          const toRemove = next;
-          next = next.nextElementSibling;
-          toRemove.remove();
-        }
+        // Remove any existing sub-select from fieldRow
+        fieldRow.querySelectorAll('.ex-param-sub').forEach(el => el.remove());
         const selectedOpt = param.options.find(o => (typeof o === 'object' ? o.value : o) === sel.value);
         const subOpts = (selectedOpt && typeof selectedOpt === 'object') ? selectedOpt.subOptions : [];
         if (subOpts && subOpts.length > 0) {
-          const subWrapper = document.createElement('div');
-          subWrapper.style.cssText = 'display:flex; align-items:center; gap:4px; font-size:13px;';
           const subSel = document.createElement('select');
-          subSel.className = 'ex-param-sub';
+          subSel.className = 'ex-param-sub field-select';
           subSel.dataset.param = param.name + '_sub';
-          subSel.className += ' field-select';
+          subSel.style.maxWidth = '180px';
           subOpts.forEach(s => {
             const o = document.createElement('option');
             o.value = s; o.textContent = s;
@@ -2650,8 +2648,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
             if (s === savedSub) o.selected = true;
             subSel.appendChild(o);
           });
-          subWrapper.appendChild(subSel);
-          wrapper.after(subWrapper);
+          fieldRow.appendChild(subSel);
         }
       };
       sel.addEventListener('change', updateSubOptions);
@@ -2662,12 +2659,12 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       inp.value = val != null ? val : '';
       inp.className += ' field-number'; inp.style.width = '70px';
       inp.inputMode = 'decimal';
-      wrapper.appendChild(inp);
+      fieldRow.appendChild(inp);
       if (param.unit) {
         const unit = document.createElement('span');
         unit.textContent = param.unit === 'deg' ? '°' : param.unit;
         unit.style.color = 'var(--muted)';
-        wrapper.appendChild(unit);
+        fieldRow.appendChild(unit);
       }
     }
     paramsDiv.appendChild(wrapper);
@@ -2676,6 +2673,7 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       const selEl = wrapper.querySelector('select.ex-param');
       if (selEl) selEl.dispatchEvent(new Event('change'));
     }
+
   });
 }
 
