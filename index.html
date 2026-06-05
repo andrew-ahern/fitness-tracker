@@ -2275,7 +2275,7 @@ function buildMealItemOptions(selectedName) {
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push(i);
   });
-  let opts = '<option value="">-- select item --</option>';
+  let opts = '';
   const keys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
     if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
@@ -2311,6 +2311,7 @@ function addMealItemBlock(itemData, interactive) {
   // Using CSS field-type classes instead of inline styles
 
   block.innerHTML =
+    '<div class="field"><label>Item</label></div>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
@@ -2320,10 +2321,10 @@ function addMealItemBlock(itemData, interactive) {
     '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
       '<input type="text" class="mi-name field-text" placeholder="Item name">' +
     '</div>' +
-    '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:6px;margin-bottom:2px;">' +
+    '<div class="set-labels" style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div><div class="set-label">Note</div>' +
     '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:6px;margin-bottom:6px;">' +
+    '<div style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:6px;">' +
       '<input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;">' +
       '<input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;">' +
       '<textarea class="mi-note field-textarea"></textarea>' +
@@ -2568,7 +2569,7 @@ function buildExerciseOptions(selectedName) {
     if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
     else opts += items;
   });
-  return `<option value="">— select exercise —</option>${opts}`;
+  return opts;
 }
 
 function getExerciseLibItem(name) {
@@ -2600,8 +2601,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
     wrapper.style.cssText = 'display:flex; align-items:center; gap:4px; font-size:13px;';
 
     const label = document.createElement('label');
-    label.textContent = param.name + ':';
-    label.style.cssText = 'color:var(--muted); text-transform:capitalize;';
+    label.textContent = param.type === 'select' ? 'Variant' : param.name.charAt(0).toUpperCase() + param.name.slice(1);
+    label.style.cssText = 'color:var(--muted); font-size:13px;';
     wrapper.appendChild(label);
 
     if (param.type === 'select') {
@@ -2689,11 +2690,13 @@ function addExerciseBlock(exerciseData, containerId) {
   block.id = blockId;
 
   block.innerHTML =
-    '<div class="exercise-header">' +
-      '<select class="ex-name field-select" style="flex:1">' +
-        buildExerciseOptions(exerciseData ? exerciseData.name : '') +
-      '</select>' +
-      '<button class="del-btn" title="Remove exercise">&times;</button>' +
+    '<div style="position:relative;">' +
+      '<div class="field"><label>Exercise</label>' +
+        '<select class="ex-name field-select">' +
+          buildExerciseOptions(exerciseData ? exerciseData.name : '') +
+        '</select>' +
+      '</div>' +
+      '<button class="del-btn" title="Remove exercise" style="position:absolute;top:0;right:0;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:28px 2fr 2fr 3fr 28px;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label" style="text-align:center">#</div>' +
@@ -3116,6 +3119,7 @@ function addSheetMealItemBlock(itemData, interactive) {
   // CSS field-type classes used instead of inline styles
 
   block.innerHTML =
+    '<div class="field"><label>Item</label></div>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
       '<span style="color:var(--muted);font-size:14px;white-space:nowrap;padding:0 4px">×</span>' +
@@ -3125,10 +3129,10 @@ function addSheetMealItemBlock(itemData, interactive) {
     '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
       '<input type="text" class="mi-name field-text" placeholder="Item name">' +
     '</div>' +
-    '<div class="set-labels" style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:6px;margin-bottom:2px;">' +
+    '<div class="set-labels" style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div><div class="set-label">Note</div>' +
     '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:6px;margin-bottom:6px;">' +
+    '<div style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:6px;">' +
       '<input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;">' +
       '<input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;">' +
       '<textarea class="mi-note field-textarea"></textarea>' +
