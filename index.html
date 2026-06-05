@@ -5335,7 +5335,7 @@ function showTestScreen() {
    Sets per muscle group for selected week
    ════════════════════════════════════════════════════════════════════ */
 
-const MUSCLE_DEFAULT_GROUPS = ['chest', 'back', 'delts', 'triceps', 'biceps', 'legs', 'core'];
+const MUSCLE_DEFAULT_GROUPS = ['Chest', 'Triceps', 'Back', 'Biceps', 'Delts', 'Legs', 'Core'];
 
 let muscleChartInstance = null;
 let muscleSelectedWeek  = null;
@@ -5381,8 +5381,8 @@ function getMuscleSetCounts(weekMonday) {
     const entryTime = new Date(ey, emo-1, ed, h, m);
     if (entryTime < weekStart || entryTime >= weekEnd) return;
     e.exercises.forEach(ex => {
-      const lib = db.userAddedExercises.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
-      const group = (lib && lib.group) ? lib.group.toLowerCase().trim() : null;
+      const lib = db.exercises.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
+      const group = (lib && lib.group) ? lib.group.trim() : null;
       const setCount = (ex.sets || []).length;
       if (group) counts[group] = (counts[group] || 0) + setCount;
     });
