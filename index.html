@@ -2688,7 +2688,7 @@ function addExerciseBlock(exerciseData, containerId) {
 
   block.innerHTML =
     '<div class="exercise-header">' +
-      '<select class="ex-name">' +
+      '<select class="ex-name field-select" style="flex:1">' +
         buildExerciseOptions(exerciseData ? exerciseData.name : '') +
       '</select>' +
       '<button class="del-btn" title="Remove exercise">&times;</button>' +
