@@ -2362,7 +2362,7 @@ function buildMealItemOptions(selectedName) {
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push(i);
   });
-  let opts = '';
+  let opts = '<option value="">— select —</option>';
   const keys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
     if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
@@ -2382,7 +2382,7 @@ function buildMealItemOptions(selectedName) {
     else opts += items;
   });
   opts += `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Other (enter manually)</option>`;
-  return opts;
+  return `<option value="">— select —</option>${opts}`;
 }
 
 function addMealItemBlock(itemData, interactive) {
