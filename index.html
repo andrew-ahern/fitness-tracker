@@ -3122,13 +3122,13 @@ function closeSheet() {
 function buildEditForm(e) {
   /* Returns HTML string for the edit form body, pre-filled with entry data. */
   const dateField = (id, val) =>
-    `<div class="field"><label>Date</label><input type="date" id="${id}" value="${val || ''}"></div>`;
+    `<div class="field"><label>Date</label><input type="date" class="field-date" id="${id}" value="${val || ''}"></div>`;
   const timeField = (id, label, val) =>
-    `<div class="field"><label>${label}</label><input type="time" id="${id}" value="${val || ''}"></div>`;
+    `<div class="field"><label>${label}</label><input type="time" class="field-time" id="${id}" value="${val || ''}"></div>`;
   const numField = (id, label, val, step) =>
-    `<div class="field"><label>${label}</label><input type="number" id="${id}" value="${val ?? ''}" step="${step||1}" min="0" inputmode="decimal"></div>`;
+    `<div class="field"><label>${label}</label><input type="number" class="field-number" id="${id}" value="${val ?? ''}" step="${step||1}" min="0" inputmode="decimal"></div>`;
   const textField = (id, label, val) =>
-    `<div class="field"><label>${label}</label><textarea id="${id}">${val || ''}</textarea></div>`;
+    `<div class="field"><label>${label}</label><textarea class="field-textarea" id="${id}">${val || ''}</textarea></div>`;
   const row2 = (...fields) => `<div class="field-row">${fields.join('')}</div>`;
 
   if (e.type === 'weight') {
