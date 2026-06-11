@@ -855,23 +855,33 @@
       <div class="card" id="hidden-forms-card">
         <div class="card-row">
           <div style="font-weight:500">Gym</div>
-          <input type="checkbox" id="show-gym" onchange="toggleFormVisibility('gym', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+          <div id="toggle-show-gym" onclick="toggleFormVisibility('gym', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('gym')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
         </div>
         <div class="card-row">
           <div style="font-weight:500">Cardio</div>
-          <input type="checkbox" id="show-cardio" onchange="toggleFormVisibility('cardio', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+          <div id="toggle-show-cardio" onclick="toggleFormVisibility('cardio', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('cardio')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
         </div>
         <div class="card-row">
           <div style="font-weight:500">Meal</div>
-          <input type="checkbox" id="show-meal" onchange="toggleFormVisibility('meal', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+          <div id="toggle-show-meal" onclick="toggleFormVisibility('meal', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('meal')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
         </div>
         <div class="card-row">
           <div style="font-weight:500">Weight</div>
-          <input type="checkbox" id="show-weight" onchange="toggleFormVisibility('weight', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+          <div id="toggle-show-weight" onclick="toggleFormVisibility('weight', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('weight')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
         </div>
         <div class="card-row" style="border-bottom:none;">
           <div style="font-weight:500">Rise</div>
-          <input type="checkbox" id="show-rise" onchange="toggleFormVisibility('rise', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+          <div id="toggle-show-rise" onclick="toggleFormVisibility('rise', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
         </div>
       </div>
 
@@ -1408,8 +1418,13 @@ function applyFormVisibility() {
   ['gym','cardio','meal','weight','rise'].forEach(type => {
     const tab = document.getElementById('tab-' + type);
     if (tab) tab.style.display = hidden.includes(type) ? 'none' : '';
-    const chk = document.getElementById('show-' + type);
-    if (chk) chk.checked = !hidden.includes(type);
+    const tog = document.getElementById('toggle-show-' + type);
+    if (tog) {
+      const visible = !hidden.includes(type);
+      tog.style.background = visible ? 'var(--accent)' : 'var(--border)';
+      const knob = tog.querySelector('div');
+      if (knob) knob.style.transform = visible ? 'translateX(18px)' : 'none';
+    }
   });
   const activeTab = document.querySelector('.log-tab.active');
   if (activeTab && activeTab.style.display === 'none') {
@@ -1418,11 +1433,13 @@ function applyFormVisibility() {
   }
 }
 
-function toggleFormVisibility(type, visible) {
+function toggleFormVisibility(type, currentlyHidden) {
   if (!db.settings.hiddenForms) db.settings.hiddenForms = [];
-  if (visible) {
+  if (currentlyHidden) {
+    // currently hidden → show it
     db.settings.hiddenForms = db.settings.hiddenForms.filter(t => t !== type);
   } else {
+    // currently visible → hide it
     if (!db.settings.hiddenForms.includes(type)) db.settings.hiddenForms.push(type);
   }
   saveSettings();
@@ -3048,7 +3065,7 @@ function buildViewBody(e) {
         </div>
       </div>`;
     }).join('');
-    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}</div>
+    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}${e.note ? row('Note', e.note) : ''}</div>
     ${itemsHTML ? `<div class="card">${itemsHTML}</div>` : ''}
     <div class="card">
       <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Totals</div>
@@ -3352,6 +3369,7 @@ function saveEdit() {
   else if (entry.type === 'meal') {
     entry.date = str('e-date') || entry.date;
     entry.time = str('e-time') || entry.time;
+    entry.note = str('e-note') || null;
 
     const items = [];
     document.querySelectorAll('#sheet-meal-items-container .exercise-block').forEach(block => {
