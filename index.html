@@ -1403,6 +1403,32 @@ function toggleDarkMode() {
   applyTheme();
 }
 
+function applyFormVisibility() {
+  const hidden = db.settings.hiddenForms || [];
+  ['gym','cardio','meal','weight','rise'].forEach(type => {
+    const tab = document.getElementById('tab-' + type);
+    if (tab) tab.style.display = hidden.includes(type) ? 'none' : '';
+    const chk = document.getElementById('show-' + type);
+    if (chk) chk.checked = !hidden.includes(type);
+  });
+  const activeTab = document.querySelector('.log-tab.active');
+  if (activeTab && activeTab.style.display === 'none') {
+    const firstVisible = document.querySelector('.log-tab:not([style*="display: none"])');
+    if (firstVisible) firstVisible.click();
+  }
+}
+
+function toggleFormVisibility(type, visible) {
+  if (!db.settings.hiddenForms) db.settings.hiddenForms = [];
+  if (visible) {
+    db.settings.hiddenForms = db.settings.hiddenForms.filter(t => t !== type);
+  } else {
+    if (!db.settings.hiddenForms.includes(type)) db.settings.hiddenForms.push(type);
+  }
+  saveSettings();
+  applyFormVisibility();
+}
+
 function saveSettings() {
   const calT    = parseFloat(document.getElementById('cal-target').value);
   const protT   = parseFloat(document.getElementById('prot-target').value);
