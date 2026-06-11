@@ -3132,16 +3132,23 @@ function buildEditForm(e) {
   const row2 = (...fields) => `<div class="field-row">${fields.join('')}</div>`;
 
   if (e.type === 'weight') {
-    return row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
-           numField('e-value', 'Weight (kg)', e.value, '0.1');
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      `<div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">` +
+      numField('e-value', 'Weight (kg)', e.value, '0.1') +
+      dateField('e-date', e.date) + timeField('e-time', 'Time', e.time) +
+      `</div></div>`;
   }
 
   if (e.type === 'rise') {
-    return row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time));
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      row2(timeField('e-time', 'Rise time', e.time), dateField('e-date', e.date)) +
+      `</div>`;
   }
 
   if (e.type === 'meal') {
-    return row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
+      `</div>` +
       `<div id="sheet-meal-items-container" style="margin-top:0.5rem;"></div>
        <button class="add-exercise-btn" onclick="addSheetMealItemBlock(null, true)">+ Add item</button>
        <div class="card" style="margin-top:0.75rem;">
@@ -3156,20 +3163,22 @@ function buildEditForm(e) {
 
   if (e.type === 'cardio') {
     const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
-    return `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype">${actOpts}</select></div>` +
-      row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype">${actOpts}</select></div>` +
+      row2(dateField('e-date', e.date), timeField('e-time', 'Start', e.startTime)) +
       row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
            timeField('e-endtime', 'End', e.endTime)) +
       row2(numField('e-hravg', 'Avg HR (bpm)', e.hrAvg, '1'),
            numField('e-hrmax', 'Max HR (bpm)', e.hrMax, '1')) +
       numField('e-elev', 'Elevation (m)', e.elevationGain, '1') +
-      textField('e-note', 'Note', e.note);
+      textField('e-note', 'Note', e.note) + `</div>`;
   }
 
   if (e.type === 'gym') {
-    return row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
-      timeField('e-endtime', 'End', e.endTime) +
-      textField('e-note', 'Note', e.note) +
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      `<div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">` +
+      dateField('e-date', e.date) + timeField('e-time', 'Start', e.startTime) + timeField('e-endtime', 'End', e.endTime) +
+      `</div>` + textField('e-note', 'Note', e.note) + `</div>` +
       `<div id="sheet-exercises-container" style="margin-top:0.5rem;"></div>
        <button class="add-exercise-btn" onclick="addExerciseBlock(null, 'sheet-exercises-container')">+ Add exercise</button>`;
   }
