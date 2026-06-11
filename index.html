@@ -850,6 +850,31 @@
         </div>
       </div>
 
+      <!-- Entry forms -->
+      <h3>Entry forms</h3>
+      <div class="card" id="hidden-forms-card">
+        <div class="card-row">
+          <div style="font-weight:500">Gym</div>
+          <input type="checkbox" id="show-gym" onchange="toggleFormVisibility('gym', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Cardio</div>
+          <input type="checkbox" id="show-cardio" onchange="toggleFormVisibility('cardio', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Meal</div>
+          <input type="checkbox" id="show-meal" onchange="toggleFormVisibility('meal', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Weight</div>
+          <input type="checkbox" id="show-weight" onchange="toggleFormVisibility('weight', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+        </div>
+        <div class="card-row" style="border-bottom:none;">
+          <div style="font-weight:500">Rise</div>
+          <input type="checkbox" id="show-rise" onchange="toggleFormVisibility('rise', this.checked)" style="width:18px;height:18px;cursor:pointer;">
+        </div>
+      </div>
+
       <!-- Appearance -->
       <h3>Appearance</h3>
       <div class="card">
@@ -1037,7 +1062,8 @@ let db = {
     calTarget: null,
     proteinTarget: null,
     weightTarget: null,
-    riseTarget: null
+    riseTarget: null,
+    hiddenForms: []
   },
   libraryExercises: [],
   libraryCardioActivities: [],
@@ -1096,6 +1122,7 @@ function loadDB() {
         if (!db.mealItems)                 db.mealItems = [];
         if (!db.drafts)                    db.drafts = {};
         if (!db.settings.darkMode)         db.settings.darkMode = false;
+        if (!db.settings.hiddenForms)      db.settings.hiddenForms = [];
         if ('draft' in db)                 delete db.draft;
         // Migrate flat meal entries to multi-item format
         db.logs.forEach(e => {
@@ -1697,12 +1724,32 @@ function renderHistory() {
   if (exFilterEl) {
     if (filter === 'gym') {
       exFilterEl.style.display = 'block';
-      const usedExercises = [...new Set(
+      const usedNames = new Set(
         db.logs.filter(e => e.type === 'gym').flatMap(e => e.exercises.map(ex => ex.name))
-      )].sort();
+      );
       const currentVal = exFilterEl.value;
-      exFilterEl.innerHTML = '<option value="">All exercises</option>' +
-        usedExercises.map(n => `<option value="${n}" ${n === currentVal ? 'selected' : ''}>${n}</option>`).join('');
+      // Build grouped options matching gym entry form
+      const grouped = {};
+      db.exercises.forEach(ex => {
+        const name = typeof ex === 'string' ? ex : ex.name;
+        if (!usedNames.has(name)) return;
+        const g = (ex && ex.group) || '';
+        if (!grouped[g]) grouped[g] = [];
+        grouped[g].push(name);
+      });
+      const groupOrder = [...EXERCISE_GROUP_ORDER, ''];
+      const keys = Object.keys(grouped).sort((a,b) => {
+        const ai = groupOrder.indexOf(a); const bi = groupOrder.indexOf(b);
+        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      });
+      let opts = '<option value="">All exercises</option>';
+      keys.forEach(g => {
+        const label = g === 'newlyAdded' ? 'Newly added' : g;
+        const items = grouped[g].map(n => `<option value="${n}" ${n === currentVal ? 'selected' : ''}>${n}</option>`).join('');
+        if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
+        else opts += items;
+      });
+      exFilterEl.innerHTML = opts;
     } else {
       exFilterEl.style.display = 'none';
       exFilterEl.value = '';
@@ -2145,6 +2192,7 @@ function renderAll() {
   restoreDraft('gym');
   restoreDraft('cardio');
   updateDraftDots();
+  applyFormVisibility();
 }
 
 
@@ -3082,7 +3130,7 @@ function buildEditForm(e) {
 
   if (e.type === 'cardio') {
     const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
-    return `<div class="field"><label>Activity</label><select id="e-acttype">${actOpts}</select></div>` +
+    return `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype">${actOpts}</select></div>` +
       row2(dateField('e-date', e.date), timeField('e-time', 'Start time', e.startTime)) +
       row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
            timeField('e-endtime', 'End', e.endTime)) +
