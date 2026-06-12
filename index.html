@@ -653,14 +653,18 @@
             <label>Activity</label>
             <select id="c-type" class="field-select"></select>
           </div>
-          <div class="field-row">
+          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
             <div class="field">
               <label>Date</label>
               <input type="date" id="c-date" class="field-date">
             </div>
             <div class="field">
-              <label>Start time</label>
+              <label>Start</label>
               <input type="time" id="c-starttime" class="field-time">
+            </div>
+            <div class="field">
+              <label>End</label>
+              <input type="time" id="c-endtime" class="field-time">
             </div>
           </div>
           <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
@@ -2024,6 +2028,7 @@ function saveDraft(type) {
     d.activityType = getVal('c-type');
     d.date         = getVal('c-date');
     d.startTime    = getVal('c-starttime');
+    d.endTime      = getVal('c-endtime');
     d.distance     = getVal('c-dist');
     d.duration     = getVal('c-dur');
     d.hrAvg        = getVal('c-hravg');
@@ -2107,6 +2112,7 @@ function restoreDraft(type) {
   } else if (type === 'cardio') {
     populateCardioActivityDropdown(d.activityType);
     setVal('c-date', d.date);      setVal('c-starttime', d.startTime);
+    setVal('c-endtime', d.endTime);
     setVal('c-dist', d.distance);  setVal('c-dur', d.duration);
     setVal('c-hravg', d.hrAvg);    setVal('c-hrmax', d.hrMax);
     setVal('c-elev', d.elevation); setVal('c-note', d.note);
@@ -2128,7 +2134,7 @@ function clearDraftAndForm(type) {
   } else if (type === 'gym') {
     resetGymForm();
   } else if (type === 'cardio') {
-    ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note'].forEach(id => setVal(id, ''));
+    ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note','c-endtime'].forEach(id => setVal(id, ''));
     const cNote = document.getElementById('c-note'); if (cNote) cNote.style.height = '';
     refreshDateTime('cardio');
   } else if (type === 'rise') {
@@ -2592,6 +2598,7 @@ function saveCardio() {
     type: 'cardio',
     date: getVal('c-date') || today(),
     startTime: getVal('c-starttime') || nowTime(),
+    endTime: getVal('c-endtime') || null,
     activityType: getVal('c-type') || 'Cycle',
     distance: isNaN(dist) ? null : dist,
     duration: isNaN(dur)  ? null : dur,
@@ -2608,7 +2615,7 @@ function saveCardio() {
   showToast('Activity saved ✓');
 
   // Clear numeric fields; leave activity type and date
-  ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note'].forEach(id => setVal(id, ''));
+  ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note','c-endtime'].forEach(id => setVal(id, ''));
   setVal('c-date', today()); setVal('c-starttime', nowTime());
 }
 
@@ -2766,12 +2773,19 @@ function renderExerciseParams(block, exerciseName, existingParams) {
       inp.dataset.param = param.name;
       inp.value = val != null ? val : '';
       inp.inputMode = 'decimal';
-      fieldRow.appendChild(inp);
       if (param.unit) {
+        const cell = document.createElement('div');
+        cell.style.cssText = 'display:flex;align-items:center;gap:4px;';
+        inp.style.flex = '1';
+        inp.style.minWidth = '0';
+        cell.appendChild(inp);
         const unit = document.createElement('span');
         unit.textContent = param.unit === 'deg' ? '°' : param.unit;
-        unit.style.cssText = 'color:var(--muted);align-self:center;';
-        fieldRow.appendChild(unit);
+        unit.style.cssText = 'color:var(--muted);flex-shrink:0;';
+        cell.appendChild(unit);
+        fieldRow.appendChild(cell);
+      } else {
+        fieldRow.appendChild(inp);
       }
     }
   });
@@ -3182,9 +3196,10 @@ function buildEditForm(e) {
     const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
     return `<div class="card" style="margin-bottom:0.75rem;">` +
       `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype">${actOpts}</select></div>` +
-      row2(dateField('e-date', e.date), timeField('e-time', 'Start', e.startTime)) +
-      row2(numField('e-dist', 'Distance (km)', e.distance, '0.1'),
-           timeField('e-endtime', 'End', e.endTime)) +
+      `<div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">` +
+      dateField('e-date', e.date) + timeField('e-time', 'Start', e.startTime) + timeField('e-endtime', 'End', e.endTime) +
+      `</div>` +
+      numField('e-dist', 'Distance (km)', e.distance, '0.1') +
       row2(numField('e-hravg', 'Avg HR (bpm)', e.hrAvg, '1'),
            numField('e-hrmax', 'Max HR (bpm)', e.hrMax, '1')) +
       numField('e-elev', 'Elevation (m)', e.elevationGain, '1') +
