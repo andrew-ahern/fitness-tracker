@@ -362,8 +362,8 @@
         "options": [
           "Dumbbell",
           "Barbell",
-          "Machine, Selectorized",
-          "Machine, Plate-loaded"
+          "Machine, selectorized",
+          "Machine, plate-loaded"
         ]
       }
     ],
