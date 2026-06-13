@@ -1999,7 +1999,7 @@ function saveDraft(type) {
     d.items = [];
     document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
       d.items.push({
-        name:        (() => { const s = block.querySelector('.mi-select'); return s && s.value === '__custom__' ? (block.querySelector('.mi-name')?.value.trim() || '') : (s ? s.value : (block.querySelector('.mi-name')?.value.trim() || '')); })(),
+        name:        (() => { const t = block.querySelector('.mi-manual-toggle'); const isManual = t && t.dataset.manual === 'true'; return isManual ? (block.querySelector('.mi-name')?.value.trim() || '') : (block.querySelector('.mi-select')?.value || ''); })(),
         quantity:    block.querySelector('.mi-qty')?.value   || '1',
         calories:    block.querySelector('.mi-cal')?.value   || '',
         protein:     block.querySelector('.mi-pro')?.value   || '',
@@ -2417,9 +2417,26 @@ function buildMealItemOptions(selectedName) {
     if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
     else opts += items;
   });
-  const customSelected = (selectedName === '__custom__' || !selectedName);
-  const customOpt = `<option value="__custom__" ${customSelected ? 'selected' : ''}>Enter manually</option>`;
-  return customOpt + opts;
+  return `<option value="">— select —</option>${opts}`;
+}
+
+function setMealItemMode(block, manual) {
+  const toggle = block.querySelector('.mi-manual-toggle');
+  const knob = toggle.querySelector('div');
+  const selInput = block.querySelector('.mi-select');
+  const nameInput = block.querySelector('.mi-name');
+  toggle.dataset.manual = manual ? 'true' : 'false';
+  toggle.style.background = manual ? 'var(--accent)' : 'var(--border)';
+  knob.style.transform = manual ? 'translateX(16px)' : 'none';
+  if (manual) {
+    selInput.style.display = 'none';
+    nameInput.style.display = '';
+    selInput.value = '';
+  } else {
+    nameInput.style.display = 'none';
+    selInput.style.display = '';
+    nameInput.value = '';
+  }
 }
 
 function addMealItemBlock(itemData, interactive) {
@@ -2435,15 +2452,20 @@ function addMealItemBlock(itemData, interactive) {
   // Using CSS field-type classes instead of inline styles
 
   block.innerHTML =
-    '<label style="font-size:14px;color:var(--muted);display:block;margin-bottom:4px;">Item</label>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+      '<label style="font-size:14px;color:var(--muted);">Item</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;">' +
+        '<span style="font-size:12px;color:var(--muted);">Manual</span>' +
+        '<div class="mi-manual-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">' +
+          '<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>' +
+        '</div>' +
+      '</label>' +
+    '</div>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
-
+      '<input type="text" class="mi-name field-text" placeholder="Item name" autocapitalize="off" style="flex:1;display:none;">' +
       '<input type="number" class="mi-qty field-number" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;text-align:center;">' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
-    '</div>' +
-    '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
-      '<input type="text" class="mi-name field-text" placeholder="Item name" autocapitalize="off">' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div><div class="set-label">Note</div>' +
@@ -2455,9 +2477,9 @@ function addMealItemBlock(itemData, interactive) {
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
-  const nameRow   = block.querySelector('.mi-custom-name-row');
   const nameInput = block.querySelector('.mi-name');
   const qtyInput  = block.querySelector('.mi-qty');
+  const toggle    = block.querySelector('.mi-manual-toggle');
 
   // Delete button
   block.querySelector('.del-btn').addEventListener('click', () => {
@@ -2470,17 +2492,20 @@ function addMealItemBlock(itemData, interactive) {
     el.addEventListener('change', () => { updateMealTotals(); saveDraft('meal'); });
   });
 
-  // Select change: auto-fill macros or show custom name row
+  // Manual/library toggle
+  toggle.addEventListener('click', () => {
+    const currentlyManual = toggle.dataset.manual === 'true';
+    setMealItemMode(block, !currentlyManual);
+    block.querySelector('.mi-cal').value = '';
+    block.querySelector('.mi-pro').value = '';
+    block._unitMacros = null;
+    updateMealTotals(); saveDraft('meal');
+  });
+
+  // Select change: auto-fill macros from library item
   selInput.addEventListener('change', () => {
     const val = selInput.value;
-    if (val === '__custom__') {
-      nameRow.style.display = 'block';
-      nameInput.value = '';
-      block.querySelector('.mi-cal').value = '';
-      block.querySelector('.mi-pro').value = '';
-      block._unitMacros = null;
-    } else if (val) {
-      nameRow.style.display = 'none';
+    if (val) {
       const match = (db.mealItems || []).find(i => i.name === val);
       if (match) {
         const qty = parseFloat(qtyInput.value) || 1;
@@ -2489,7 +2514,6 @@ function addMealItemBlock(itemData, interactive) {
         block._unitMacros = { cal: match.calories, pro: match.protein };
       }
     } else {
-      nameRow.style.display = 'none';
       block._unitMacros = null;
     }
     updateMealTotals(); saveDraft('meal');
@@ -2507,15 +2531,15 @@ function addMealItemBlock(itemData, interactive) {
 
   // Populate from existing data if provided (macros are already effective values)
   if (itemData) {
-    // Try to find item in library by name
     const libMatch = (db.mealItems || []).find(i => i.name === itemData.name);
     if (libMatch) {
+      setMealItemMode(block, false);
       selInput.value = itemData.name;
-      nameRow.style.display = 'none';
     } else if (itemData.name) {
-      selInput.value = '__custom__';
-      nameRow.style.display = 'block';
+      setMealItemMode(block, true);
       nameInput.value = itemData.name;
+    } else {
+      setMealItemMode(block, true);
     }
     if (itemData.quantity != null) qtyInput.value = itemData.quantity;
     if (itemData.calories != null) block.querySelector('.mi-cal').value = itemData.calories;
@@ -2523,8 +2547,8 @@ function addMealItemBlock(itemData, interactive) {
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
-    // New block defaults to "Enter manually" — show name row
-    nameRow.style.display = 'block';
+    // New block defaults to manual entry
+    setMealItemMode(block, true);
   }
 
   document.getElementById('meal-items-container').appendChild(block);
@@ -2556,10 +2580,12 @@ function saveMeal() {
   const items = [];
   document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
     const num = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
+    const toggle = block.querySelector('.mi-manual-toggle');
+    const isManual = toggle && toggle.dataset.manual === 'true';
     const miSel = block.querySelector('.mi-select');
-    const name = miSel && miSel.value === '__custom__'
+    const name = isManual
       ? (block.querySelector('.mi-name')?.value.trim() || '')
-      : (miSel ? miSel.value : (block.querySelector('.mi-name')?.value.trim() || ''));
+      : (miSel ? miSel.value : '');
     const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
     const cal  = num('.mi-cal'), pro = num('.mi-pro');
     const note = block.querySelector('.mi-note')?.value.trim() || null;
@@ -3269,15 +3295,20 @@ function addSheetMealItemBlock(itemData, interactive) {
   // CSS field-type classes used instead of inline styles
 
   block.innerHTML =
-    '<label style="font-size:14px;color:var(--muted);display:block;margin-bottom:4px;">Item</label>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+      '<label style="font-size:14px;color:var(--muted);">Item</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;">' +
+        '<span style="font-size:12px;color:var(--muted);">Manual</span>' +
+        '<div class="mi-manual-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">' +
+          '<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>' +
+        '</div>' +
+      '</label>' +
+    '</div>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
-
+      '<input type="text" class="mi-name field-text" placeholder="Item name" autocapitalize="off" style="flex:1;display:none;">' +
       '<input type="number" class="mi-qty field-number" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;text-align:center;">' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
-    '</div>' +
-    '<div class="mi-custom-name-row" style="display:none;margin-bottom:6px;">' +
-      '<input type="text" class="mi-name field-text" placeholder="Item name" autocapitalize="off">' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label">kcal</div><div class="set-label">P (g)</div><div class="set-label">Note</div>' +
@@ -3289,9 +3320,9 @@ function addSheetMealItemBlock(itemData, interactive) {
     '</div>';
 
   const selInput  = block.querySelector('.mi-select');
-  const nameRow   = block.querySelector('.mi-custom-name-row');
   const nameInput = block.querySelector('.mi-name');
   const qtyInput  = block.querySelector('.mi-qty');
+  const toggle    = block.querySelector('.mi-manual-toggle');
 
   block.querySelector('.del-btn').addEventListener('click', () => {
     block.remove(); updateSheetMealTotals();
@@ -3301,16 +3332,18 @@ function addSheetMealItemBlock(itemData, interactive) {
     el.addEventListener('change', () => updateSheetMealTotals());
   });
 
+  toggle.addEventListener('click', () => {
+    const currentlyManual = toggle.dataset.manual === 'true';
+    setMealItemMode(block, !currentlyManual);
+    block.querySelector('.mi-cal').value = '';
+    block.querySelector('.mi-pro').value = '';
+    block._unitMacros = null;
+    updateSheetMealTotals();
+  });
+
   selInput.addEventListener('change', () => {
     const val = selInput.value;
-    if (val === '__custom__') {
-      nameRow.style.display = 'block';
-      nameInput.value = '';
-      block.querySelector('.mi-cal').value = '';
-      block.querySelector('.mi-pro').value = '';
-      block._unitMacros = null;
-    } else if (val) {
-      nameRow.style.display = 'none';
+    if (val) {
       const match = (db.mealItems || []).find(i => i.name === val);
       if (match) {
         const qty = parseFloat(qtyInput.value) || 1;
@@ -3319,7 +3352,6 @@ function addSheetMealItemBlock(itemData, interactive) {
         block._unitMacros = { cal: match.calories, pro: match.protein };
       }
     } else {
-      nameRow.style.display = 'none';
       block._unitMacros = null;
     }
     updateSheetMealTotals();
@@ -3337,12 +3369,13 @@ function addSheetMealItemBlock(itemData, interactive) {
   if (itemData) {
     const libMatch = (db.mealItems || []).find(i => i.name === itemData.name);
     if (libMatch) {
+      setMealItemMode(block, false);
       selInput.value = itemData.name;
-      nameRow.style.display = 'none';
     } else if (itemData.name) {
-      selInput.value = '__custom__';
-      nameRow.style.display = 'block';
+      setMealItemMode(block, true);
       nameInput.value = itemData.name;
+    } else {
+      setMealItemMode(block, true);
     }
     if (itemData.quantity != null) qtyInput.value = itemData.quantity;
     if (itemData.calories != null) block.querySelector('.mi-cal').value = itemData.calories;
@@ -3350,8 +3383,7 @@ function addSheetMealItemBlock(itemData, interactive) {
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
-    // New block defaults to "Enter manually" — show name row
-    nameRow.style.display = 'block';
+    setMealItemMode(block, true);
   }
 
   document.getElementById('sheet-meal-items-container').appendChild(block);
@@ -3412,10 +3444,12 @@ function saveEdit() {
     const items = [];
     document.querySelectorAll('#sheet-meal-items-container .exercise-block').forEach(block => {
       const numB = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
+      const toggle = block.querySelector('.mi-manual-toggle');
+      const isManual = toggle && toggle.dataset.manual === 'true';
       const miSel = block.querySelector('.mi-select');
-    const name = miSel && miSel.value === '__custom__'
-      ? (block.querySelector('.mi-name')?.value.trim() || '')
-      : (miSel ? miSel.value : (block.querySelector('.mi-name')?.value.trim() || ''));
+      const name = isManual
+        ? (block.querySelector('.mi-name')?.value.trim() || '')
+        : (miSel ? miSel.value : '');
       const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
       const cal  = numB('.mi-cal'), pro = numB('.mi-pro');
       const note = block.querySelector('.mi-note')?.value.trim() || null;
