@@ -1,10 +1,22 @@
 [
   {
     "name": "Cycle",
-    "active": true
+    "active": true,
+    "group": null
   },
   {
     "name": "Run",
-    "active": true
+    "active": true,
+    "group": null
+  },
+  {
+    "name": "Tennis",
+    "active": true,
+    "group": null
+  },
+  {
+    "name": "Squash",
+    "active": true,
+    "group": null
   }
 ]
