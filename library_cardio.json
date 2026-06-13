@@ -18,5 +18,10 @@
     "name": "Squash",
     "active": true,
     "group": null
+  },
+  {
+    "name": "Hike",
+    "active": true,
+    "group": null
   }
 ]
