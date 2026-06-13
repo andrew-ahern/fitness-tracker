@@ -362,13 +362,8 @@
         "options": [
           "Dumbbell",
           "Barbell",
-          {
-            "value": "Machine",
-            "subOptions": [
-              "Selectorized",
-              "Plate-loaded"
-            ]
-          }
+          "Machine, Selectorized",
+          "Machine, Plate-loaded"
         ]
       }
     ],
