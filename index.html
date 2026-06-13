@@ -2148,6 +2148,7 @@ function clearDraftAndForm(type) {
   } else if (type === 'cardio') {
     ['c-dist','c-dur','c-hravg','c-hrmax','c-elev','c-note','c-endtime'].forEach(id => setVal(id, ''));
     const cNote = document.getElementById('c-note'); if (cNote) cNote.style.height = '';
+    populateCardioActivityDropdown();
     refreshDateTime('cardio');
   } else if (type === 'rise') {
     refreshDateTime('rise');
