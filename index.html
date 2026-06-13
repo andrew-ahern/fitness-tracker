@@ -662,28 +662,30 @@
               <input type="time" id="c-endtime" class="field-time">
             </div>
           </div>
-          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
-            <div class="field">
-              <label>Distance (km)</label>
-              <input type="number" id="c-dist" class="field-number" step="0.1" min="0" inputmode="decimal">
+          <div id="c-distfields-wrapper">
+            <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
+              <div class="field">
+                <label>Distance (km)</label>
+                <input type="number" id="c-dist" class="field-number" step="0.1" min="0" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label>Duration (min)</label>
+                <input type="number" id="c-dur" class="field-number" min="0" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label>Elevation (m)</label>
+                <input type="number" id="c-elev" class="field-number" min="0" inputmode="numeric">
+              </div>
             </div>
-            <div class="field">
-              <label>Duration (min)</label>
-              <input type="number" id="c-dur" class="field-number" min="0" inputmode="numeric">
-            </div>
-            <div class="field">
-              <label>Elevation (m)</label>
-              <input type="number" id="c-elev" class="field-number" min="0" inputmode="numeric">
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label>Avg HR (bpm)</label>
-              <input type="number" id="c-hravg" class="field-number" min="0" inputmode="numeric">
-            </div>
-            <div class="field">
-              <label>Max HR (bpm)</label>
-              <input type="number" id="c-hrmax" class="field-number" min="0" inputmode="numeric">
+            <div class="field-row">
+              <div class="field">
+                <label>Avg HR (bpm)</label>
+                <input type="number" id="c-hravg" class="field-number" min="0" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label>Max HR (bpm)</label>
+                <input type="number" id="c-hrmax" class="field-number" min="0" inputmode="numeric">
+              </div>
             </div>
           </div>
           <div class="field">
@@ -1752,6 +1754,21 @@ function populateCardioActivityDropdown(selectedVal) {
     else cOpts += items;
   });
   sel.innerHTML = cOpts;
+  updateCardioFieldVisibility();
+  sel.removeEventListener('change', updateCardioFieldVisibility);
+  sel.addEventListener('change', updateCardioFieldVisibility);
+}
+
+const CARDIO_DISTANCE_ACTIVITIES = ['Cycle', 'Run'];
+function updateCardioFieldVisibility() {
+  const sel = document.getElementById('c-type');
+  const wrapper = document.getElementById('c-distfields-wrapper');
+  if (!sel || !wrapper) return;
+  const show = CARDIO_DISTANCE_ACTIVITIES.includes(sel.value);
+  wrapper.style.display = show ? '' : 'none';
+  if (!show) {
+    ['c-dist','c-dur','c-elev','c-hravg','c-hrmax'].forEach(id => setVal(id, ''));
+  }
 }
 
 
@@ -2399,8 +2416,9 @@ function buildMealItemOptions(selectedName) {
     if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
     else opts += items;
   });
-  const customOpt = `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Enter manually</option>`;
-  return `<option value="">— select —</option>${customOpt}${opts}`;
+  const customSelected = (selectedName === '__custom__' || !selectedName);
+  const customOpt = `<option value="__custom__" ${customSelected ? 'selected' : ''}>Enter manually</option>`;
+  return customOpt + opts;
 }
 
 function addMealItemBlock(itemData, interactive) {
@@ -2503,6 +2521,9 @@ function addMealItemBlock(itemData, interactive) {
     if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
+  } else {
+    // New block defaults to "Enter manually" — show name row
+    nameRow.style.display = 'block';
   }
 
   document.getElementById('meal-items-container').appendChild(block);
@@ -3189,15 +3210,18 @@ function buildEditForm(e) {
 
   if (e.type === 'cardio') {
     const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
+    const showDist = CARDIO_DISTANCE_ACTIVITIES.includes(e.activityType);
     return `<div class="card" style="margin-bottom:0.75rem;">` +
-      `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype">${actOpts}</select></div>` +
+      `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype" onchange="document.getElementById('e-distfields-wrapper').style.display = CARDIO_DISTANCE_ACTIVITIES.includes(this.value) ? '' : 'none';">${actOpts}</select></div>` +
       `<div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">` +
       dateField('e-date', e.date) + timeField('e-time', 'Start', e.startTime) + timeField('e-endtime', 'End', e.endTime) +
       `</div>` +
+      `<div id="e-distfields-wrapper" style="${showDist ? '' : 'display:none;'}">` +
       numField('e-dist', 'Distance (km)', e.distance, '0.1') +
       row2(numField('e-hravg', 'Avg HR (bpm)', e.hrAvg, '1'),
            numField('e-hrmax', 'Max HR (bpm)', e.hrMax, '1')) +
       numField('e-elev', 'Elevation (m)', e.elevationGain, '1') +
+      `</div>` +
       textField('e-note', 'Note', e.note) + `</div>`;
   }
 
@@ -3324,6 +3348,9 @@ function addSheetMealItemBlock(itemData, interactive) {
     if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
+  } else {
+    // New block defaults to "Enter manually" — show name row
+    nameRow.style.display = 'block';
   }
 
   document.getElementById('sheet-meal-items-container').appendChild(block);
