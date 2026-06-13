@@ -322,16 +322,11 @@
         "options": [
           "Dumbbell, single-arm",
           "Hammer, single-arm",
-          "EZ bar"
+          "EZ bar",
+          "Machine"
         ]
       }
     ],
-    "group": "Biceps",
-    "active": true
-  },
-  {
-    "name": "Preacher curl machine",
-    "params": [],
     "group": "Biceps",
     "active": true
   },
@@ -350,16 +345,11 @@
         "options": [
           "Cable, single-arm",
           "Dumbbell, single-arm",
-          "Dumbbell, bilateral"
+          "Dumbbell, bilateral",
+          "Machine"
         ]
       }
     ],
-    "group": "Delts",
-    "active": true
-  },
-  {
-    "name": "Lateral raise machine",
-    "params": [],
     "group": "Delts",
     "active": true
   },
@@ -371,22 +361,14 @@
         "type": "select",
         "options": [
           "Dumbbell",
-          "Barbell"
-        ]
-      }
-    ],
-    "group": "Delts",
-    "active": true
-  },
-  {
-    "name": "Overhead press machine",
-    "params": [
-      {
-        "name": "variant",
-        "type": "select",
-        "options": [
-          "Selectorized",
-          "Plate-loaded"
+          "Barbell",
+          {
+            "value": "Machine",
+            "subOptions": [
+              "Selectorized",
+              "Plate-loaded"
+            ]
+          }
         ]
       }
     ],
