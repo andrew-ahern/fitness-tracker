@@ -2399,7 +2399,7 @@ function buildMealItemOptions(selectedName) {
     if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
     else opts += items;
   });
-  const customOpt = `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Other (enter manually)</option>`;
+  const customOpt = `<option value="__custom__" ${selectedName === '__custom__' ? 'selected' : ''}>Enter manually</option>`;
   return `<option value="">— select —</option>${customOpt}${opts}`;
 }
 
