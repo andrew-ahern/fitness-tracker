@@ -2551,8 +2551,8 @@ function addMealItemBlock(itemData, interactive) {
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
-    // New block defaults to manual entry
-    setMealItemMode(block, true);
+    // New block defaults to library mode
+    setMealItemMode(block, false);
   }
 
   document.getElementById('meal-items-container').appendChild(block);
@@ -3387,7 +3387,7 @@ function addSheetMealItemBlock(itemData, interactive) {
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
-    setMealItemMode(block, true);
+    setMealItemMode(block, false);
   }
 
   document.getElementById('sheet-meal-items-container').appendChild(block);
