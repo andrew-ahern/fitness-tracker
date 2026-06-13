@@ -2425,6 +2425,7 @@ function setMealItemMode(block, manual) {
   const knob = toggle.querySelector('div');
   const selInput = block.querySelector('.mi-select');
   const nameInput = block.querySelector('.mi-name');
+  const qtyInput = block.querySelector('.mi-qty');
   toggle.dataset.manual = manual ? 'true' : 'false';
   toggle.style.background = manual ? 'var(--accent)' : 'var(--border)';
   knob.style.transform = manual ? 'translateX(16px)' : 'none';
@@ -2432,10 +2433,13 @@ function setMealItemMode(block, manual) {
     selInput.style.display = 'none';
     nameInput.style.display = '';
     selInput.value = '';
+    qtyInput.style.display = 'none';
+    qtyInput.value = '1';
   } else {
     nameInput.style.display = 'none';
     selInput.style.display = '';
     nameInput.value = '';
+    qtyInput.style.display = '';
   }
 }
 
