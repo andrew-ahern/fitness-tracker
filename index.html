@@ -216,6 +216,11 @@
       resize: vertical;
     }
     .field-textarea:focus { outline: none; border-color: var(--accent); }
+    .field-number:disabled, .field-time:disabled {
+      color: var(--muted);
+      -webkit-text-fill-color: var(--muted);
+      opacity: 1;
+    }
 
     /* ── Toast notification ───────────────────────────────────────── */
     #toast {
@@ -594,6 +599,10 @@
             <div class="field"><label>Date</label><input type="date" id="m-date" class="field-date"></div>
             <div class="field"><label>Time</label><input type="time" id="m-time" class="field-time"></div>
           </div>
+          <div class="field">
+            <label>Note</label>
+            <textarea id="m-note" class="field-textarea" autocapitalize="off"></textarea>
+          </div>
         </div>
         <!-- Meal items -->
         <div id="meal-items-container"></div>
@@ -851,6 +860,12 @@
         </div>
       </div>
 
+      <!-- Muscle group targets -->
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Sets per week</div>
+        <div id="muscle-targets-card"></div>
+      </div>
+
       <!-- Entry forms -->
       <h3>Entry forms</h3>
       <div class="card" id="hidden-forms-card">
@@ -885,6 +900,125 @@
           </div>
         </div>
       </div>
+
+      <!-- Charts -->
+      <h3>Charts</h3>
+      <div class="card" id="hidden-charts-card">
+        <div class="card-row">
+          <div style="font-weight:500">Weight</div>
+          <div id="toggle-show-chart-weight" onclick="toggleChartVisibility('weight', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('weight')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Rise</div>
+          <div id="toggle-show-chart-rise" onclick="toggleChartVisibility('rise', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Calories</div>
+          <div id="toggle-show-chart-calories" onclick="toggleChartVisibility('calories', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('calories')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Protein</div>
+          <div id="toggle-show-chart-protein" onclick="toggleChartVisibility('protein', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('protein')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Activity</div>
+          <div id="toggle-show-chart-activity" onclick="toggleChartVisibility('activity', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('activity')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row" style="border-bottom:none;">
+          <div style="font-weight:500">Muscle</div>
+          <div id="toggle-show-chart-muscle" onclick="toggleChartVisibility('muscle', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('muscle')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+      </div>
+
+      <details class="lib-details">
+        <summary class="lib-summary">Y axis limits</summary>
+        <div class="card">
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Weight (kg)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-weight-min" class="field-number" placeholder="60" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('weight')">
+            <input type="number" id="yaxis-weight-max" class="field-number" placeholder="100" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('weight')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-weight-auto" onchange="toggleChartAuto('weight', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Rise</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="time" id="yaxis-rise-min" class="field-number" placeholder="5:00" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('rise')">
+            <input type="time" id="yaxis-rise-max" class="field-number" placeholder="9:00" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('rise')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-rise-auto" onchange="toggleChartAuto('rise', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Calories (kcal)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-calories-min" class="field-number" placeholder="0" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('calories')">
+            <input type="number" id="yaxis-calories-max" class="field-number" placeholder="3000" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('calories')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-calories-auto" onchange="toggleChartAuto('calories', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Protein (g)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-protein-min" class="field-number" placeholder="0" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('protein')">
+            <input type="number" id="yaxis-protein-max" class="field-number" placeholder="250" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('protein')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-protein-auto" onchange="toggleChartAuto('protein', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Activity (sessions)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-activity-min" class="field-number" placeholder="0" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('activity')">
+            <input type="number" id="yaxis-activity-max" class="field-number" placeholder="5" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('activity')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-activity-auto" onchange="toggleChartAuto('activity', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="border-bottom:none;" style="flex-direction:column;align-items:stretch;gap:6px; border-bottom:none;">
+          <div style="font-weight:500">Muscle (sets)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-muscle-min" class="field-number" placeholder="0" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
+            <input type="number" id="yaxis-muscle-max" class="field-number" placeholder="20" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-muscle-auto" onchange="toggleChartAuto('muscle', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        </div>
+      </details>
 
       <!-- Appearance -->
       <h3>Appearance</h3>
@@ -1074,7 +1208,17 @@ let db = {
     proteinTarget: null,
     weightTarget: null,
     riseTarget: null,
-    hiddenForms: []
+    hiddenForms: [],
+    hiddenCharts: [],
+    chartYAxis: {
+      weight:   { auto: true, min: null, max: null },
+      rise:     { auto: true, min: null, max: null },
+      calories: { auto: true, min: null, max: null },
+      protein:  { auto: true, min: null, max: null },
+      activity: { auto: true, min: null, max: null },
+      muscle:   { auto: true, min: null, max: null }
+    },
+    muscleTargets: { Chest: null, Triceps: null, Back: null, Biceps: null, Delts: null, Legs: null, Core: null }
   },
   libraryExercises: [],
   libraryCardioActivities: [],
@@ -1134,6 +1278,25 @@ function loadDB() {
         if (!db.drafts)                    db.drafts = {};
         if (!db.settings.darkMode)         db.settings.darkMode = false;
         if (!db.settings.hiddenForms)      db.settings.hiddenForms = [];
+        if (!db.settings.hiddenCharts)      db.settings.hiddenCharts = [];
+        if (!db.settings.chartYAxis) {
+          db.settings.chartYAxis = {
+            weight:   { auto: true, min: null, max: null },
+            rise:     { auto: true, min: null, max: null },
+            calories: { auto: true, min: null, max: null },
+            protein:  { auto: true, min: null, max: null },
+            activity: { auto: true, min: null, max: null },
+            muscle:   { auto: true, min: null, max: null }
+          };
+        }
+        ['weight','rise','calories','protein','activity','muscle'].forEach(k => {
+          if (!db.settings.chartYAxis[k]) db.settings.chartYAxis[k] = { auto: true, min: null, max: null };
+          if (db.settings.chartYAxis[k].auto === undefined) db.settings.chartYAxis[k].auto = true;
+        });
+        if (!db.settings.muscleTargets) {
+          db.settings.muscleTargets = { Chest: null, Triceps: null, Back: null, Biceps: null, Delts: null, Legs: null, Core: null };
+        }
+        EXERCISE_GROUP_ORDER.forEach(g => { if (!(g in db.settings.muscleTargets)) db.settings.muscleTargets[g] = null; });
         if ('draft' in db)                 delete db.draft;
         // Migrate flat meal entries to multi-item format
         db.logs.forEach(e => {
@@ -1445,6 +1608,102 @@ function toggleFormVisibility(type, currentlyHidden) {
   }
   saveSettings();
   applyFormVisibility();
+}
+
+/* ── Chart visibility & Y-axis settings ──────────────────────────── */
+// Maps chart settings key -> chart card id (note: calories chart card uses 'cal')
+const CHART_CARD_IDS = { weight: 'weight', rise: 'rise', calories: 'cal', protein: 'protein', activity: 'activity', muscle: 'muscle' };
+const CHART_RENDER_FNS = {
+  weight: renderWeightChart, rise: renderRiseChart, calories: renderCalChart,
+  protein: renderProteinChart, activity: renderActivityChart, muscle: renderMuscleChart
+};
+
+function toggleChartVisibility(chartId, currentlyHidden) {
+  if (!db.settings.hiddenCharts) db.settings.hiddenCharts = [];
+  if (currentlyHidden) {
+    db.settings.hiddenCharts = db.settings.hiddenCharts.filter(t => t !== chartId);
+  } else {
+    if (!db.settings.hiddenCharts.includes(chartId)) db.settings.hiddenCharts.push(chartId);
+  }
+  saveDB();
+  applyChartVisibility();
+}
+
+function applyChartVisibility() {
+  const hidden = db.settings.hiddenCharts || [];
+  Object.keys(CHART_CARD_IDS).forEach(chartId => {
+    const card = document.getElementById('chart-card-' + CHART_CARD_IDS[chartId]);
+    if (card) card.style.display = hidden.includes(chartId) ? 'none' : '';
+    const toggle = document.getElementById('toggle-show-chart-' + chartId);
+    if (toggle) {
+      const isHidden = hidden.includes(chartId);
+      toggle.style.background = isHidden ? 'var(--border)' : 'var(--accent)';
+      toggle.querySelector('div').style.transform = isHidden ? 'none' : 'translateX(18px)';
+    }
+  });
+}
+
+function toggleChartAuto(chartId, checked) {
+  if (!db.settings.chartYAxis) db.settings.chartYAxis = {};
+  if (!db.settings.chartYAxis[chartId]) db.settings.chartYAxis[chartId] = { auto: true, min: null, max: null };
+  db.settings.chartYAxis[chartId].auto = checked;
+  saveDB();
+  const minInput = document.getElementById('yaxis-' + chartId + '-min');
+  const maxInput = document.getElementById('yaxis-' + chartId + '-max');
+  if (minInput) minInput.disabled = checked;
+  if (maxInput) maxInput.disabled = checked;
+  if (CHART_RENDER_FNS[chartId]) CHART_RENDER_FNS[chartId]();
+}
+
+function saveChartYAxisLimit(chartId) {
+  if (!db.settings.chartYAxis) db.settings.chartYAxis = {};
+  if (!db.settings.chartYAxis[chartId]) db.settings.chartYAxis[chartId] = { auto: true, min: null, max: null };
+  const minInput = document.getElementById('yaxis-' + chartId + '-min');
+  const maxInput = document.getElementById('yaxis-' + chartId + '-max');
+  const minVal = minInput ? minInput.value : '';
+  const maxVal = maxInput ? maxInput.value : '';
+  db.settings.chartYAxis[chartId].min = minVal === '' ? null : minVal;
+  db.settings.chartYAxis[chartId].max = maxVal === '' ? null : maxVal;
+  saveDB();
+  if (db.settings.chartYAxis[chartId].auto === false && CHART_RENDER_FNS[chartId]) {
+    CHART_RENDER_FNS[chartId]();
+  }
+}
+
+function populateChartSettings() {
+  Object.keys(CHART_CARD_IDS).forEach(chartId => {
+    const cfg = (db.settings.chartYAxis && db.settings.chartYAxis[chartId]) || { auto: true, min: null, max: null };
+    const autoChk = document.getElementById('yaxis-' + chartId + '-auto');
+    const minInput = document.getElementById('yaxis-' + chartId + '-min');
+    const maxInput = document.getElementById('yaxis-' + chartId + '-max');
+    const isAuto = cfg.auto !== false;
+    if (autoChk) autoChk.checked = isAuto;
+    if (minInput) { minInput.value = cfg.min != null ? cfg.min : ''; minInput.disabled = isAuto; }
+    if (maxInput) { maxInput.value = cfg.max != null ? cfg.max : ''; maxInput.disabled = isAuto; }
+  });
+  applyChartVisibility();
+}
+
+function saveMuscleTarget(group) {
+  if (!db.settings.muscleTargets) db.settings.muscleTargets = {};
+  const input = document.getElementById('muscle-target-' + group);
+  const v = parseFloat(input.value);
+  db.settings.muscleTargets[group] = isNaN(v) ? null : v;
+  saveDB();
+  renderMuscleChart();
+}
+
+function populateMuscleTargetsCard() {
+  const container = document.getElementById('muscle-targets-card');
+  if (!container) return;
+  const targets = db.settings.muscleTargets || {};
+  container.innerHTML = EXERCISE_GROUP_ORDER.map((g, i) => `
+    <div class="card-row" ${i === EXERCISE_GROUP_ORDER.length - 1 ? 'style="border-bottom:none;"' : ''}>
+      <div style="font-weight:500">${g}</div>
+      <input type="number" id="muscle-target-${g}" min="0" inputmode="numeric" onchange="saveMuscleTarget('${g}')"
+        value="${targets[g] != null ? targets[g] : ''}"
+        style="width:70px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+    </div>`).join('');
 }
 
 function saveSettings() {
@@ -1944,6 +2203,8 @@ function showScreen(name, btn) {
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
     if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
+    populateChartSettings();
+    populateMuscleTargetsCard();
   }
   updateGithubConfigStatus();
   updateGithubExportStatus();
@@ -1996,6 +2257,7 @@ function saveDraft(type) {
   } else if (type === 'meal') {
     d.date  = getVal('m-date');
     d.time  = getVal('m-time');
+    d.note  = getVal('m-note');
     d.items = [];
     document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
       d.items.push({
@@ -2005,6 +2267,7 @@ function saveDraft(type) {
         protein:     block.querySelector('.mi-pro')?.value   || '',
 
         note:        block.querySelector('.mi-note')?.value  || '',
+        guess:       block.querySelector('.mi-guess')?.checked || false,
         _unitMacros: block._unitMacros || null
       });
     });
@@ -2097,7 +2360,7 @@ function restoreDraft(type) {
     setVal('wk-time', d.time);
     setVal('wk-date', d.date);
   } else if (type === 'meal') {
-    setVal('m-date', d.date); setVal('m-time', d.time);
+    setVal('m-date', d.date); setVal('m-time', d.time); setVal('m-note', d.note || '');
     document.getElementById('meal-items-container').innerHTML = '';
     mealItemCount = 0;
     if (d.items && d.items.length > 0) {
@@ -2109,6 +2372,7 @@ function restoreDraft(type) {
         carbs:       item.carbs    ? parseFloat(item.carbs)    : null,
         fat:         item.fat      ? parseFloat(item.fat)      : null,
         note:        item.note,
+        guess:       item.guess || false,
         _unitMacros: item._unitMacros || null
       }));
     } else { addMealItemBlock(); }
@@ -2243,6 +2507,8 @@ function renderAll() {
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
     if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
+    populateChartSettings();
+    populateMuscleTargetsCard();
   }
   // Initialise gym and meal forms then restore any drafts
   resetGymForm();
@@ -2426,6 +2692,8 @@ function setMealItemMode(block, manual) {
   const selInput = block.querySelector('.mi-select');
   const nameInput = block.querySelector('.mi-name');
   const qtyInput = block.querySelector('.mi-qty');
+  const guessWrapper = block.querySelector('.mi-guess-wrapper');
+  const guessInput = block.querySelector('.mi-guess');
   toggle.dataset.manual = manual ? 'true' : 'false';
   toggle.style.background = manual ? 'var(--accent)' : 'var(--border)';
   knob.style.transform = manual ? 'translateX(16px)' : 'none';
@@ -2435,11 +2703,14 @@ function setMealItemMode(block, manual) {
     selInput.value = '';
     qtyInput.style.display = 'none';
     qtyInput.value = '1';
+    if (guessWrapper) guessWrapper.style.display = 'flex';
   } else {
     nameInput.style.display = 'none';
     selInput.style.display = '';
     nameInput.value = '';
     qtyInput.style.display = '';
+    if (guessWrapper) guessWrapper.style.display = 'none';
+    if (guessInput) guessInput.checked = false;
   }
 }
 
@@ -2456,19 +2727,24 @@ function addMealItemBlock(itemData, interactive) {
   // Using CSS field-type classes instead of inline styles
 
   block.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+    '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">' +
       '<label style="font-size:14px;color:var(--muted);">Item</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;">' +
-        '<span style="font-size:12px;color:var(--muted);">Manual</span>' +
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;justify-self:center;">' +
+        '<span style="font-size:12px;color:var(--muted);">Enter manually</span>' +
         '<div class="mi-manual-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">' +
           '<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>' +
         '</div>' +
       '</label>' +
+      '<div></div>' +
     '</div>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
-      '<input type="text" class="mi-name field-text" placeholder="Item name" autocapitalize="off" style="flex:1;display:none;">' +
+      '<input type="text" class="mi-name field-text" placeholder="Item name" style="flex:1;display:none;">' +
       '<input type="number" class="mi-qty field-number" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;text-align:center;">' +
+      '<label class="mi-guess-wrapper" style="display:none;align-items:center;gap:4px;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;">' +
+        '<input type="checkbox" class="mi-guess" style="width:16px;height:16px;cursor:pointer;">' +
+        'Guess' +
+      '</label>' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:2px;">' +
@@ -2549,6 +2825,7 @@ function addMealItemBlock(itemData, interactive) {
     if (itemData.calories != null) block.querySelector('.mi-cal').value = itemData.calories;
     if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
+    if (itemData.guess)            block.querySelector('.mi-guess').checked = true;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
     // New block defaults to library mode
@@ -2578,6 +2855,7 @@ function resetMealForm() {
   mealItemCount = 0;
   addMealItemBlock();
   updateMealTotals();
+  const mn = document.getElementById('m-note'); if (mn) { mn.value = ''; mn.style.height = ''; }
 }
 
 function saveMeal() {
@@ -2593,9 +2871,10 @@ function saveMeal() {
     const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
     const cal  = num('.mi-cal'), pro = num('.mi-pro');
     const note = block.querySelector('.mi-note')?.value.trim() || null;
+    const guess = isManual && block.querySelector('.mi-guess')?.checked ? true : null;
     if (qty <= 0) { showToast('Quantity must be greater than 0'); return; }
     if (name || cal || pro)
-      items.push({ name, quantity: qty, calories: cal, protein: pro, note });
+      items.push({ name, quantity: qty, calories: cal, protein: pro, note, guess });
   });
 
   if (!items.length) { showToast('Please add at least one item'); return; }
@@ -2610,6 +2889,7 @@ function saveMeal() {
     id, type: 'meal',
     date: getVal('m-date') || today(),
     time: getVal('m-time') || nowTime(),
+    note: getVal('m-note') || null,
     items,
     totals: { calories: sum('calories'), protein: sum('protein') }
   });
@@ -3119,9 +3399,10 @@ function buildViewBody(e) {
       if (item.protein  != null) parts.push('P ' + item.protein + 'g');
 
       const qtyStr = (item.quantity && item.quantity !== 1) ? ' ×' + item.quantity : '';
+      const guessStr = item.guess ? '~' : '';
       return `<div class="card-row">
         <div>
-          <div style="font-size:15px;font-weight:500">${item.name || 'Item ' + (i+1)}${qtyStr}</div>
+          <div style="font-size:15px;font-weight:500">${guessStr}${item.name || 'Item ' + (i+1)}${qtyStr}</div>
           <div style="font-size:13px;color:var(--muted)">${[...parts, ...(item.note ? [item.note] : [])].join(' · ')}</div>
         </div>
       </div>`;
@@ -3226,6 +3507,7 @@ function buildEditForm(e) {
   if (e.type === 'meal') {
     return `<div class="card" style="margin-bottom:0.75rem;">` +
       row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
+      textField('e-note', 'Note', e.note) +
       `</div>` +
       `<div id="sheet-meal-items-container" style="margin-top:0.5rem;"></div>
        <button class="add-exercise-btn" onclick="addSheetMealItemBlock(null, true)">+ Add item</button>
@@ -3299,19 +3581,24 @@ function addSheetMealItemBlock(itemData, interactive) {
   // CSS field-type classes used instead of inline styles
 
   block.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+    '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">' +
       '<label style="font-size:14px;color:var(--muted);">Item</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;">' +
-        '<span style="font-size:12px;color:var(--muted);">Manual</span>' +
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;justify-self:center;">' +
+        '<span style="font-size:12px;color:var(--muted);">Enter manually</span>' +
         '<div class="mi-manual-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">' +
           '<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>' +
         '</div>' +
       '</label>' +
+      '<div></div>' +
     '</div>' +
     '<div class="exercise-header">' +
       `<select class="mi-select field-select" style="flex:1">${buildMealItemOptions('')}</select>` +
-      '<input type="text" class="mi-name field-text" placeholder="Item name" autocapitalize="off" style="flex:1;display:none;">' +
+      '<input type="text" class="mi-name field-text" placeholder="Item name" style="flex:1;display:none;">' +
       '<input type="number" class="mi-qty field-number" value="1" min="0.01" step="any" inputmode="decimal" style="width:52px;flex-shrink:0;text-align:center;">' +
+      '<label class="mi-guess-wrapper" style="display:none;align-items:center;gap:4px;font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;">' +
+        '<input type="checkbox" class="mi-guess" style="width:16px;height:16px;cursor:pointer;">' +
+        'Guess' +
+      '</label>' +
       '<button class="del-btn" title="Remove item">&times;</button>' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:2fr 2fr 3fr;gap:6px;margin-bottom:2px;">' +
@@ -3385,6 +3672,7 @@ function addSheetMealItemBlock(itemData, interactive) {
     if (itemData.calories != null) block.querySelector('.mi-cal').value = itemData.calories;
     if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
+    if (itemData.guess)            block.querySelector('.mi-guess').checked = true;
     if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
     setMealItemMode(block, false);
@@ -3457,8 +3745,9 @@ function saveEdit() {
       const qty  = parseFloat(block.querySelector('.mi-qty')?.value) || 1;
       const cal  = numB('.mi-cal'), pro = numB('.mi-pro');
       const note = block.querySelector('.mi-note')?.value.trim() || null;
+      const guess = isManual && block.querySelector('.mi-guess')?.checked ? true : null;
       if (name || cal || pro)
-        items.push({ name, quantity: qty, calories: cal, protein: pro, note });
+        items.push({ name, quantity: qty, calories: cal, protein: pro, note, guess });
     });
 
     if (!items.length) { showToast('Please add at least one item'); return; }
@@ -3655,6 +3944,7 @@ function renderCharts() {
   renderProteinChart();
   renderRiseChart();
   renderWeightChart();
+  applyChartVisibility();
 }
 
 function setWeightView(mode) {
@@ -3716,10 +4006,7 @@ function renderWeightChart() {
 
   const yVals = chartData.map(p => p.y).filter(v => v !== null);
   const wTarget = db.settings && db.settings.weightTarget && weightRangeMonths !== 0 ? parseFloat(db.settings.weightTarget) : null;
-  const yDataMin = Math.min(...yVals, wTarget !== null ? wTarget - 0.1 : Infinity);
-  const yDataMax = Math.max(...yVals, wTarget !== null ? wTarget + 0.1 : -Infinity);
-  const yMin = parseFloat((yDataMin - 0.1).toFixed(2));
-  const yMax = parseFloat((yDataMax + 0.1).toFixed(2));
+  const { min: yMin, max: yMax } = getChartYRange('weight', yVals, wTarget);
 
   if (weightChartInstance) { weightChartInstance.destroy(); weightChartInstance = null; }
 
@@ -3786,13 +4073,16 @@ function renderWeightChart() {
           title: { display: true, text: 'kg', color: mutedColor, font: { size: 11 } },
           afterBuildTicks: axis => {
             const ticks = [];
-            let v = Math.ceil(yMin * 2) / 2;
-            while (v <= yMax + 0.001) { ticks.push({ value: v }); v = Math.round((v + 0.5) * 10) / 10; }
+            const range = yMax - yMin;
+            // Adaptive step: tight ranges (auto) use 0.5kg; wide ranges (fixed) use larger steps
+            const step = range <= 6 ? 0.5 : range <= 15 ? 1 : range <= 40 ? 2 : 5;
+            let v = Math.ceil(yMin / step) * step;
+            while (v <= yMax + 0.001) { ticks.push({ value: parseFloat(v.toFixed(2)) }); v += step; }
             axis.ticks = ticks;
           },
           ticks: {
             font: { size: 11 }, color: mutedColor,
-            callback: v => { const r = Math.round(v * 2) / 2; return Math.abs(r - v) > 0.01 ? null : r.toFixed(1); }
+            callback: v => v.toFixed(1)
           },
           grid: { color: borderColor }
         }
@@ -3827,6 +4117,66 @@ function minsToTime(mins) {
   const h = Math.floor(mins / 60) % 24;
   const m = Math.round(mins % 60);
   return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+/* ── Chart Y-axis settings ─────────────────────────────────────────
+   Fixed auto-buffers (added/subtracted from the data/target range when
+   "Auto" is enabled for that chart in Settings). */
+const CHART_AUTO_BUFFERS = {
+  weight: 0.5, rise: 30, calories: 200, protein: 20, activity: 1, muscle: 2
+};
+const CHARTS_WITH_TARGET = ['weight', 'rise', 'calories', 'protein'];
+const CHART_FIXED_FALLBACK = {
+  weight: { min: 60, max: 100 },
+  rise: { min: 300, max: 540 }, // 5:00–9:00 in minutes
+  calories: { min: 0, max: 3000 },
+  protein: { min: 0, max: 250 },
+  activity: { min: 0, max: 5 },
+  muscle: { min: 0, max: 20 }
+};
+
+/* dataVals: array of numeric y-values visible in the chart's current
+   timespan. targetVal: the relevant target (or null/undefined). */
+function getChartYRange(chartId, dataVals, targetVal) {
+  const cfg = (db.settings.chartYAxis && db.settings.chartYAxis[chartId]) || { auto: true, min: null, max: null };
+  const buffer = CHART_AUTO_BUFFERS[chartId];
+  const hasTarget = CHARTS_WITH_TARGET.includes(chartId) && targetVal != null;
+
+  if (cfg.auto !== false) {
+    const vals = (dataVals || []).filter(v => v != null);
+    let dataMin = vals.length ? Math.min(...vals) : null;
+    let dataMax = vals.length ? Math.max(...vals) : null;
+    let yMin, yMax;
+    if (!CHARTS_WITH_TARGET.includes(chartId)) {
+      // Activity, Muscle: min fixed at 0, buffer only on max
+      yMin = 0;
+      yMax = (dataMax != null ? dataMax : 0) + buffer;
+    } else {
+      let lo = dataMin, hi = dataMax;
+      if (hasTarget) {
+        lo = (lo != null) ? Math.min(lo, targetVal) : targetVal;
+        hi = (hi != null) ? Math.max(hi, targetVal) : targetVal;
+      }
+      if (lo == null) lo = 0;
+      if (hi == null) hi = 0;
+      yMin = lo - buffer;
+      yMax = hi + buffer;
+      if (chartId === 'calories' || chartId === 'protein') yMin = Math.max(0, yMin);
+    }
+    if (chartId === 'weight') { yMin = Math.round(yMin*100)/100; yMax = Math.round(yMax*100)/100; }
+    return { min: yMin, max: yMax };
+  } else {
+    const fallback = CHART_FIXED_FALLBACK[chartId];
+    let min = cfg.min, max = cfg.max;
+    if (chartId === 'rise') {
+      min = (min != null && min !== '') ? timeToMins(min) : fallback.min;
+      max = (max != null && max !== '') ? timeToMins(max) : fallback.max;
+    } else {
+      min = (min != null && min !== '') ? parseFloat(min) : fallback.min;
+      max = (max != null && max !== '') ? parseFloat(max) : fallback.max;
+    }
+    return { min, max };
+  }
 }
 
 function getRiseByDay() {
@@ -3900,13 +4250,8 @@ function renderRiseChart() {
   }
 
   const yVals = chartData.map(p => p.y).filter(v => v !== null);
-  const riseTargetMinsForRange = (() => {
-    const t = db.settings && db.settings.riseTarget;
-    if (!t) return null;
-    const [h, m] = t.split(':').map(Number); return h * 60 + m;
-  })();
-  const yMin = Math.min(...yVals, riseRangeMonths !== 0 && riseTargetMinsForRange ? riseTargetMinsForRange - 6 : Infinity) - 6;
-  const yMax = Math.max(...yVals, riseRangeMonths !== 0 && riseTargetMinsForRange ? riseTargetMinsForRange + 6 : -Infinity) + 6;
+  const riseTargetMins = (db.settings && db.settings.riseTarget) ? timeToMins(db.settings.riseTarget) : null;
+  const { min: yMin, max: yMax } = getChartYRange('rise', yVals, riseTargetMins);
 
   if (riseChartInstance) { riseChartInstance.destroy(); riseChartInstance = null; }
 
@@ -4155,7 +4500,7 @@ function renderCalChart() {
     rangeStart = d.toISOString().slice(0, 10);
   }
 
-  const targetVal = db.settings && db.settings.calTarget ? db.settings.calTarget : 0;
+  const targetVal = db.settings && db.settings.calTarget ? db.settings.calTarget : null;
   const style = getComputedStyle(document.documentElement);
   const accentColor = style.getPropertyValue('--accent').trim();
   const mutedColor  = style.getPropertyValue('--muted').trim();
@@ -4175,8 +4520,7 @@ function renderCalChart() {
       data.push(dateStr <= today() ? (lookup[dateStr] ?? null) : null);
     }
     const yVals = data.filter(v => v != null);
-    const yMin = 0;
-    const yMax = 3000;
+    const { min: yMin, max: yMax } = getChartYRange('calories', yVals, targetVal);
 
     const targetLinePlugin = {
       id: '_calChartInstTarget',
@@ -4211,8 +4555,8 @@ function renderCalChart() {
             callback: (v,i) => new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}) },
             grid:{color:'transparent'} },
           y: { min:yMin, max:yMax, title:{display:true,text:'kcal',color:mutedColor,font:{size:11}},
-            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/500)*500; for(let v=first;v<=yMax+0.001;v+=500) ticks.push({value:v}); axis.ticks=ticks; },
-            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/500)*500}, grid:{color:borderColor} }
+            afterBuildTicks: axis => { const ticks=[]; const range=yMax-yMin; const step = range<=600?100:range<=1500?250:range<=3000?500:1000; const first=Math.ceil(yMin/step)*step; for(let v=first;v<=yMax+0.001;v+=step) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v)}, grid:{color:borderColor} }
         }
       }
     });
@@ -4230,8 +4574,7 @@ function renderCalChart() {
       labels.push(ds); data.push(lookup[ds] ?? null);
     }
     const yVals = data.filter(v => v != null);
-    const yMin = 0;
-    const yMax = 3000;
+    const { min: yMin, max: yMax } = getChartYRange('calories', yVals, targetVal);
 
     // Week shading plugin (not for All view)
     const weekBandPlugin = {
@@ -4318,8 +4661,8 @@ function renderCalChart() {
             }
           },
           y: { min:yMin, max:yMax, title:{display:true,text:'kcal',color:mutedColor,font:{size:11}},
-            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/500)*500; for(let v=first;v<=yMax+0.001;v+=500) ticks.push({value:v}); axis.ticks=ticks; },
-            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/500)*500}, grid:{color:borderColor} }
+            afterBuildTicks: axis => { const ticks=[]; const range=yMax-yMin; const step = range<=600?100:range<=1500?250:range<=3000?500:1000; const first=Math.ceil(yMin/step)*step; for(let v=first;v<=yMax+0.001;v+=step) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v)}, grid:{color:borderColor} }
         }
       }
     });
@@ -4346,7 +4689,7 @@ function renderProteinChart() {
     rangeStart = d.toISOString().slice(0, 10);
   }
 
-  const targetVal = db.settings && db.settings.proteinTarget ? db.settings.proteinTarget : 0;
+  const targetVal = db.settings && db.settings.proteinTarget ? db.settings.proteinTarget : null;
   const style = getComputedStyle(document.documentElement);
   const accentColor = style.getPropertyValue('--accent').trim();
   const mutedColor  = style.getPropertyValue('--muted').trim();
@@ -4366,8 +4709,7 @@ function renderProteinChart() {
       data.push(dateStr <= today() ? (lookup[dateStr] ?? null) : null);
     }
     const yVals = data.filter(v => v != null);
-    const yMin = 0;
-    const yMax = 250;
+    const { min: yMin, max: yMax } = getChartYRange('protein', yVals, targetVal);
 
     const targetLinePlugin = {
       id: '_protChartInstTarget',
@@ -4402,8 +4744,8 @@ function renderProteinChart() {
             callback: (v,i) => new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}) },
             grid:{color:'transparent'} },
           y: { min:yMin, max:yMax, title:{display:true,text:'g',color:mutedColor,font:{size:11}},
-            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/50)*50; for(let v=first;v<=yMax+0.001;v+=50) ticks.push({value:v}); axis.ticks=ticks; },
-            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/50)*50}, grid:{color:borderColor} }
+            afterBuildTicks: axis => { const ticks=[]; const range=yMax-yMin; const step = range<=60?10:range<=150?25:range<=300?50:100; const first=Math.ceil(yMin/step)*step; for(let v=first;v<=yMax+0.001;v+=step) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v)}, grid:{color:borderColor} }
         }
       }
     });
@@ -4421,8 +4763,7 @@ function renderProteinChart() {
       labels.push(ds); data.push(lookup[ds] ?? null);
     }
     const yVals = data.filter(v => v != null);
-    const yMin = 0;
-    const yMax = 250;
+    const { min: yMin, max: yMax } = getChartYRange('protein', yVals, targetVal);
 
     // Week shading plugin (not for All view)
     const weekBandPlugin = {
@@ -4509,8 +4850,8 @@ function renderProteinChart() {
             }
           },
           y: { min:yMin, max:yMax, title:{display:true,text:'g',color:mutedColor,font:{size:11}},
-            afterBuildTicks: axis => { const ticks=[]; const first=Math.ceil(yMin/50)*50; for(let v=first;v<=yMax+0.001;v+=50) ticks.push({value:v}); axis.ticks=ticks; },
-            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v/50)*50}, grid:{color:borderColor} }
+            afterBuildTicks: axis => { const ticks=[]; const range=yMax-yMin; const step = range<=60?10:range<=150?25:range<=300?50:100; const first=Math.ceil(yMin/step)*step; for(let v=first;v<=yMax+0.001;v+=step) ticks.push({value:v}); axis.ticks=ticks; },
+            ticks:{font:{size:11},color:mutedColor,callback:v=>Math.round(v)}, grid:{color:borderColor} }
         }
       }
     });
@@ -4827,16 +5168,18 @@ function renderActivityChart() {
             }
           }
         },
-        y: { stacked: true, min: 0,
-          max: Math.max(...days.map(d => d.sessions.length), 1) + 0.5,
-          afterBuildTicks: axis => {
-            const ticks = [];
-            for (let v = 0; v <= axis.max; v++) ticks.push({ value: v });
-            axis.ticks = ticks;
-          },
-          ticks: { font: { size: 11 }, color: mutedColor, callback: v => Number.isInteger(v) ? v : null },
-          grid: { color: borderColor, z: -1 }
-        }
+        y: (() => {
+          const { min: yMin, max: yMax } = getChartYRange('activity', days.map(d => d.sessions.length), null);
+          return { stacked: true, min: yMin, max: yMax,
+            afterBuildTicks: axis => {
+              const ticks = [];
+              for (let v = 0; v <= axis.max; v++) ticks.push({ value: v });
+              axis.ticks = ticks;
+            },
+            ticks: { font: { size: 11 }, color: mutedColor, callback: v => Number.isInteger(v) ? v : null },
+            grid: { color: borderColor, z: -1 }
+          };
+        })()
       }
     }
   });
@@ -5582,6 +5925,43 @@ function getMuscleSetCounts(weekMonday) {
   return counts;
 }
 
+/* Returns ["Bench press ×2", "Chest fly ×2", ...] for the given muscle
+   group and week, ordered as the exercises appear in db.exercises. */
+function getMuscleExerciseBreakdown(weekMonday, group) {
+  const [y,mo,d] = weekMonday.split('-').map(Number);
+  const weekStart = new Date(y, mo-1, d, 3, 30);
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
+
+  const exerciseCounts = {};
+  db.logs.forEach(e => {
+    if (e.type !== 'gym') return;
+    const [h, m] = (e.startTime || '12:00').split(':').map(Number);
+    const [ey, emo, ed] = e.date.split('-').map(Number);
+    const entryTime = new Date(ey, emo-1, ed, h, m);
+    if (entryTime < weekStart || entryTime >= weekEnd) return;
+    e.exercises.forEach(ex => {
+      const lib = db.exercises.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
+      const exGroup = (lib && lib.group) ? lib.group.trim() : null;
+      if (exGroup !== group) return;
+      const setCount = (ex.sets || []).length;
+      if (setCount > 0) exerciseCounts[ex.name] = (exerciseCounts[ex.name] || 0) + setCount;
+    });
+  });
+
+  const orderedNames = (db.exercises || [])
+    .filter(i => typeof i === 'object' && i.group && i.group.trim() === group)
+    .map(i => i.name);
+
+  const result = [];
+  orderedNames.forEach(name => {
+    if (exerciseCounts[name] > 0) { result.push(name + ' ×' + exerciseCounts[name]); delete exerciseCounts[name]; }
+  });
+  // Any logged exercises not currently in the library/group (edge case)
+  Object.keys(exerciseCounts).forEach(name => result.push(name + ' ×' + exerciseCounts[name]));
+
+  return result;
+}
+
 function renderMuscleChart() {
   createChartCard('muscle',
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
@@ -5610,9 +5990,11 @@ function renderMuscleChart() {
   const weekMonday = muscleSelectedWeek || getCurrentWeekMonday();
   const counts = getMuscleSetCounts(weekMonday);
   const data   = MUSCLE_DEFAULT_GROUPS.map(t => counts[t] || 0);
-  const yMax   = Math.max(...data, 1) + 2;
+  const muscleTargets = db.settings.muscleTargets || {};
+  const targetVals = MUSCLE_DEFAULT_GROUPS.map(g => muscleTargets[g]).filter(v => v != null && v > 0);
+  const { min: yMin, max: yMax } = getChartYRange('muscle', [...data, ...targetVals], null);
 
-  if (data.every(v => v === 0)) {
+  if (data.every(v => v === 0) && targetVals.length === 0) {
     canvas.style.display = 'none'; empty.style.display = 'block'; return;
   }
   canvas.style.display = 'block'; empty.style.display = 'none';
@@ -5624,18 +6006,48 @@ function renderMuscleChart() {
 
   if (muscleChartInstance) { muscleChartInstance.destroy(); muscleChartInstance = null; }
 
+  // Per-bar target marker lines (no numeric label)
+  const muscleTargetPlugin = {
+    id: '_muscleChartTargets',
+    afterDraw(chart) {
+      const { ctx: c, chartArea, scales } = chart;
+      const n = MUSCLE_DEFAULT_GROUPS.length;
+      const barWidth = (chartArea.right - chartArea.left) / n;
+      MUSCLE_DEFAULT_GROUPS.forEach((g, i) => {
+        const target = muscleTargets[g];
+        if (target == null || target <= 0) return;
+        const y = scales.y.getPixelForValue(target);
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        const center = chartArea.left + (i + 0.5) * barWidth;
+        const x1 = center - barWidth * 0.35;
+        const x2 = center + barWidth * 0.35;
+        c.save();
+        c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([4,3]);
+        c.beginPath(); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
+        c.setLineDash([]);
+        c.restore();
+      });
+    }
+  };
+
   muscleChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'bar',
+    plugins: [muscleTargetPlugin],
     data: { labels: MUSCLE_DEFAULT_GROUPS, datasets: [{ data, backgroundColor: accentColor, borderColor: accentColor, borderWidth: 1, borderRadius: 3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: {
-        label: item => item.raw + ' set' + (item.raw !== 1 ? 's' : '')
+        label: () => null,
+        afterBody: items => {
+          const group = MUSCLE_DEFAULT_GROUPS[items[0].dataIndex];
+          const breakdown = getMuscleExerciseBreakdown(weekMonday, group);
+          return breakdown.length ? breakdown : ['No sets'];
+        }
       }}},
       scales: {
         x: { grid: { color: 'transparent' }, ticks: { font: { size: 11 }, color: mutedColor } },
-        y: { min: 0, max: yMax,
-          afterBuildTicks: axis => { const ticks=[]; for(let v=0;v<=yMax;v++) ticks.push({value:v}); axis.ticks=ticks; },
+        y: { min: yMin, max: yMax,
+          afterBuildTicks: axis => { const ticks=[]; const step = yMax<=10?1:yMax<=30?2:5; for(let v=0;v<=yMax;v+=step) ticks.push({value:v}); axis.ticks=ticks; },
           ticks: { font: { size: 11 }, color: mutedColor, callback: v => Number.isInteger(v) ? v : null },
           grid: { color: borderColor }
         }
