@@ -905,14 +905,14 @@
       <h3>Charts</h3>
       <div class="card" id="hidden-charts-card">
         <div class="card-row">
-          <div style="font-weight:500">Weight</div>
-          <div id="toggle-show-chart-weight" onclick="toggleChartVisibility('weight', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('weight')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+          <div style="font-weight:500">Activity</div>
+          <div id="toggle-show-chart-activity" onclick="toggleChartVisibility('activity', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('activity')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
         <div class="card-row">
-          <div style="font-weight:500">Rise</div>
-          <div id="toggle-show-chart-rise" onclick="toggleChartVisibility('rise', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+          <div style="font-weight:500">Muscle</div>
+          <div id="toggle-show-chart-muscle" onclick="toggleChartVisibility('muscle', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('muscle')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
@@ -929,14 +929,14 @@
           </div>
         </div>
         <div class="card-row">
-          <div style="font-weight:500">Activity</div>
-          <div id="toggle-show-chart-activity" onclick="toggleChartVisibility('activity', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('activity')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+          <div style="font-weight:500">Rise</div>
+          <div id="toggle-show-chart-rise" onclick="toggleChartVisibility('rise', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
         <div class="card-row" style="border-bottom:none;">
-          <div style="font-weight:500">Muscle</div>
-          <div id="toggle-show-chart-muscle" onclick="toggleChartVisibility('muscle', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('muscle')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+          <div style="font-weight:500">Weight</div>
+          <div id="toggle-show-chart-weight" onclick="toggleChartVisibility('weight', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('weight')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
@@ -1005,7 +1005,7 @@
             </label>
           </div>
         </div>
-        <div class="card-row" style="border-bottom:none;" style="flex-direction:column;align-items:stretch;gap:6px; border-bottom:none;">
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;border-bottom:none;">
           <div style="font-weight:500">Muscle (sets)</div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <input type="number" id="yaxis-muscle-min" class="field-number" placeholder="0" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
@@ -3387,12 +3387,12 @@ function buildViewBody(e) {
       const parts = [];
       if (item.calories != null) parts.push(item.calories + ' kcal');
       if (item.protein  != null) parts.push('P ' + item.protein + 'g');
+      if (item.guess) parts.push('(guess)');
 
       const qtyStr = (item.quantity && item.quantity !== 1) ? ' ×' + item.quantity : '';
-      const guessStr = item.guess ? '~' : '';
       return `<div class="card-row">
         <div>
-          <div style="font-size:15px;font-weight:500">${guessStr}${item.name || 'Item ' + (i+1)}${qtyStr}</div>
+          <div style="font-size:15px;font-weight:500">${item.name || 'Item ' + (i+1)}${qtyStr}</div>
           <div style="font-size:13px;color:var(--muted)">${[...parts, ...(item.note ? [item.note] : [])].join(' · ')}</div>
         </div>
       </div>`;
@@ -6022,6 +6022,7 @@ function renderMuscleChart() {
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: {
+        title: () => [],
         label: () => null,
         afterBody: items => {
           const group = MUSCLE_DEFAULT_GROUPS[items[0].dataIndex];
