@@ -1157,6 +1157,67 @@
 const STORAGE_KEY = 'fitlog_v1';
 const EXERCISE_GROUP_ORDER = ['Chest', 'Triceps', 'Back', 'Biceps', 'Delts', 'Legs', 'Core'];
 
+/* ── Chart Y-axis settings ─────────────────────────────────────────
+   Fixed auto-buffers (added/subtracted from the data/target range when
+   "Auto" is enabled for that chart in Settings). */
+const CHART_AUTO_BUFFERS = {
+  weight: 0.5, rise: 30, calories: 200, protein: 20, activity: 1, muscle: 2
+};
+const CHARTS_WITH_TARGET = ['weight', 'rise', 'calories', 'protein'];
+const CHART_FIXED_FALLBACK = {
+  weight: { min: 70, max: 90 },
+  rise: { min: 360, max: 540 }, // 6:00–9:00 in minutes
+  calories: { min: 0, max: 3000 },
+  protein: { min: 0, max: 300 },
+  activity: { min: 0, max: 4 },
+  muscle: { min: 0, max: 14 }
+};
+
+/* dataVals: array of numeric y-values visible in the chart's current
+   timespan. targetVal: the relevant target (or null/undefined). */
+function getChartYRange(chartId, dataVals, targetVal) {
+  const cfg = (db.settings.chartYAxis && db.settings.chartYAxis[chartId]) || { auto: true, min: null, max: null };
+  const buffer = CHART_AUTO_BUFFERS[chartId];
+  const hasTarget = CHARTS_WITH_TARGET.includes(chartId) && targetVal != null;
+
+  if (cfg.auto !== false) {
+    const vals = (dataVals || []).filter(v => v != null);
+    let dataMin = vals.length ? Math.min(...vals) : null;
+    let dataMax = vals.length ? Math.max(...vals) : null;
+    let yMin, yMax;
+    if (!CHARTS_WITH_TARGET.includes(chartId)) {
+      // Activity, Muscle: min fixed at 0, buffer only on max
+      yMin = 0;
+      yMax = (dataMax != null ? dataMax : 0) + buffer;
+    } else {
+      let lo = dataMin, hi = dataMax;
+      if (hasTarget) {
+        lo = (lo != null) ? Math.min(lo, targetVal) : targetVal;
+        hi = (hi != null) ? Math.max(hi, targetVal) : targetVal;
+      }
+      if (lo == null) lo = 0;
+      if (hi == null) hi = 0;
+      yMin = lo - buffer;
+      yMax = hi + buffer;
+      if (chartId === 'calories' || chartId === 'protein') yMin = Math.max(0, yMin);
+    }
+    if (chartId === 'weight') { yMin = Math.round(yMin*100)/100; yMax = Math.round(yMax*100)/100; }
+    return { min: yMin, max: yMax };
+  } else {
+    const fallback = CHART_FIXED_FALLBACK[chartId];
+    let min = cfg.min, max = cfg.max;
+    if (chartId === 'rise') {
+      min = (min != null && min !== '') ? timeToMins(min) : fallback.min;
+      max = (max != null && max !== '') ? timeToMins(max) : fallback.max;
+    } else {
+      min = (min != null && min !== '') ? parseFloat(min) : fallback.min;
+      max = (max != null && max !== '') ? parseFloat(max) : fallback.max;
+    }
+    return { min, max };
+  }
+}
+
+
 /* ── Unsynced entry tracking ────────────────────────────────────────
    UNSYNCED_IDS is a Set of entry IDs created since the last GitHub
    export. Entries in this set are editable; all others are read-only.
@@ -4109,66 +4170,6 @@ function minsToTime(mins) {
   const h = Math.floor(mins / 60) % 24;
   const m = Math.round(mins % 60);
   return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
-}
-
-/* ── Chart Y-axis settings ─────────────────────────────────────────
-   Fixed auto-buffers (added/subtracted from the data/target range when
-   "Auto" is enabled for that chart in Settings). */
-const CHART_AUTO_BUFFERS = {
-  weight: 0.5, rise: 30, calories: 200, protein: 20, activity: 1, muscle: 2
-};
-const CHARTS_WITH_TARGET = ['weight', 'rise', 'calories', 'protein'];
-const CHART_FIXED_FALLBACK = {
-  weight: { min: 70, max: 90 },
-  rise: { min: 360, max: 540 }, // 6:00–9:00 in minutes
-  calories: { min: 0, max: 3000 },
-  protein: { min: 0, max: 300 },
-  activity: { min: 0, max: 4 },
-  muscle: { min: 0, max: 14 }
-};
-
-/* dataVals: array of numeric y-values visible in the chart's current
-   timespan. targetVal: the relevant target (or null/undefined). */
-function getChartYRange(chartId, dataVals, targetVal) {
-  const cfg = (db.settings.chartYAxis && db.settings.chartYAxis[chartId]) || { auto: true, min: null, max: null };
-  const buffer = CHART_AUTO_BUFFERS[chartId];
-  const hasTarget = CHARTS_WITH_TARGET.includes(chartId) && targetVal != null;
-
-  if (cfg.auto !== false) {
-    const vals = (dataVals || []).filter(v => v != null);
-    let dataMin = vals.length ? Math.min(...vals) : null;
-    let dataMax = vals.length ? Math.max(...vals) : null;
-    let yMin, yMax;
-    if (!CHARTS_WITH_TARGET.includes(chartId)) {
-      // Activity, Muscle: min fixed at 0, buffer only on max
-      yMin = 0;
-      yMax = (dataMax != null ? dataMax : 0) + buffer;
-    } else {
-      let lo = dataMin, hi = dataMax;
-      if (hasTarget) {
-        lo = (lo != null) ? Math.min(lo, targetVal) : targetVal;
-        hi = (hi != null) ? Math.max(hi, targetVal) : targetVal;
-      }
-      if (lo == null) lo = 0;
-      if (hi == null) hi = 0;
-      yMin = lo - buffer;
-      yMax = hi + buffer;
-      if (chartId === 'calories' || chartId === 'protein') yMin = Math.max(0, yMin);
-    }
-    if (chartId === 'weight') { yMin = Math.round(yMin*100)/100; yMax = Math.round(yMax*100)/100; }
-    return { min: yMin, max: yMax };
-  } else {
-    const fallback = CHART_FIXED_FALLBACK[chartId];
-    let min = cfg.min, max = cfg.max;
-    if (chartId === 'rise') {
-      min = (min != null && min !== '') ? timeToMins(min) : fallback.min;
-      max = (max != null && max !== '') ? timeToMins(max) : fallback.max;
-    } else {
-      min = (min != null && min !== '') ? parseFloat(min) : fallback.min;
-      max = (max != null && max !== '') ? parseFloat(max) : fallback.max;
-    }
-    return { min, max };
-  }
 }
 
 function getRiseByDay() {
