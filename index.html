@@ -2530,16 +2530,6 @@ if (new URLSearchParams(window.location.search).get('test') === 'true') {
   loadDB();
   showTestScreen();
 } else {
-  // Log current SW version dynamically
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(reg => {
-      if (reg.active) {
-        const chan = new MessageChannel();
-        chan.port1.onmessage = e => console.log('Fitness Tracker —', e.data);
-        reg.active.postMessage({ type: 'GET_VERSION' }, [chan.port2]);
-      }
-    });
-  }
   loadDB();
   rebuildCombinedLibraries(); // build combined arrays from whatever is in db
   renderAll();
@@ -4264,11 +4254,6 @@ function renderRiseChart() {
   const weekBandPlugin = makeWeekBandPlugin('riseWeekBands', () => riseRangeMonths);
 
   // Target line — only in This week view
-  const riseTargetStr = db.settings && db.settings.riseTarget;
-  const riseTargetMins = riseTargetStr ? (() => {
-    const [h, m] = riseTargetStr.split(':').map(Number); return h * 60 + m;
-  })() : null;
-
   const riseTargetPlugin = {
     id: 'riseTargetLine',
     afterDraw(chart) {
@@ -6058,6 +6043,17 @@ function renderMuscleChart() {
 
 </script>
 <script>
+  // Log current SW version dynamically — kept in its own script tag so it
+  // always runs even if the main app script has a syntax error.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      if (reg.active) {
+        const chan = new MessageChannel();
+        chan.port1.onmessage = e => console.log('Fitness Tracker —', e.data);
+        reg.active.postMessage({ type: 'GET_VERSION' }, [chan.port2]);
+      }
+    });
+  }
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then(reg => {
       // When a new SW is found, skip waiting immediately
