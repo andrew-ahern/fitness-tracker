@@ -3398,11 +3398,8 @@ function buildWorkoutShareText(entry) {
      messaging apps (Web Share API) or clipboard copy. */
   const lines = [];
   lines.push('GYM SESSION');
-  const timeRange = entry.startTime
-    ? entry.startTime + (entry.endTime ? '–' + entry.endTime : '')
-    : '';
-  lines.push(formatDate(entry.date) + (timeRange ? ', ' + timeRange : ''));
-  lines.push('─'.repeat(20));
+  lines.push(formatDate(entry.date));
+  lines.push('─'.repeat(12));
 
   if (entry.note) {
     lines.push('');
