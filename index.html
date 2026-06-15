@@ -1072,16 +1072,16 @@
       <button onclick="closeSheet()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted);padding:0;">&times;</button>
     </div>
     <div id="sheet-body"></div>
-    <!-- View mode footer -->
-    <div id="sheet-footer-view" style="display:flex; gap:8px; margin-top:1rem;">
-      <button id="sheet-edit-btn" class="btn btn-primary" style="flex:1" onclick="switchToEditMode()">Edit</button>
-      <button id="sheet-share-btn" class="btn" style="flex:1" onclick="shareWorkout()">Share</button>
-      <button id="sheet-delete-btn" class="btn btn-danger" style="flex:1" onclick="deleteCurrentEntry()">Delete</button>
+    <!-- View mode footer: Share (bottom-left, gym only) + Edit (bottom-right, if editable) -->
+    <div id="sheet-footer-view" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:1rem;">
+      <button id="sheet-share-btn" class="btn" style="grid-column:1;" onclick="shareWorkout()">Share</button>
+      <button id="sheet-edit-btn" class="btn btn-primary" style="grid-column:2;" onclick="switchToEditMode()">Edit</button>
     </div>
     <!-- Edit mode footer -->
     <div id="sheet-footer-edit" style="display:none; gap:8px; margin-top:1rem;">
       <button class="btn btn-primary" style="flex:1" onclick="saveEdit()">Save changes</button>
       <button class="btn" style="flex:1" onclick="switchToViewMode()">Cancel</button>
+      <button class="btn btn-danger" style="flex:1" onclick="deleteCurrentEntry()">Delete</button>
     </div>
   </div>
 
@@ -1899,7 +1899,7 @@ function populateCardioActivityDropdown(selectedVal) {
     if (!cGrouped[g]) cGrouped[g] = [];
     cGrouped[g].push({ n, selected: n === selectedVal });
   });
-  let cOpts = '';
+  let cOpts = '<option value="">— select —</option>';
   Object.keys(cGrouped).sort((a,b) => {
     if (a === b) return 0;
     if (!a) return 1; if (!b) return -1;
@@ -3084,7 +3084,7 @@ function addExerciseBlock(exerciseData, containerId) {
   block.className = 'exercise-block';
   block.id = blockId;
 
-  const groupOptions = EXERCISE_GROUP_ORDER.map(g => `<option value="${g}">${g}</option>`).join('');
+  const groupOptions = '<option value="">— select —</option>' + EXERCISE_GROUP_ORDER.map(g => `<option value="${g}">${g}</option>`).join('');
 
   block.innerHTML =
     '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">' +
@@ -3357,17 +3357,15 @@ function openEntry(id, highlightExercise) {
     }, 30);
   }
 
-  // Show/hide edit/delete/share buttons based on entry type and whether
+  // Show/hide edit/share buttons based on entry type and whether
   // it has been exported to GitHub
   const editable = isEntryEditable(id);
   const isGym = entry.type === 'gym';
   const editBtn = document.getElementById('sheet-edit-btn');
-  if (editBtn) editBtn.style.display = editable ? 'inline-flex' : 'none';
-  const deleteBtn = document.getElementById('sheet-delete-btn');
-  if (deleteBtn) deleteBtn.style.display = editable ? 'inline-flex' : 'none';
+  if (editBtn) editBtn.style.display = editable ? '' : 'none';
   const shareBtn = document.getElementById('sheet-share-btn');
-  if (shareBtn) shareBtn.style.display = isGym ? 'inline-flex' : 'none';
-  document.getElementById('sheet-footer-view').style.display = (editable || isGym) ? 'flex' : 'none';
+  if (shareBtn) shareBtn.style.display = isGym ? '' : 'none';
+  document.getElementById('sheet-footer-view').style.display = (editable || isGym) ? 'grid' : 'none';
 
   document.getElementById('sheet-footer-edit').style.display = 'none';
   document.getElementById('sheet-overlay').style.display = 'block';
@@ -3391,7 +3389,7 @@ function switchToViewMode() {
   const entry = db.logs.find(e => e.id === currentEditId);
   if (!entry) return;
   document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
-  document.getElementById('sheet-footer-view').style.display = 'flex';
+  document.getElementById('sheet-footer-view').style.display = 'grid';
   document.getElementById('sheet-footer-edit').style.display = 'none';
 }
 
