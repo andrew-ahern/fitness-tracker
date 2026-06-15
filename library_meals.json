@@ -1,86 +1,159 @@
 [
   {
-    "name": "Eggs (2)",
-    "calories": 140,
-    "protein": 12,
-    "group": "Protein",
-    "active": true
+    "name": "Tesco Pastrami & Emmental",
+    "calories": 426,
+    "protein": 27.1,
+    "active": true,
+    "group": "Sandwich"
   },
   {
-    "name": "Oats (80g)",
-    "calories": 310,
-    "protein": 10,
-    "group": "Carbs",
-    "active": true
+    "name": "Tesco Smoked Salmon & Cream Cheese",
+    "calories": 439,
+    "protein": 20.5,
+    "active": true,
+    "group": "Sandwich"
   },
   {
-    "name": "Chicken breast (150g)",
-    "calories": 247,
-    "protein": 46,
-    "group": "Protein",
-    "active": true
+    "name": "Tesco Ham & Cheddar",
+    "calories": 424,
+    "protein": 22.2,
+    "active": true,
+    "group": "Sandwich"
   },
   {
-    "name": "Rice (200g cooked)",
-    "calories": 260,
-    "protein": 5,
-    "group": "Carbs",
-    "active": true
+    "name": "Tesco Chicken Tikka & Mango Chutney",
+    "calories": 345,
+    "protein": 22.1,
+    "active": true,
+    "group": "Sandwich"
   },
   {
-    "name": "Whey protein shake",
-    "calories": 130,
+    "name": "Tesco Ham & Mustard",
+    "calories": 330,
+    "protein": 19.9,
+    "active": true,
+    "group": "Sandwich"
+  },
+  {
+    "name": "Tesco Chicken Bacon & Lettuce",
+    "calories": 421,
+    "protein": 28.7,
+    "active": true,
+    "group": "Sandwich"
+  },
+  {
+    "name": "Tesco BLT",
+    "calories": 415,
+    "protein": 19.5,
+    "active": true,
+    "group": "Sandwich"
+  },
+  {
+    "name": "Graham's (200g)",
+    "calories": 180,
     "protein": 25,
-    "group": "Protein",
-    "active": true
+    "active": true,
+    "group": "Protein yoghurt"
   },
   {
-    "name": "Greek yogurt (150g)",
-    "calories": 130,
-    "protein": 15,
-    "group": "Protein",
-    "active": true
+    "name": "Arla (200g)",
+    "calories": 142,
+    "protein": 20,
+    "active": true,
+    "group": "Protein yoghurt",
+    "comment": "Near-identical values for pouch vs. pot and for all flavours."
   },
   {
-    "name": "Banana",
-    "calories": 90,
-    "protein": 1,
-    "group": "Fruit",
-    "active": true
+    "name": "Ufit (330ml)",
+    "calories": 155,
+    "protein": 25,
+    "active": true,
+    "group": "Protein drink",
+    "comment": "Averaged across Strawberry/Chocolate flavours (149-158 kcal)."
   },
   {
-    "name": "Apple",
+    "name": "Ufit (500ml)",
+    "calories": 285,
+    "protein": 50,
+    "active": true,
+    "group": "Protein drink",
+    "comment": "Averaged across Strawberry/Salted Caramel/Chocolate flavours (280-295 kcal)."
+  },
+  {
+    "name": "Emmi Caffe Latte (370ml)",
+    "calories": 210,
+    "protein": 28,
+    "active": true,
+    "group": "Protein drink"
+  },
+  {
+    "name": "For Goodness Shakes (250ml)",
+    "calories": 165,
+    "protein": 27,
+    "active": true,
+    "group": "Protein drink"
+  },
+  {
+    "name": "Beef mince (5% fat) with taco powder (250g)",
+    "calories": 366,
+    "protein": 55,
+    "active": true,
+    "group": "Meat",
+    "comment": "Tesco beef (250g raw), Old El Paso powder, excluding oil."
+  },
+  {
+    "name": "Sainsbury's Cajun chicken breast (90g)",
+    "calories": 127,
+    "protein": 21,
+    "active": true,
+    "group": "Meat"
+  },
+  {
+    "name": "Tesco chicken skewers (x10)",
+    "calories": 260,
+    "protein": 36,
+    "active": true,
+    "group": "Meat",
+    "comment": "freezer"
+  },
+  {
+    "name": "Steak (100g)",
+    "calories": 150,
+    "protein": 21,
+    "active": true,
+    "group": "Meat",
+    "comment": "estimate, raw"
+  },
+  {
+    "name": "Egg (medium)",
+    "calories": 65,
+    "protein": 6,
+    "active": true,
+    "group": "Eggs",
+    "comment": "estimate"
+  },
+  {
+    "name": "Egg (large)",
     "calories": 80,
-    "protein": 0,
-    "group": "Fruit",
-    "active": true
+    "protein": 7.5,
+    "active": true,
+    "group": "Eggs",
+    "comment": "estimate"
   },
   {
-    "name": "Bread (2 slices)",
-    "calories": 160,
-    "protein": 6,
-    "group": "Carbs",
-    "active": true
+    "name": "Warburtons Crumpet Thin",
+    "calories": 61,
+    "protein": 2,
+    "active": true,
+    "group": "Bread",
+    "comment": "32g"
   },
   {
-    "name": "Peanut butter (2 tbsp)",
-    "calories": 190,
-    "protein": 8,
-    "group": "Fats",
-    "active": true
-  },
-  {
-    "name": "Salmon (150g)",
-    "calories": 280,
-    "protein": 40,
-    "group": "Protein",
-    "active": true
-  },
-  {
-    "name": "Almonds (30g)",
-    "calories": 170,
-    "protein": 6,
-    "group": "Snacks",
-    "active": true
+    "name": "Warburtons Crumpet",
+    "calories": 97,
+    "protein": 3,
+    "active": true,
+    "group": "Bread",
+    "comment": "55g"
   }
 ]
