@@ -2001,6 +2001,15 @@ function renderHistory() {
         if (!grouped[g]) grouped[g] = [];
         grouped[g].push(name);
       });
+      // Also include manual exercises (group stored on the log entry, not in library)
+      db.logs.filter(e => e.type === 'gym').flatMap(e => e.exercises).forEach(ex => {
+        const inLib = db.exercises.some(i => (typeof i === 'string' ? i : i.name) === ex.name);
+        if (!inLib && ex.name) {
+          const g = ex.group || '';
+          if (!grouped[g]) grouped[g] = [];
+          if (!grouped[g].includes(ex.name)) grouped[g].push(ex.name);
+        }
+      });
       const groupOrder = [...EXERCISE_GROUP_ORDER, ''];
       const keys = Object.keys(grouped).sort((a,b) => {
         const ai = groupOrder.indexOf(a); const bi = groupOrder.indexOf(b);
@@ -2845,8 +2854,9 @@ function saveMeal() {
 function saveCardio() {
   const dist = parseFloat(getVal('c-dist'));
   const dur  = parseInt(getVal('c-dur'));
+  const isManual = document.getElementById('c-type-manual-toggle')?.dataset.manual === 'true';
 
-  if (isNaN(dist) && isNaN(dur)) {
+  if (!isManual && isNaN(dist) && isNaN(dur)) {
     showToast('Please enter distance or duration');
     return;
   }
@@ -3730,6 +3740,8 @@ function addSheetMealItemBlock(itemData, interactive) {
     if (libMatch) {
       setMealItemMode(block, false);
       selInput.value = itemData.name;
+      // Restore _unitMacros from library so qty changes recalculate correctly
+      block._unitMacros = { cal: libMatch.calories, pro: libMatch.protein };
     } else if (itemData.name) {
       setMealItemMode(block, true);
       nameInput.value = itemData.name;
@@ -3741,7 +3753,6 @@ function addSheetMealItemBlock(itemData, interactive) {
     if (itemData.protein  != null) block.querySelector('.mi-pro').value = itemData.protein;
     if (itemData.note)             block.querySelector('.mi-note').value = itemData.note;
     if (itemData.guess)            block.querySelector('.mi-guess').checked = true;
-    if (itemData._unitMacros)      block._unitMacros = itemData._unitMacros;
   } else {
     setMealItemMode(block, false);
   }

@@ -155,5 +155,35 @@
     "active": true,
     "group": "Bread",
     "comment": "55g"
+  },
+  {
+    "name": "McDonald's chicken wrap (sweet chilli)",
+    "calories": 453,
+    "protein": 21,
+    "active": true,
+    "group": "Takeaway",
+    "comment": "crispy"
+  },
+  {
+    "name": "McDonald's chicken wrap (BBQ & bacon)",
+    "calories": 477,
+    "protein": 23,
+    "active": true,
+    "group": "Takeaway",
+    "comment": "crispy"
+  },
+  {
+    "name": "Apple (Pink Lady, large)",
+    "calories": 74,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Olive oil (10ml)",
+    "calories": 80,
+    "protein": 0,
+    "active": true,
+    "group": "Fats & oils"
   }
 ]
