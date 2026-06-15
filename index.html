@@ -902,18 +902,6 @@
       <h3>Charts</h3>
       <div class="card" id="hidden-charts-card">
         <div class="card-row">
-          <div style="font-weight:500">Activities</div>
-          <div id="toggle-show-chart-activity" onclick="toggleChartVisibility('activity', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('activity')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
-          </div>
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Sets by muscle group</div>
-          <div id="toggle-show-chart-muscle" onclick="toggleChartVisibility('muscle', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('muscle')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
-          </div>
-        </div>
-        <div class="card-row">
           <div style="font-weight:500">Calories</div>
           <div id="toggle-show-chart-calories" onclick="toggleChartVisibility('calories', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('calories')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
@@ -931,6 +919,18 @@
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
+        <div class="card-row">
+          <div style="font-weight:500">Sets by muscle group</div>
+          <div id="toggle-show-chart-muscle" onclick="toggleChartVisibility('muscle', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('muscle')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Activities</div>
+          <div id="toggle-show-chart-activity" onclick="toggleChartVisibility('activity', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('activity')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
         <div class="card-row" style="border-bottom:none;">
           <div style="font-weight:500">Weight</div>
           <div id="toggle-show-chart-weight" onclick="toggleChartVisibility('weight', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('weight')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
@@ -941,30 +941,6 @@
 
       <div class="card" style="margin-bottom:0.75rem;">
         <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Y axis limits</div>
-        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
-          <div style="font-weight:500">Activities (sessions)</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <input type="number" id="yaxis-activity-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('activity')">
-            <input type="number" id="yaxis-activity-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('activity')">
-            <span style="color:var(--muted);font-size:13px;">or</span>
-            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
-              <input type="checkbox" id="yaxis-activity-auto" onchange="toggleChartAuto('activity', this.checked)" style="width:16px;height:16px;cursor:pointer;">
-              Auto
-            </label>
-          </div>
-        </div>
-        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
-          <div style="font-weight:500">Sets by muscle group</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <input type="number" id="yaxis-muscle-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
-            <input type="number" id="yaxis-muscle-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
-            <span style="color:var(--muted);font-size:13px;">or</span>
-            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
-              <input type="checkbox" id="yaxis-muscle-auto" onchange="toggleChartAuto('muscle', this.checked)" style="width:16px;height:16px;cursor:pointer;">
-              Auto
-            </label>
-          </div>
-        </div>
         <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
           <div style="font-weight:500">Calories (kcal)</div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -997,6 +973,30 @@
             <span style="color:var(--muted);font-size:13px;">or</span>
             <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
               <input type="checkbox" id="yaxis-rise-auto" onchange="toggleChartAuto('rise', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Sets by muscle group</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-muscle-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
+            <input type="number" id="yaxis-muscle-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-muscle-auto" onchange="toggleChartAuto('muscle', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Activities (sessions)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-activity-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('activity')">
+            <input type="number" id="yaxis-activity-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('activity')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-activity-auto" onchange="toggleChartAuto('activity', this.checked)" style="width:16px;height:16px;cursor:pointer;">
               Auto
             </label>
           </div>
@@ -3912,9 +3912,8 @@ function shareWorkout() {
   const entry = db.logs.find(e => e.id === currentEditId);
   if (!entry || entry.type !== 'gym') return;
   const text = '```\n' + buildWorkoutShareText(entry) + '\n```';
-  const title = 'Workout — ' + formatDate(entry.date);
   if (navigator.share) {
-    navigator.share({ title, text }).catch(err => {
+    navigator.share({ text }).catch(err => {
       if (err && err.name !== 'AbortError') copyToClipboardFallback(text);
     });
   } else {
@@ -4035,11 +4034,11 @@ function createChartCard(chartId, headerHTML, canvasId, emptyId, emptyMsg) {
 
 function renderCharts() {
   clearChartCards();
-  renderActivityChart();
-  renderMuscleChart();
   renderCalChart();
   renderProteinChart();
   renderRiseChart();
+  renderMuscleChart();
+  renderActivityChart();
   renderWeightChart();
   applyChartVisibility();
 }
