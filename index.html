@@ -939,9 +939,8 @@
         </div>
       </div>
 
-      <details class="lib-details">
-        <summary class="lib-summary">Y axis limits</summary>
-        <div class="card">
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Y axis limits</div>
         <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
           <div style="font-weight:500">Activities (sessions)</div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -1015,7 +1014,6 @@
           </div>
         </div>
         </div>
-      </details>
 
       <!-- Appearance -->
       <h3>Appearance</h3>
@@ -1934,15 +1932,16 @@ function populateCardioActivityDropdown(selectedVal) {
 const CARDIO_DISTANCE_ACTIVITIES = ['Cycle', 'Run', 'Hike'];
 
 function updateCardioDistFieldsVisibility(selectId, manualId, wrapperId, clearIds) {
-  /* Distance/duration/elevation/HR fields are shown for known
-     distance-based activities, OR always when manual entry is on
-     (the user knows what they did; let them fill in what's relevant). */
+  /* Distance/duration/elevation/HR fields are only shown for known
+     distance-based activities (Cycle/Run/Hike). Manual entries are
+     treated like any other non-distance activity (e.g. Tennis) —
+     just date/time/note. */
   const sel = document.getElementById(selectId);
   const manualInput = document.getElementById(manualId);
   const wrapper = document.getElementById(wrapperId);
   if (!sel || !wrapper) return;
   const isManual = manualInput && manualInput.style.display !== 'none';
-  const show = isManual || CARDIO_DISTANCE_ACTIVITIES.includes(sel.value);
+  const show = !isManual && CARDIO_DISTANCE_ACTIVITIES.includes(sel.value);
   wrapper.style.display = show ? '' : 'none';
   if (!show && clearIds) clearIds.forEach(id => setVal(id, ''));
 }
@@ -2969,8 +2968,8 @@ function renderExerciseParams(block, exerciseName, existingParams) {
     paramsDiv = document.createElement('div');
     paramsDiv.className = 'ex-params';
     paramsDiv.style.cssText = 'margin:0 0 0.85rem 0;';
-    // Insert params after the exercise select wrapper div
-    const header = block.querySelector('[style*="position:relative"]') || block.querySelector('.field');
+    // Insert params after the exercise name wrapper div
+    const header = block.querySelector('.ex-name-row') || block.querySelector('.field');
     header.after(paramsDiv);
   }
   paramsDiv.innerHTML = '';
@@ -3097,7 +3096,7 @@ function addExerciseBlock(exerciseData, containerId) {
       '</label>' +
       '<div></div>' +
     '</div>' +
-    '<div style="position:relative;">' +
+    '<div class="ex-name-row" style="position:relative;">' +
       '<div class="field">' +
         '<select class="ex-name field-select">' +
           buildExerciseOptions(exerciseData ? exerciseData.name : '') +
@@ -3536,7 +3535,7 @@ function buildEditForm(e) {
     const isLibraryActivity = (db.cardioActivities || []).some(a => (typeof a === 'string' ? a : a.name) === e.activityType);
     const eManual = !!e.activityType && !isLibraryActivity;
     const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => { const n = typeof a === 'string' ? a : a.name; return `<option ${n === e.activityType ? 'selected' : ''}>${n}</option>`; }).join('');
-    const showDist = eManual || CARDIO_DISTANCE_ACTIVITIES.includes(e.activityType);
+    const showDist = !eManual && CARDIO_DISTANCE_ACTIVITIES.includes(e.activityType);
     return `<div class="card" style="margin-bottom:0.75rem;">` +
       `<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">` +
       `<label style="font-size:14px;color:var(--muted);">Activity</label>` +
@@ -3544,7 +3543,7 @@ function buildEditForm(e) {
       `<span style="font-size:12px;color:var(--muted);">Enter manually</span>` +
       `<div id="e-acttype-manual-toggle" class="cardio-manual-toggle" data-manual="${eManual ? 'true' : 'false'}" ` +
       `style="width:36px;height:20px;border-radius:10px;background:${eManual ? 'var(--accent)' : 'var(--border)'};position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;" ` +
-      `onclick="toggleCardioManual(this,'e-acttype','e-acttype-manual','e-distfields-wrapper',null,false)">` +
+      `onclick="toggleCardioManual(this,'e-acttype','e-acttype-manual','e-distfields-wrapper',['e-dist','e-hravg','e-hrmax','e-elev'],false)">` +
       `<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);${eManual ? 'transform:translateX(16px);' : ''}"></div>` +
       `</div></label><div></div></div>` +
       `<div class="field">` +
