@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ft-v191';
+const CACHE_NAME = 'ft-v194';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -6,7 +6,8 @@ const APP_SHELL = [
   './icon-512.png',
   './library_exercises.json',
   './library_cardio.json',
-  './library_meals.json'
+  './library_meals.json',
+  './library_config.json'
 ];
 
 self.addEventListener('install', event => {

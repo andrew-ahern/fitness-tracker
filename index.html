@@ -1156,6 +1156,11 @@
 
 const STORAGE_KEY = 'fitlog_v1';
 const EXERCISE_GROUP_ORDER = ['Chest', 'Triceps', 'Back', 'Biceps', 'Delts', 'Legs', 'Core'];
+// Fallback used if library_config.json can't be fetched (offline, first load before SW cache, etc.)
+const FALLBACK_MEAL_GROUP_ORDER = ['Sandwich', 'Protein yoghurt', 'Protein drink', 'Meat', 'Eggs', 'Bread'];
+function getMealGroupOrder() {
+  return (db.mealGroupOrder && db.mealGroupOrder.length) ? db.mealGroupOrder : FALLBACK_MEAL_GROUP_ORDER;
+}
 
 /* ── Chart Y-axis settings ─────────────────────────────────────────
    Fixed auto-buffers (added/subtracted from the data/target range when
@@ -1284,6 +1289,7 @@ let db = {
   libraryExercises: [],
   libraryCardioActivities: [],
   libraryMealItems: [],
+  mealGroupOrder: [],
   userAddedExercises: [],
   userAddedCardioActivities: [],
   userAddedMealItems: [],
@@ -1333,6 +1339,7 @@ function loadDB() {
         if (!db.libraryExercises)          db.libraryExercises = [];
         if (!db.libraryCardioActivities)   db.libraryCardioActivities = [];
         if (!db.libraryMealItems)          db.libraryMealItems = [];
+        if (!db.mealGroupOrder)             db.mealGroupOrder = [];
         if (!db.exercises)                 db.exercises = [];
         if (!db.cardioActivities)          db.cardioActivities = [];
         if (!db.mealItems)                 db.mealItems = [];
@@ -1395,10 +1402,11 @@ async function loadDefaultLibraries() {
      On failure (offline), uses SW-cached versions or leaves arrays empty. */
   const BASE = 'https://andrew-ahern.github.io/fitness-tracker/';
   try {
-    const [exRes, cardRes, mealRes] = await Promise.all([
+    const [exRes, cardRes, mealRes, configRes] = await Promise.all([
       fetch(BASE + 'library_exercises.json'),
       fetch(BASE + 'library_cardio.json'),
       fetch(BASE + 'library_meals.json'),
+      fetch(BASE + 'library_config.json'),
     ]);
     const cleanLib = arr => (arr || [])
       .filter(i => i.active !== false)
@@ -1406,6 +1414,10 @@ async function loadDefaultLibraries() {
     if (exRes.ok)   db.libraryExercises        = cleanLib(await exRes.json());
     if (cardRes.ok) db.libraryCardioActivities = cleanLib(await cardRes.json());
     if (mealRes.ok) db.libraryMealItems        = cleanLib(await mealRes.json());
+    if (configRes.ok) {
+      const cfg = await configRes.json();
+      db.mealGroupOrder = cfg.mealGroupOrder || [];
+    }
     rebuildCombinedLibraries();
     saveDB();
     renderAll();
@@ -1946,12 +1958,13 @@ function renderMealItemLibrary() {
     const uIdx = userAddedMeal.findIndex(u => (typeof u === 'string' ? u : u.name) === name);
     grouped[g].push({ item, i: uIdx });
   });
+  const mealGroupOrder = getMealGroupOrder();
   const groupKeys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
     if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
-    const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
-    const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    const ai = mealGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = mealGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
     if (ai === -1) return 1; if (bi === -1) return -1;
     return ai - bi;
@@ -2718,12 +2731,13 @@ function buildMealItemOptions(selectedName) {
     grouped[g].push(i);
   });
   let opts = '';
+  const mealGroupOrder = getMealGroupOrder();
   const keys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
     if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
-    const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
-    const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+    const ai = mealGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
+    const bi = mealGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
     if (ai === -1 && bi === -1) return a.localeCompare(b);
     if (ai === -1) return 1; if (bi === -1) return -1;
     return ai - bi;
