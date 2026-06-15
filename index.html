@@ -1075,7 +1075,8 @@
     <!-- View mode footer -->
     <div id="sheet-footer-view" style="display:flex; gap:8px; margin-top:1rem;">
       <button id="sheet-edit-btn" class="btn btn-primary" style="flex:1" onclick="switchToEditMode()">Edit</button>
-      <button class="btn btn-danger" style="flex:1" onclick="deleteCurrentEntry()">Delete</button>
+      <button id="sheet-share-btn" class="btn" style="flex:1" onclick="shareWorkout()">Share</button>
+      <button id="sheet-delete-btn" class="btn btn-danger" style="flex:1" onclick="deleteCurrentEntry()">Delete</button>
     </div>
     <!-- Edit mode footer -->
     <div id="sheet-footer-edit" style="display:none; gap:8px; margin-top:1rem;">
@@ -3096,8 +3097,8 @@ function addExerciseBlock(exerciseData, containerId) {
       '</label>' +
       '<div></div>' +
     '</div>' +
-    '<div class="ex-name-row" style="position:relative;">' +
-      '<div class="field">' +
+    '<div class="ex-name-row" style="display:flex;align-items:flex-start;gap:8px;">' +
+      '<div class="field" style="flex:1;">' +
         '<select class="ex-name field-select">' +
           buildExerciseOptions(exerciseData ? exerciseData.name : '') +
         '</select>' +
@@ -3107,7 +3108,7 @@ function addExerciseBlock(exerciseData, containerId) {
           `<select class="ex-group field-select">${groupOptions}</select>` +
         '</div>' +
       '</div>' +
-      '<button class="del-btn" title="Remove exercise" style="position:absolute;top:0;right:0;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>' +
+      '<button class="del-btn" title="Remove exercise">&times;</button>' +
     '</div>' +
     '<div class="set-labels" style="display:grid;grid-template-columns:28px 2fr 2fr 3fr 28px;gap:6px;margin-bottom:2px;">' +
       '<div class="set-label" style="text-align:center">#</div>' +
@@ -3356,11 +3357,18 @@ function openEntry(id, highlightExercise) {
     }, 30);
   }
 
-  // Show/hide edit button based on whether entry has been exported to GitHub
+  // Show/hide edit/delete/share buttons based on entry type and whether
+  // it has been exported to GitHub
+  const editable = isEntryEditable(id);
+  const isGym = entry.type === 'gym';
   const editBtn = document.getElementById('sheet-edit-btn');
-  if (editBtn) editBtn.style.display = isEntryEditable(id) ? 'inline-flex' : 'none';
+  if (editBtn) editBtn.style.display = editable ? 'inline-flex' : 'none';
+  const deleteBtn = document.getElementById('sheet-delete-btn');
+  if (deleteBtn) deleteBtn.style.display = editable ? 'inline-flex' : 'none';
+  const shareBtn = document.getElementById('sheet-share-btn');
+  if (shareBtn) shareBtn.style.display = isGym ? 'inline-flex' : 'none';
+  document.getElementById('sheet-footer-view').style.display = (editable || isGym) ? 'flex' : 'none';
 
-  document.getElementById('sheet-footer-view').style.display = 'flex';
   document.getElementById('sheet-footer-edit').style.display = 'none';
   document.getElementById('sheet-overlay').style.display = 'block';
   document.getElementById('edit-sheet').style.display = 'block';
@@ -3385,6 +3393,45 @@ function switchToViewMode() {
   document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
   document.getElementById('sheet-footer-view').style.display = 'flex';
   document.getElementById('sheet-footer-edit').style.display = 'none';
+}
+
+function buildWorkoutShareText(entry) {
+  /* Plain-text summary of a gym entry, suitable for sharing via
+     messaging apps (Web Share API) or clipboard copy. */
+  const lines = [];
+  lines.push('🏋️ Workout — ' + formatDate(entry.date));
+  const timeRange = entry.startTime
+    ? entry.startTime + (entry.endTime ? '–' + entry.endTime : '')
+    : '';
+  if (timeRange) lines.push(timeRange);
+
+  (entry.exercises || []).forEach((ex) => {
+    lines.push('');
+    const paramsStr = ex.params && Object.keys(ex.params).length
+      ? Object.entries(ex.params)
+          .filter(([k,v]) => v != null && v !== '')
+          .map(([k,v]) => {
+            if (typeof v === 'number') return v + '°';
+            if (typeof v === 'object' && v.value) return v.subOption ? v.value + ', ' + v.subOption : v.value;
+            return v;
+          })
+          .join(', ')
+      : '';
+    lines.push(ex.name + (paramsStr ? ' (' + paramsStr + ')' : ''));
+    (ex.sets || []).forEach(s => {
+      const w = s.weight != null ? fmtWeight(s.weight) + 'kg' : '—';
+      const r = s.reps != null ? s.reps : '—';
+      const note = s.note ? ' (' + s.note + ')' : '';
+      lines.push('  ' + w + ' × ' + r + note);
+    });
+  });
+
+  if (entry.note) {
+    lines.push('');
+    lines.push('Note: ' + entry.note);
+  }
+
+  return lines.join('\n');
 }
 
 function buildViewBody(e) {
@@ -3862,6 +3909,31 @@ function deleteCurrentEntry() {
   closeSheet();
   renderHistory();
   showToast('Deleted');
+}
+
+function shareWorkout() {
+  const entry = db.logs.find(e => e.id === currentEditId);
+  if (!entry || entry.type !== 'gym') return;
+  const text = buildWorkoutShareText(entry);
+  const title = 'Workout — ' + formatDate(entry.date);
+  if (navigator.share) {
+    navigator.share({ title, text }).catch(err => {
+      if (err && err.name !== 'AbortError') copyToClipboardFallback(text);
+    });
+  } else {
+    copyToClipboardFallback(text);
+  }
+}
+
+function copyToClipboardFallback(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => showToast('Copied to clipboard ✓'),
+      () => showToast('Could not copy to clipboard')
+    );
+  } else {
+    showToast('Could not copy to clipboard');
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════
