@@ -3912,7 +3912,7 @@ function deleteCurrentEntry() {
 function shareWorkout() {
   const entry = db.logs.find(e => e.id === currentEditId);
   if (!entry || entry.type !== 'gym') return;
-  const text = buildWorkoutShareText(entry);
+  const text = '```\n' + buildWorkoutShareText(entry) + '\n```';
   const title = 'Workout — ' + formatDate(entry.date);
   if (navigator.share) {
     navigator.share({ title, text }).catch(err => {
