@@ -1927,14 +1927,27 @@ function deleteExercise(index) {
     name => db.logs.some(e =>
       e.type === 'gym' && e.exercises && e.exercises.some(ex => ex.name === name)
     ),
-    () => renderExerciseLibrary()
+    () => {
+      renderExerciseLibrary();
+      refreshExerciseDropdowns();
+    }
   );
 }
 
 function refreshExerciseDropdowns() {
-  /* Update all open exercise dropdowns to reflect current library order. */
+  /* Update all open exercise dropdowns to reflect current library order.
+     If the previously-selected exercise no longer exists, reset the
+     selection and let the change handler clear/refresh dependent params. */
   document.querySelectorAll('#exercises-container .ex-name, #sheet-exercises-container .ex-name')
-    .forEach(sel => { sel.innerHTML = buildExerciseOptions(sel.value); });
+    .forEach(sel => {
+      const current = sel.value;
+      sel.innerHTML = buildExerciseOptions(current);
+      const stillExists = (db.exercises || []).some(i => (typeof i === 'string' ? i : i.name) === current);
+      if (current && !stillExists) {
+        sel.value = '';
+        sel.dispatchEvent(new Event('change'));
+      }
+    });
 }
 
 /* ── Meal item library ─────────────────────────────────────────── */
@@ -2001,6 +2014,34 @@ function renderMealItemLibrary() {
   list.innerHTML = html;
 }
 
+function refreshMealItemDropdowns() {
+  /* Re-syncs every currently-rendered meal-item control with db.mealItems.
+     Called whenever the meal item library changes (add/move/delete in
+     Settings), so open meal/edit forms reflect the change immediately
+     without needing a screen reload. */
+  // Manual-entry name datalists (autocomplete suggestions)
+  const dlOpts = (db.mealItems || []).map(i => '<option value="' + i.name + '">').join('');
+  document.querySelectorAll('[id^="mi-list-"]').forEach(dl => { dl.innerHTML = dlOpts; });
+
+  // Library-mode <select> dropdowns
+  document.querySelectorAll('.mi-select').forEach(sel => {
+    const current = sel.value;
+    sel.innerHTML = buildMealItemOptions(current);
+    const stillExists = (db.mealItems || []).some(i => i.name === current);
+    if (current && !stillExists) {
+      sel.value = '';
+      const block = sel.closest('.exercise-block');
+      if (block) {
+        const calEl = block.querySelector('.mi-cal');
+        const proEl = block.querySelector('.mi-pro');
+        if (calEl) calEl.value = '';
+        if (proEl) proEl.value = '';
+        block._unitMacros = null;
+      }
+    }
+  });
+}
+
 function addMealItem() {
   const name = document.getElementById('new-meal-item-name').value.trim();
   if (!name) { showToast('Please enter a name'); return; }
@@ -2016,20 +2057,18 @@ function addMealItem() {
   saveDB();
   rebuildCombinedLibraries();
   renderMealItemLibrary();
-  // Refresh all existing meal item datalists in the log form
-  const opts = (db.mealItems || []).map(i => '<option value="' + i.name + '">').join('');
-  document.querySelectorAll('[id^="mi-list-"]').forEach(dl => { dl.innerHTML = opts; });
+  refreshMealItemDropdowns();
   ['new-meal-item-name','new-meal-item-calories','new-meal-item-protein']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   showToast('Added: ' + name);
 }
 
 function moveMealItem(index, direction) {
-  moveInLibrary('userAddedMealItems', index, direction, () => renderMealItemLibrary());
+  moveInLibrary('userAddedMealItems', index, direction, () => { renderMealItemLibrary(); refreshMealItemDropdowns(); });
 }
 
 function deleteMealItem(index) {
-  deleteFromLibrary('userAddedMealItems', index, null, () => renderMealItemLibrary());
+  deleteFromLibrary('userAddedMealItems', index, null, () => { renderMealItemLibrary(); refreshMealItemDropdowns(); });
 }
 
 /* ── Cardio library ────────────────────────────────────────────── */
