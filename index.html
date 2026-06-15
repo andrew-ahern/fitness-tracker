@@ -653,9 +653,20 @@
       <!-- ── CARDIO FORM ─────────────────────────────────────────── -->
       <div id="form-cardio" class="log-form">
         <div class="card">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">
+            <label style="font-size:14px;color:var(--muted);">Activity</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;justify-self:center;">
+              <span style="font-size:12px;color:var(--muted);">Enter manually</span>
+              <div id="c-type-manual-toggle" class="cardio-manual-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;"
+                   onclick="toggleCardioManual(this, 'c-type', 'c-type-manual', 'c-distfields-wrapper', ['c-dist','c-dur','c-elev','c-hravg','c-hrmax'], true)">
+                <div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+              </div>
+            </label>
+            <div></div>
+          </div>
           <div class="field">
-            <label>Activity</label>
             <select id="c-type" class="field-select"></select>
+            <input type="text" id="c-type-manual" class="field-text" placeholder="Activity name" style="display:none;">
           </div>
           <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
             <div class="field">
@@ -811,28 +822,14 @@
       <details class="lib-details">
         <summary class="lib-summary">Gym exercises</summary>
         <div id="exercise-library-list"></div>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input type="text" id="new-exercise-name" placeholder="Exercise name" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;">
-          <button class="btn btn-primary" onclick="addExercise()">Add</button>
-        </div>
       </details>
       <details class="lib-details">
         <summary class="lib-summary">Cardio activities</summary>
         <div id="cardio-library-list"></div>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <input type="text" id="new-cardio-name" placeholder="Activity name" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;">
-          <button class="btn btn-primary" onclick="addCardioActivity()">Add</button>
-        </div>
       </details>
       <details class="lib-details">
         <summary class="lib-summary">Meal items</summary>
         <div id="meal-item-library-list"></div>
-        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
-          <input type="text"   id="new-meal-item-name"     placeholder="Item name"  style="flex:2; min-width:120px; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;">
-          <input type="number" id="new-meal-item-calories"  placeholder="kcal"       style="flex:1; min-width:60px;  padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;" inputmode="decimal">
-          <input type="number" id="new-meal-item-protein"   placeholder="protein g"  style="flex:1; min-width:60px;  padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px;" inputmode="decimal">
-          <button class="btn btn-primary" onclick="addMealItem()">Add</button>
-        </div>
       </details>
 
       <!-- Targets -->
@@ -1121,12 +1118,9 @@
      libraryExercises: [],         // loaded from app repo JSON on every load
      libraryCardioActivities: [],    // loaded from app repo JSON on every load
      libraryMealItems: [],           // loaded from app repo JSON on every load
-     userAddedExercises: [],         // added by user via Settings
-     userAddedCardioActivities: [],  // added by user via Settings
-     userAddedMealItems: [],         // added by user via Settings
-     exercises: [],                  // combined: libraryExercises + userAddedExercises
-     cardioActivities: [],           // combined: libraryCardioActivities + userAddedCardioActivities
-     mealItems: [],                  // combined: libraryMealItems + userAddedMealItems
+     exercises: [],                  // = libraryExercises (read-only view used throughout the app)
+     cardioActivities: [],           // = libraryCardioActivities (read-only view)
+     mealItems: [],                  // = libraryMealItems (read-only view)
      logs: [                  // all log entries, any type, in creation order
        {
          id: 1734012345678,   // unique ID = timestamp of creation (ms)
@@ -1290,9 +1284,6 @@ let db = {
   libraryCardioActivities: [],
   libraryMealItems: [],
   mealGroupOrder: [],
-  userAddedExercises: [],
-  userAddedCardioActivities: [],
-  userAddedMealItems: [],
   exercises: [],
   cardioActivities: [],
   mealItems: [],
@@ -1305,13 +1296,13 @@ let db = {
 /* ── Combined library rebuild ──────────────────────────────────── */
 
 function rebuildCombinedLibraries() {
-  /* Rebuild the unified library arrays from library + user-added items.
-     Called after any library change (load, user add/delete).
+  /* Populate the read-only view arrays from the library arrays.
+     Called after the library JSON files load.
      db.exercises, db.cardioActivities, db.mealItems are the single
      source of truth for all read operations (dropdowns, Settings, charts). */
-  db.exercises        = [...(db.libraryExercises        || []), ...(db.userAddedExercises        || [])];
-  db.cardioActivities = [...(db.libraryCardioActivities || []), ...(db.userAddedCardioActivities || [])];
-  db.mealItems        = [...(db.libraryMealItems        || []), ...(db.userAddedMealItems        || [])];
+  db.exercises        = [...(db.libraryExercises        || [])];
+  db.cardioActivities = [...(db.libraryCardioActivities || [])];
+  db.mealItems        = [...(db.libraryMealItems        || [])];
 }
 
 /* ── Storage: load & save ──────────────────────────────────────── */
@@ -1329,13 +1320,6 @@ function loadDB() {
         db = parsed;
         // Patch in any fields added in later versions that may be missing
         // from data saved before those fields existed
-        if (!db.userAddedCardioActivities) db.userAddedCardioActivities = [];
-        if (!db.userAddedExercises)        db.userAddedExercises = [];
-        // Migrate: set group to 'newlyAdded' for user-added items with null group
-        ['userAddedExercises','userAddedCardioActivities','userAddedMealItems'].forEach(key => {
-          (db[key] || []).forEach(item => { if (!item.group) item.group = 'newlyAdded'; });
-        });
-        if (!db.userAddedMealItems)        db.userAddedMealItems = [];
         if (!db.libraryExercises)          db.libraryExercises = [];
         if (!db.libraryCardioActivities)   db.libraryCardioActivities = [];
         if (!db.libraryMealItems)          db.libraryMealItems = [];
@@ -1565,7 +1549,7 @@ function toCSV(headers, rows) {
 /* ── Import ────────────────────────────────────────────────────── */
 
 function confirmDeviceImport() {
-  if (!confirm('Import from device backup? This will merge logs and overwrite libraries and settings.')) return;
+  if (!confirm('Import from device backup? This will merge logs and overwrite settings.')) return;
   document.getElementById('device-import-input').click();
 }
 
@@ -1609,9 +1593,6 @@ function importData(event) {
       }
       db = imported;
       // Ensure new keys exist (backward compat with old backups)
-      if (!db.userAddedExercises)        db.userAddedExercises = [];
-      if (!db.userAddedCardioActivities) db.userAddedCardioActivities = [];
-      if (!db.userAddedMealItems)        db.userAddedMealItems = [];
       if (!db.libraryExercises)          db.libraryExercises = [];
       if (!db.libraryCardioActivities)   db.libraryCardioActivities = [];
       if (!db.libraryMealItems)          db.libraryMealItems = [];
@@ -1795,17 +1776,12 @@ function saveSettings() {
 
 
 
-function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
-  /* key is the combined array (e.g. 'exercises') for display.
-     Move/delete operations use the userAdded counterpart.
-     Index passed to moveFn/deleteFn is the index within the userAdded array. */
-  const userAddedKey = key === 'exercises'        ? 'userAddedExercises'
-                     : key === 'cardioActivities'  ? 'userAddedCardioActivities'
-                     : key;
+function renderLibrary(key, listId, emptyMsg) {
+  /* Read-only display of a library array (exercises or cardioActivities),
+     grouped by item.group. Libraries are sourced from the repo's
+     library_*.json files and are not editable in-app. */
   const list = document.getElementById(listId);
   const arr = db[key];
-  const userAddedArr = db[userAddedKey] || [];
-  const n = userAddedArr.length;
   if (arr.length === 0) {
     list.innerHTML = `<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">${emptyMsg}</div>`;
     return;
@@ -1816,14 +1792,10 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   arr.forEach((item) => {
     const g = (item && item.group) ? item.group : '';
     if (!grouped[g]) grouped[g] = [];
-    // Find index within userAdded array for editable items
-    const name = typeof item === 'string' ? item : item.name;
-    const userAddedIdx = userAddedArr.findIndex(u => (typeof u === 'string' ? u : u.name) === name);
-    grouped[g].push({ item, i: userAddedIdx });
+    grouped[g].push(item);
   });
   const groupKeys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
-    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
     const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
@@ -1837,64 +1809,18 @@ function renderLibrary(key, listId, emptyMsg, moveFn, deleteFn) {
   let isFirstGroup = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroups) {
-      const heading = g === 'newlyAdded' ? 'Newly added' : g;
       const mt = isFirstGroup ? '9px' : '25px';
-      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${g}</div>`;
       isFirstGroup = false;
     }
-    grouped[g].forEach(({ item, i }) => {
-      const name     = typeof item === 'string' ? item : item.name;
-      const editable = i >= 0; // only userAdded items (index >= 0) are editable
-      const buttons  = editable ? `
-        <button onclick="${moveFn}(${i}, -1)" ${i === 0 ? 'disabled' : ''}
-          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i === 0 ? '0.2' : '1'}">↑</button>
-        <button onclick="${moveFn}(${i},  1)" ${i === n-1 ? 'disabled' : ''}
-          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i === n-1 ? '0.2' : '1'}">↓</button>
-        <button onclick="${deleteFn}(${i})"
-          style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
+    grouped[g].forEach((item) => {
+      const name = typeof item === 'string' ? item : item.name;
       html += `<div class="card-row lib-item">
         <span style="font-size:15px;flex:1;">${name}</span>
-        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">${buttons}</div>
       </div>`;
     });
   });
   list.innerHTML = html;
-}
-
-
-
-function addToLibrary(key, inputId, onUpdate) {
-  const input = document.getElementById(inputId);
-  const name = input.value.trim();
-  if (!name) return;
-  if (db[key].some(i => (typeof i === 'string' ? i : i.name) === name)) { showToast('Already in library'); return; }
-  db[key].push({ name, group: 'newlyAdded' });
-  saveDB();
-  rebuildCombinedLibraries();
-  onUpdate();
-  input.value = '';
-  showToast('Added: ' + name);
-}
-
-function moveInLibrary(key, index, direction, onUpdate) {
-  const arr = db[key];
-  const target = index + direction;
-  if (target < 0 || target >= arr.length) return;
-  [arr[index], arr[target]] = [arr[target], arr[index]];
-  saveDB();
-  rebuildCombinedLibraries();
-  onUpdate();
-}
-
-function deleteFromLibrary(key, index, inUseFn, onUpdate) {
-  const name = db[key][index];
-  if (inUseFn && inUseFn(name)) {
-    if (!confirm(`"${name}" is used in existing entries. Delete anyway?`)) return;
-  }
-  db[key].splice(index, 1);
-  saveDB();
-  rebuildCombinedLibraries();
-  onUpdate();
 }
 
 /* ── Library wrappers ──────────────────────────────────────────────
@@ -1904,50 +1830,7 @@ function deleteFromLibrary(key, index, inUseFn, onUpdate) {
 /* ── Exercise library ──────────────────────────────────────────── */
 
 function renderExerciseLibrary() {
-  renderLibrary('exercises', 'exercise-library-list',
-    'No exercises yet', 'moveExercise', 'deleteExercise');
-}
-
-function addExercise() {
-  addToLibrary('userAddedExercises', 'new-exercise-name', () => {
-    renderExerciseLibrary();
-    refreshExerciseDropdowns();
-  });
-}
-
-function moveExercise(index, direction) {
-  moveInLibrary('userAddedExercises', index, direction, () => {
-    renderExerciseLibrary();
-    refreshExerciseDropdowns();
-  });
-}
-
-function deleteExercise(index) {
-  deleteFromLibrary('userAddedExercises', index,
-    name => db.logs.some(e =>
-      e.type === 'gym' && e.exercises && e.exercises.some(ex => ex.name === name)
-    ),
-    () => {
-      renderExerciseLibrary();
-      refreshExerciseDropdowns();
-    }
-  );
-}
-
-function refreshExerciseDropdowns() {
-  /* Update all open exercise dropdowns to reflect current library order.
-     If the previously-selected exercise no longer exists, reset the
-     selection and let the change handler clear/refresh dependent params. */
-  document.querySelectorAll('#exercises-container .ex-name, #sheet-exercises-container .ex-name')
-    .forEach(sel => {
-      const current = sel.value;
-      sel.innerHTML = buildExerciseOptions(current);
-      const stillExists = (db.exercises || []).some(i => (typeof i === 'string' ? i : i.name) === current);
-      if (current && !stillExists) {
-        sel.value = '';
-        sel.dispatchEvent(new Event('change'));
-      }
-    });
+  renderLibrary('exercises', 'exercise-library-list', 'No exercises yet');
 }
 
 /* ── Meal item library ─────────────────────────────────────────── */
@@ -1956,25 +1839,20 @@ function renderMealItemLibrary() {
   const list = document.getElementById('meal-item-library-list');
   if (!list) return;
   const arr = db.mealItems || [];
-  const n = arr.length;
-  if (n === 0) {
+  if (arr.length === 0) {
     list.innerHTML = '<div style="color:var(--muted); font-size:14px; padding:0.5rem 0">No items yet</div>';
     return;
   }
   // Group by item.group
   const grouped = {};
-  const userAddedMeal = db.userAddedMealItems || [];
   arr.forEach((item) => {
     const g = (item && item.group) ? item.group : '';
     if (!grouped[g]) grouped[g] = [];
-    const name = typeof item === 'string' ? item : item.name;
-    const uIdx = userAddedMeal.findIndex(u => (typeof u === 'string' ? u : u.name) === name);
-    grouped[g].push({ item, i: uIdx });
+    grouped[g].push(item);
   });
   const mealGroupOrder = getMealGroupOrder();
   const groupKeys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
-    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
     const ai = mealGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = mealGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
@@ -1988,117 +1866,28 @@ function renderMealItemLibrary() {
   let isFirstGroupMeal = true;
   groupKeys.forEach(g => {
     if (hasMultipleGroupsMeal) {
-      const heading = g === 'newlyAdded' ? 'Newly added' : g;
       const mt = isFirstGroupMeal ? '9px' : '25px';
-      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${heading}</div>`;
+      html += `<div style="font-size:14px;font-weight:500;color:var(--muted);margin-top:${mt};margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${g}</div>`;
       isFirstGroupMeal = false;
     }
-    grouped[g].forEach(({ item, i }) => {
+    grouped[g].forEach((item) => {
       const parts = [];
       if (item.calories != null) parts.push(item.calories + 'kcal');
       if (item.protein  != null) parts.push('P ' + item.protein + 'g');
-      const editable = i >= 0; // only userAdded items (index >= 0) are editable
-      const buttons = editable ? `
-          <button onclick="moveMealItem(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===0?'0.2':'1'}">↑</button>
-          <button onclick="moveMealItem(${i}, 1)" ${i===n-1?'disabled':''} style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;opacity:${i===n-1?'0.2':'1'}">↓</button>
-          <button onclick="deleteMealItem(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>` : '';
       html += `<div class="card-row lib-item">
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px">${item.name}</div>
           ${parts.length ? `<div style="font-size:12px;color:var(--muted)">${parts.join(' · ')}</div>` : ''}
         </div>
-        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0;">${buttons}</div>
       </div>`;
     });
   });
   list.innerHTML = html;
 }
 
-function refreshMealItemDropdowns() {
-  /* Re-syncs every currently-rendered meal-item control with db.mealItems.
-     Called whenever the meal item library changes (add/move/delete in
-     Settings), so open meal/edit forms reflect the change immediately
-     without needing a screen reload. */
-  // Manual-entry name datalists (autocomplete suggestions)
-  const dlOpts = (db.mealItems || []).map(i => '<option value="' + i.name + '">').join('');
-  document.querySelectorAll('[id^="mi-list-"]').forEach(dl => { dl.innerHTML = dlOpts; });
-
-  // Library-mode <select> dropdowns
-  document.querySelectorAll('.mi-select').forEach(sel => {
-    const current = sel.value;
-    sel.innerHTML = buildMealItemOptions(current);
-    const stillExists = (db.mealItems || []).some(i => i.name === current);
-    if (current && !stillExists) {
-      sel.value = '';
-      const block = sel.closest('.exercise-block');
-      if (block) {
-        const calEl = block.querySelector('.mi-cal');
-        const proEl = block.querySelector('.mi-pro');
-        if (calEl) calEl.value = '';
-        if (proEl) proEl.value = '';
-        block._unitMacros = null;
-      }
-    }
-  });
-}
-
-function addMealItem() {
-  const name = document.getElementById('new-meal-item-name').value.trim();
-  if (!name) { showToast('Please enter a name'); return; }
-  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
-  if ((db.mealItems || []).some(i => i.name === name)) { showToast('Already in library'); return; }
-  if (!db.userAddedMealItems) db.userAddedMealItems = [];
-  db.userAddedMealItems.push({
-    name,
-    calories: num('new-meal-item-calories'),
-    protein:  num('new-meal-item-protein'),
-    group: 'newlyAdded'
-  });
-  saveDB();
-  rebuildCombinedLibraries();
-  renderMealItemLibrary();
-  refreshMealItemDropdowns();
-  ['new-meal-item-name','new-meal-item-calories','new-meal-item-protein']
-    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  showToast('Added: ' + name);
-}
-
-function moveMealItem(index, direction) {
-  moveInLibrary('userAddedMealItems', index, direction, () => { renderMealItemLibrary(); refreshMealItemDropdowns(); });
-}
-
-function deleteMealItem(index) {
-  deleteFromLibrary('userAddedMealItems', index, null, () => { renderMealItemLibrary(); refreshMealItemDropdowns(); });
-}
-
 /* ── Cardio library ────────────────────────────────────────────── */
 function renderCardioLibrary() {
-  renderLibrary('cardioActivities', 'cardio-library-list',
-    'No activities yet', 'moveCardioActivity', 'deleteCardioActivity');
-}
-
-function addCardioActivity() {
-  addToLibrary('userAddedCardioActivities', 'new-cardio-name', () => {
-    renderCardioLibrary();
-    populateCardioActivityDropdown();
-  });
-}
-
-function moveCardioActivity(index, direction) {
-  moveInLibrary('userAddedCardioActivities', index, direction, () => {
-    renderCardioLibrary();
-    populateCardioActivityDropdown();
-  });
-}
-
-function deleteCardioActivity(index) {
-  deleteFromLibrary('userAddedCardioActivities', index,
-    name => db.logs.some(e => e.type === 'cardio' && e.activityType === name),
-    () => {
-      renderCardioLibrary();
-      populateCardioActivityDropdown();
-    }
-  );
+  renderLibrary('cardioActivities', 'cardio-library-list', 'No activities yet');
 }
 
 function populateCardioActivityDropdown(selectedVal) {
@@ -2114,7 +1903,6 @@ function populateCardioActivityDropdown(selectedVal) {
   let cOpts = '';
   Object.keys(cGrouped).sort((a,b) => {
     if (a === b) return 0;
-    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
     const ai = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = EXERCISE_GROUP_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
@@ -2123,26 +1911,69 @@ function populateCardioActivityDropdown(selectedVal) {
     return ai - bi;
   }).forEach(g => {
     const items = cGrouped[g].map(({n,selected}) => `<option value="${n}" ${selected?'selected':''}>${n}</option>`).join('');
-    const cLabel = g === 'newlyAdded' ? 'Newly added' : g;
-    if (cLabel) cOpts += `<optgroup label="${cLabel}">${items}</optgroup>`;
+    if (g) cOpts += `<optgroup label="${g}">${items}</optgroup>`;
     else cOpts += items;
   });
   sel.innerHTML = cOpts;
-  updateCardioFieldVisibility();
+
+  // Detect manual entries (activityType not found in the library) and
+  // toggle into manual mode accordingly (used when restoring a draft).
+  const toggle = document.getElementById('c-type-manual-toggle');
+  if (toggle) {
+    const isLibrary = (db.cardioActivities || []).some(i => (typeof i === 'string' ? i : i.name) === selectedVal);
+    const manual = !!selectedVal && !isLibrary;
+    setCardioManualMode(toggle, 'c-type', 'c-type-manual', 'c-distfields-wrapper', ['c-dist','c-dur','c-elev','c-hravg','c-hrmax'], manual);
+    if (manual) setVal('c-type-manual', selectedVal);
+  } else {
+    updateCardioFieldVisibility();
+  }
   sel.removeEventListener('change', updateCardioFieldVisibility);
   sel.addEventListener('change', updateCardioFieldVisibility);
 }
 
 const CARDIO_DISTANCE_ACTIVITIES = ['Cycle', 'Run', 'Hike'];
-function updateCardioFieldVisibility() {
-  const sel = document.getElementById('c-type');
-  const wrapper = document.getElementById('c-distfields-wrapper');
+
+function updateCardioDistFieldsVisibility(selectId, manualId, wrapperId, clearIds) {
+  /* Distance/duration/elevation/HR fields are shown for known
+     distance-based activities, OR always when manual entry is on
+     (the user knows what they did; let them fill in what's relevant). */
+  const sel = document.getElementById(selectId);
+  const manualInput = document.getElementById(manualId);
+  const wrapper = document.getElementById(wrapperId);
   if (!sel || !wrapper) return;
-  const show = CARDIO_DISTANCE_ACTIVITIES.includes(sel.value);
+  const isManual = manualInput && manualInput.style.display !== 'none';
+  const show = isManual || CARDIO_DISTANCE_ACTIVITIES.includes(sel.value);
   wrapper.style.display = show ? '' : 'none';
-  if (!show) {
-    ['c-dist','c-dur','c-elev','c-hravg','c-hrmax'].forEach(id => setVal(id, ''));
-  }
+  if (!show && clearIds) clearIds.forEach(id => setVal(id, ''));
+}
+
+function setCardioManualMode(toggle, selectId, manualId, wrapperId, clearIds, manual) {
+  const sel = document.getElementById(selectId);
+  const manualInput = document.getElementById(manualId);
+  const knob = toggle.querySelector('div');
+  toggle.dataset.manual = manual ? 'true' : 'false';
+  toggle.style.background = manual ? 'var(--accent)' : 'var(--border)';
+  if (knob) knob.style.transform = manual ? 'translateX(16px)' : 'none';
+  if (sel)         sel.style.display = manual ? 'none' : '';
+  if (manualInput) manualInput.style.display = manual ? '' : 'none';
+  if (!manual && manualInput) manualInput.value = '';
+  updateCardioDistFieldsVisibility(selectId, manualId, wrapperId, clearIds);
+}
+
+function toggleCardioManual(toggle, selectId, manualId, wrapperId, clearIds, isDraftForm) {
+  const manual = !(toggle.dataset.manual === 'true');
+  setCardioManualMode(toggle, selectId, manualId, wrapperId, clearIds, manual);
+  if (isDraftForm) saveDraft('cardio');
+}
+
+function getCardioActivityType() {
+  const toggle = document.getElementById('c-type-manual-toggle');
+  const manual = toggle && toggle.dataset.manual === 'true';
+  return manual ? (getVal('c-type-manual') || '') : (getVal('c-type') || '');
+}
+
+function updateCardioFieldVisibility() {
+  updateCardioDistFieldsVisibility('c-type', 'c-type-manual', 'c-distfields-wrapper', ['c-dist','c-dur','c-elev','c-hravg','c-hrmax']);
 }
 
 
@@ -2177,9 +2008,8 @@ function renderHistory() {
       });
       let opts = '<option value="">All exercises</option>';
       keys.forEach(g => {
-        const label = g === 'newlyAdded' ? 'Newly added' : g;
         const items = grouped[g].map(n => `<option value="${n}" ${n === currentVal ? 'selected' : ''}>${n}</option>`).join('');
-        if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
+        if (g) opts += `<optgroup label="${g}">${items}</optgroup>`;
         else opts += items;
       });
       exFilterEl.innerHTML = opts;
@@ -2393,7 +2223,7 @@ function saveDraft(type) {
     d.note      = getVal('wo-note');
     d.exercises = [];
     document.querySelectorAll('#exercises-container .exercise-block').forEach(block => {
-      const name = block.querySelector('.ex-name').value;
+      const { name, group } = getExerciseBlockInfo(block);
       const sets = [];
       block.querySelectorAll('.set-row').forEach(row => {
         sets.push({
@@ -2412,10 +2242,10 @@ function saveDraft(type) {
           params2[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v;
         }
       });
-      d.exercises.push({ name, ...(Object.keys(params2).length ? { params: params2 } : {}), sets });
+      d.exercises.push({ name, ...(group ? { group } : {}), ...(Object.keys(params2).length ? { params: params2 } : {}), sets });
     });
   } else if (type === 'cardio') {
-    d.activityType = getVal('c-type');
+    d.activityType = getCardioActivityType();
     d.date         = getVal('c-date');
     d.startTime    = getVal('c-starttime');
     d.endTime      = getVal('c-endtime');
@@ -2773,7 +2603,6 @@ function buildMealItemOptions(selectedName) {
   const mealGroupOrder = getMealGroupOrder();
   const keys = Object.keys(grouped).sort((a,b) => {
     if (a === b) return 0;
-    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
     const ai = mealGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = mealGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
@@ -2785,8 +2614,7 @@ function buildMealItemOptions(selectedName) {
     const items = grouped[g].map(i =>
       `<option value="${i.name}" ${i.name === selectedName ? 'selected' : ''}>${i.name}</option>`
     ).join('');
-    const label = g === 'newlyAdded' ? 'Newly added' : g;
-    if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
+    if (g) opts += `<optgroup label="${g}">${items}</optgroup>`;
     else opts += items;
   });
   return `<option value="">— select —</option>${opts}`;
@@ -3032,7 +2860,7 @@ function saveCardio() {
     date: getVal('c-date') || today(),
     startTime: getVal('c-starttime') || nowTime(),
     endTime: getVal('c-endtime') || null,
-    activityType: getVal('c-type') || 'Cycle',
+    activityType: getCardioActivityType() || 'Cycle',
     distance: isNaN(dist) ? null : dist,
     duration: isNaN(dur)  ? null : dur,
     hrAvg: num('c-hravg'),
@@ -3099,7 +2927,6 @@ function buildExerciseOptions(selectedName) {
   let opts = '';
   const exGroupOrder = EXERCISE_GROUP_ORDER;
   const exGroupKeys = Object.keys(exGrouped).sort((a,b) => {
-    if (a === 'newlyAdded') return 1; if (b === 'newlyAdded') return -1;
     if (!a) return 1; if (!b) return -1;
     const ai = exGroupOrder.findIndex(g => g.toLowerCase() === a.toLowerCase());
     const bi = exGroupOrder.findIndex(g => g.toLowerCase() === b.toLowerCase());
@@ -3109,8 +2936,7 @@ function buildExerciseOptions(selectedName) {
   });
   exGroupKeys.forEach(g => {
     const items = exGrouped[g].map(({name,selected}) => `<option value="${name}" ${selected?'selected':''}>${name}</option>`).join('');
-    const label = g === 'newlyAdded' ? 'Newly added' : g;
-    if (label) opts += `<optgroup label="${label}">${items}</optgroup>`;
+    if (g) opts += `<optgroup label="${g}">${items}</optgroup>`;
     else opts += items;
   });
   return `<option value="">— select —</option>${opts}`;
@@ -3118,6 +2944,21 @@ function buildExerciseOptions(selectedName) {
 
 function getExerciseLibItem(name) {
   return db.exercises.find(i => (typeof i === 'string' ? i : i.name) === name) || null;
+}
+
+function getExerciseBlockInfo(block) {
+  /* Returns { name, group } for an exercise block, accounting for the
+     manual-entry toggle. group is only set (non-null) for manually
+     entered exercises — library exercises get their group via
+     getExerciseLibItem() at chart-aggregation time. */
+  const toggle = block.querySelector('.ex-manual-toggle');
+  const isManual = toggle && toggle.dataset.manual === 'true';
+  if (isManual) {
+    const name = block.querySelector('.ex-name-manual')?.value.trim() || '';
+    const group = block.querySelector('.ex-group')?.value || null;
+    return { name, group };
+  }
+  return { name: block.querySelector('.ex-name')?.value || '', group: null };
 }
 
 function renderExerciseParams(block, exerciseName, existingParams) {
@@ -3243,12 +3084,29 @@ function addExerciseBlock(exerciseData, containerId) {
   block.className = 'exercise-block';
   block.id = blockId;
 
+  const groupOptions = EXERCISE_GROUP_ORDER.map(g => `<option value="${g}">${g}</option>`).join('');
+
   block.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">' +
+      '<label style="font-size:14px;color:var(--muted);">Exercise</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;justify-self:center;">' +
+        '<span style="font-size:12px;color:var(--muted);">Enter manually</span>' +
+        '<div class="ex-manual-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">' +
+          '<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>' +
+        '</div>' +
+      '</label>' +
+      '<div></div>' +
+    '</div>' +
     '<div style="position:relative;">' +
-      '<div class="field"><label>Exercise</label>' +
+      '<div class="field">' +
         '<select class="ex-name field-select">' +
           buildExerciseOptions(exerciseData ? exerciseData.name : '') +
         '</select>' +
+        '<input type="text" class="ex-name-manual field-text" placeholder="Exercise name" style="display:none;">' +
+        '<div class="ex-manual-group" style="display:none;margin-top:6px;">' +
+          '<label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px;">Muscle group</label>' +
+          `<select class="ex-group field-select">${groupOptions}</select>` +
+        '</div>' +
       '</div>' +
       '<button class="del-btn" title="Remove exercise" style="position:absolute;top:0;right:0;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">&times;</button>' +
     '</div>' +
@@ -3267,12 +3125,31 @@ function addExerciseBlock(exerciseData, containerId) {
 
   document.getElementById(targetId).appendChild(block);
 
-  // Render params for initial exercise selection
-  const initialName = exerciseData ? exerciseData.name : '';
+  // Determine mode and populate
+  const initialName  = exerciseData ? exerciseData.name : '';
   const initialParams = (exerciseData && exerciseData.params) ? exerciseData.params : {};
-  if (initialName) renderExerciseParams(block, initialName, initialParams);
+  const initialGroup = exerciseData ? exerciseData.group : null;
 
-  // Re-render params when exercise selection changes
+  if (initialGroup) {
+    // Manually-entered exercise (group is stored only for manual entries)
+    setExerciseMode(block, true);
+    block.querySelector('.ex-name-manual').value = initialName;
+    block.querySelector('.ex-group').value = initialGroup;
+  } else {
+    setExerciseMode(block, false);
+    if (initialName) renderExerciseParams(block, initialName, initialParams);
+  }
+
+  // Manual/library toggle
+  const manualToggle = block.querySelector('.ex-manual-toggle');
+  manualToggle.addEventListener('click', () => {
+    const manual = !(manualToggle.dataset.manual === 'true');
+    setExerciseMode(block, manual);
+    if (!manual) renderExerciseParams(block, block.querySelector('.ex-name').value, {});
+    if (containerId !== 'sheet-exercises-container') saveDraft('gym');
+  });
+
+  // Re-render params when exercise selection changes (library mode)
   block.querySelector('.ex-name').addEventListener('change', function() {
     renderExerciseParams(block, this.value, {});
   });
@@ -3281,6 +3158,34 @@ function addExerciseBlock(exerciseData, containerId) {
     exerciseData.sets.forEach(s => addSetRow(blockId, s));
   } else {
     addSetRow(blockId);
+  }
+}
+
+function setExerciseMode(block, manual) {
+  /* Toggle an exercise block between library mode (.ex-name select,
+     variant params from the library) and manual mode (free-text name +
+     a muscle-group picker, since manual exercises aren't in the library
+     and need a group for the "Sets by muscle group" chart/targets). */
+  const toggle = block.querySelector('.ex-manual-toggle');
+  const knob = toggle.querySelector('div');
+  const selInput = block.querySelector('.ex-name');
+  const nameInput = block.querySelector('.ex-name-manual');
+  const groupWrapper = block.querySelector('.ex-manual-group');
+  toggle.dataset.manual = manual ? 'true' : 'false';
+  toggle.style.background = manual ? 'var(--accent)' : 'var(--border)';
+  knob.style.transform = manual ? 'translateX(16px)' : 'none';
+  if (manual) {
+    selInput.style.display = 'none';
+    nameInput.style.display = '';
+    selInput.value = '';
+    if (groupWrapper) groupWrapper.style.display = '';
+    const paramsDiv = block.querySelector('.ex-params');
+    if (paramsDiv) paramsDiv.innerHTML = '';
+  } else {
+    nameInput.style.display = 'none';
+    selInput.style.display = '';
+    nameInput.value = '';
+    if (groupWrapper) groupWrapper.style.display = 'none';
   }
 }
 
@@ -3352,8 +3257,8 @@ function saveWorkout() {
   let hasIncomplete = false;
 
   document.querySelectorAll('#exercises-container .exercise-block').forEach(block => {
-    const name = block.querySelector('.ex-name').value;
-    if (!name) return; // skip blocks with no exercise selected
+    const { name, group } = getExerciseBlockInfo(block);
+    if (!name) return; // skip blocks with no exercise selected/entered
 
     const sets = [];
     block.querySelectorAll('.set-row').forEach(row => {
@@ -3379,7 +3284,7 @@ function saveWorkout() {
         params1[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v;
       }
     });
-    if (sets.length > 0) exercises.push({ name, ...(Object.keys(params1).length ? { params: params1 } : {}), sets });
+    if (sets.length > 0) exercises.push({ name, ...(group ? { group } : {}), ...(Object.keys(params1).length ? { params: params1 } : {}), sets });
   });
 
   if (hasIncomplete) {
@@ -3628,10 +3533,24 @@ function buildEditForm(e) {
   }
 
   if (e.type === 'cardio') {
-    const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => `<option ${a === e.activityType ? 'selected' : ''}>${a}</option>`).join('');
-    const showDist = CARDIO_DISTANCE_ACTIVITIES.includes(e.activityType);
+    const isLibraryActivity = (db.cardioActivities || []).some(a => (typeof a === 'string' ? a : a.name) === e.activityType);
+    const eManual = !!e.activityType && !isLibraryActivity;
+    const actOpts = (db.cardioActivities || ['Cycle','Run']).map(a => { const n = typeof a === 'string' ? a : a.name; return `<option ${n === e.activityType ? 'selected' : ''}>${n}</option>`; }).join('');
+    const showDist = eManual || CARDIO_DISTANCE_ACTIVITIES.includes(e.activityType);
     return `<div class="card" style="margin-bottom:0.75rem;">` +
-      `<div class="field"><label>Activity</label><select class="field-select" id="e-acttype" onchange="document.getElementById('e-distfields-wrapper').style.display = CARDIO_DISTANCE_ACTIVITIES.includes(this.value) ? '' : 'none';">${actOpts}</select></div>` +
+      `<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:4px;">` +
+      `<label style="font-size:14px;color:var(--muted);">Activity</label>` +
+      `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;justify-self:center;">` +
+      `<span style="font-size:12px;color:var(--muted);">Enter manually</span>` +
+      `<div id="e-acttype-manual-toggle" class="cardio-manual-toggle" data-manual="${eManual ? 'true' : 'false'}" ` +
+      `style="width:36px;height:20px;border-radius:10px;background:${eManual ? 'var(--accent)' : 'var(--border)'};position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;" ` +
+      `onclick="toggleCardioManual(this,'e-acttype','e-acttype-manual','e-distfields-wrapper',null,false)">` +
+      `<div style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);${eManual ? 'transform:translateX(16px);' : ''}"></div>` +
+      `</div></label><div></div></div>` +
+      `<div class="field">` +
+      `<select class="field-select" id="e-acttype" style="${eManual ? 'display:none;' : ''}" onchange="updateCardioDistFieldsVisibility('e-acttype','e-acttype-manual','e-distfields-wrapper')">${actOpts}</select>` +
+      `<input type="text" class="field-text" id="e-acttype-manual" placeholder="Activity name" value="${eManual ? e.activityType : ''}" style="${eManual ? '' : 'display:none;'}">` +
+      `</div>` +
       `<div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">` +
       dateField('e-date', e.date) + timeField('e-time', 'Start', e.startTime) + timeField('e-endtime', 'End', e.endTime) +
       `</div>` +
@@ -3870,7 +3789,11 @@ function saveEdit() {
     entry.date           = str('e-date') || entry.date;
     entry.startTime      = str('e-time') || entry.startTime;
     entry.endTime        = str('e-endtime') || null;
-    entry.activityType   = document.getElementById('e-acttype')?.value || entry.activityType;
+    const eActToggle = document.getElementById('e-acttype-manual-toggle');
+    const eManual = eActToggle && eActToggle.dataset.manual === 'true';
+    entry.activityType   = eManual
+      ? (document.getElementById('e-acttype-manual')?.value.trim() || entry.activityType)
+      : (document.getElementById('e-acttype')?.value || entry.activityType);
     entry.distance       = num('e-dist');
     entry.duration       = num('e-dur');
     entry.hrAvg          = num('e-hravg');
@@ -3891,7 +3814,7 @@ function saveEdit() {
     const exercises = [];
     let hasIncomplete = false;
     document.querySelectorAll('#sheet-exercises-container .exercise-block').forEach(block => {
-      const name = block.querySelector('.ex-name').value;
+      const { name, group } = getExerciseBlockInfo(block);
       if (!name) return;
       const sets = [];
       block.querySelectorAll('.set-row').forEach(row => {
@@ -3913,7 +3836,7 @@ function saveEdit() {
           params3[el.dataset.param] = el.type === 'number' ? (v === '' ? null : parseFloat(v)) : v;
         }
       });
-      if (sets.length > 0) exercises.push({ name, ...(Object.keys(params3).length ? { params: params3 } : {}), sets });
+      if (sets.length > 0) exercises.push({ name, ...(group ? { group } : {}), ...(Object.keys(params3).length ? { params: params3 } : {}), sets });
     });
 
     if (hasIncomplete) {
@@ -5382,47 +5305,13 @@ async function githubExport() {
     const mergedLogs = [...(ghLogs || []), ...newLogs].sort((a, b) => a.id - b.id);
 
     // Fetch current GitHub state
-    const { content: ghUserLibs, sha: userLibsSha } = await ghGetJSON('user-libraries.json');
     const { content: ghSettings, sha: settingsSha } = await ghGetJSON('settings.json');
-
-    // Merge user-added libraries (append-only both directions)
-    function mergeByName(ghLib, localLib) {
-      const ghNames    = new Set((ghLib    || []).map(i => typeof i === 'string' ? i : i.name));
-      const localNames = new Set((localLib || []).map(i => typeof i === 'string' ? i : i.name));
-      const newFromLocal = (localLib || []).filter(i => !ghNames.has(typeof i === 'string' ? i : i.name));
-      const newFromGh    = (ghLib    || []).filter(i => !localNames.has(typeof i === 'string' ? i : i.name));
-      return { merged: [...(ghLib || []), ...newFromLocal], newFromLocal, newFromGh };
-    }
-    const ghEx   = ghUserLibs ? ghUserLibs.exercises        || [] : [];
-    const ghCard = ghUserLibs ? ghUserLibs.cardioActivities  || [] : [];
-    const ghMeal = ghUserLibs ? ghUserLibs.mealItems         || [] : [];
-    const exMerge   = mergeByName(ghEx,   db.userAddedExercises);
-    const cardMerge = mergeByName(ghCard, db.userAddedCardioActivities);
-    const mealMerge = mergeByName(ghMeal, db.userAddedMealItems);
     const settingsChanged = JSON.stringify(ghSettings) !== JSON.stringify(db.settings);
-
-    // Build merged user-libraries object
-    const mergedUserLibs = {
-      exercises:        exMerge.merged,
-      cardioActivities: cardMerge.merged,
-      mealItems:        mealMerge.merged
-    };
-    const userLibsChanged = exMerge.newFromLocal.length > 0 ||
-      cardMerge.newFromLocal.length > 0 || mealMerge.newFromLocal.length > 0;
-    const anyChange = newLogs.length > 0 || userLibsChanged || settingsChanged;
+    const anyChange = newLogs.length > 0 || settingsChanged;
 
     if (anyChange) {
       await ghPutJSON('fitness-tracker-backup.json', mergedLogs, logsSha);
-      if (userLibsChanged) await ghPutJSON('user-libraries.json', mergedUserLibs, userLibsSha);
       if (settingsChanged) await ghPutJSON('settings.json', db.settings, settingsSha);
-      // Merge new items from GitHub into local user-added arrays
-      if (exMerge.newFromGh.length)   { db.userAddedExercises        = [...db.userAddedExercises,        ...exMerge.newFromGh]; }
-      if (cardMerge.newFromGh.length) { db.userAddedCardioActivities = [...db.userAddedCardioActivities, ...cardMerge.newFromGh]; }
-      if (mealMerge.newFromGh.length) { db.userAddedMealItems        = [...db.userAddedMealItems,        ...mealMerge.newFromGh]; }
-      if (exMerge.newFromGh.length || cardMerge.newFromGh.length || mealMerge.newFromGh.length) {
-        rebuildCombinedLibraries();
-        saveDB();
-      }
     }
 
     const now = new Date().toISOString();
@@ -5444,7 +5333,7 @@ async function githubExport() {
 async function githubImport() {
   const cfg = getGithubConfig();
   if (!cfg) { showToast('Load GitHub config first'); return; }
-  if (!confirm('Import from GitHub? This will merge logs and overwrite libraries and settings.')) return;
+  if (!confirm('Import from GitHub? This will merge logs and overwrite settings.')) return;
   showToast('Importing...', 30000);
   try {
     // Check repo exists
@@ -5463,18 +5352,6 @@ async function githubImport() {
       const newLogs = ghLogs.filter(e => !existingIds.has(e.id));
       db.logs = [...db.logs, ...newLogs].sort((a, b) => a.id - b.id);
       importedCount = newLogs.length;
-    }
-
-    // Import user-added libraries (append-only by name)
-    const { content: ghUserLibs } = await ghGetJSON('user-libraries.json');
-    if (ghUserLibs) {
-      const mergeByName = (ghLib, localLib) => {
-        const localNames = new Set((localLib || []).map(i => typeof i === 'string' ? i : i.name));
-        return [...(localLib || []), ...(ghLib || []).filter(i => !localNames.has(typeof i === 'string' ? i : i.name))];
-      };
-      db.userAddedExercises        = mergeByName(ghUserLibs.exercises,        db.userAddedExercises);
-      db.userAddedCardioActivities = mergeByName(ghUserLibs.cardioActivities, db.userAddedCardioActivities);
-      db.userAddedMealItems        = mergeByName(ghUserLibs.mealItems,        db.userAddedMealItems);
     }
 
     const { content: ghSettings } = await ghGetJSON('settings.json');
@@ -5561,9 +5438,9 @@ function runTests() {
   test('db object has required keys', () => {
     assert('logs'           in db, 'missing logs');
     assert('settings'       in db, 'missing settings');
-    assert('userAddedExercises' in db, 'missing exerciseLibrary');
-    assert('userAddedCardioActivities'  in db, 'missing cardioLibrary');
-    assert('userAddedMealItems' in db, 'missing mealItemLibrary');
+    assert('libraryExercises' in db, 'missing libraryExercises');
+    assert('libraryCardioActivities' in db, 'missing libraryCardioActivities');
+    assert('libraryMealItems' in db, 'missing libraryMealItems');
     assert('meta'           in db, 'missing meta');
   });
 
@@ -5703,48 +5580,38 @@ function runTests() {
   });
 
   // ── Combined library rebuild ─────────────────────────────────────
-  test('rebuildCombinedLibraries builds correct union for exercises', () => {
-    const origLib     = db.libraryExercises;
-    const origUser    = db.userAddedExercises;
+  test('rebuildCombinedLibraries copies libraryExercises into exercises', () => {
+    const origLib      = db.libraryExercises;
     const origCombined = db.exercises;
-    // Set test values
-    db.libraryExercises     = [{ name: 'Bench press', params: [], group: 'Chest', editableInApp: false }];
-    db.userAddedExercises   = [{ name: 'My exercise', group: null }];
+    db.libraryExercises = [{ name: 'Bench press', params: [], group: 'Chest' }];
     rebuildCombinedLibraries();
-    assertEqual(db.exercises.length, 2, 'exercises should have 2 items');
+    assertEqual(db.exercises.length, 1, 'exercises should have 1 item');
     assert(db.exercises.some(i => i.name === 'Bench press'), 'library item missing');
-    assert(db.exercises.some(i => i.name === 'My exercise'), 'user-added item missing');
     // Restore
-    db.libraryExercises   = origLib;
-    db.userAddedExercises = origUser;
-    db.exercises          = origCombined;
+    db.libraryExercises = origLib;
+    db.exercises        = origCombined;
+    rebuildCombinedLibraries();
   });
 
-  test('rebuildCombinedLibraries builds correct union for meal items', () => {
-    const origLib  = db.libraryMealItems;
-    const origUser = db.userAddedMealItems;
+  test('rebuildCombinedLibraries copies libraryMealItems into mealItems', () => {
+    const origLib      = db.libraryMealItems;
     const origCombined = db.mealItems;
-    db.libraryMealItems   = [{ name: 'Eggs', calories: 140, protein: 12, group: 'Protein', editableInApp: false }];
-    db.userAddedMealItems = [{ name: 'Custom food', calories: 100, protein: 5, group: null }];
+    db.libraryMealItems = [{ name: 'Eggs', calories: 140, protein: 12, group: 'Protein' }];
     rebuildCombinedLibraries();
-    assertEqual(db.mealItems.length, 2, 'mealItems should have 2 items');
+    assertEqual(db.mealItems.length, 1, 'mealItems should have 1 item');
     assert(db.mealItems.some(i => i.name === 'Eggs'), 'library meal item missing');
-    assert(db.mealItems.some(i => i.name === 'Custom food'), 'user-added meal item missing');
     // Restore
-    db.libraryMealItems   = origLib;
-    db.userAddedMealItems = origUser;
-    db.mealItems          = origCombined;
+    db.libraryMealItems = origLib;
+    db.mealItems        = origCombined;
+    rebuildCombinedLibraries();
   });
 
-  test('rebuildCombinedLibraries: combined length equals sum of parts', () => {
-    const origEx   = db.libraryExercises;
-    const origUser = db.userAddedExercises;
-    db.libraryExercises   = [{ name: 'A' }, { name: 'B' }];
-    db.userAddedExercises = [{ name: 'C' }];
+  test('rebuildCombinedLibraries: exercises length equals libraryExercises length', () => {
+    const origEx = db.libraryExercises;
+    db.libraryExercises = [{ name: 'A' }, { name: 'B' }];
     rebuildCombinedLibraries();
-    assertEqual(db.exercises.length, db.libraryExercises.length + db.userAddedExercises.length, 'combined length mismatch');
-    db.libraryExercises   = origEx;
-    db.userAddedExercises = origUser;
+    assertEqual(db.exercises.length, db.libraryExercises.length, 'length mismatch');
+    db.libraryExercises = origEx;
     rebuildCombinedLibraries();
   });
 
@@ -5778,8 +5645,8 @@ function runTests() {
   });
 
   test('getExerciseLibItem() returns correct item', () => {
-    if (db.userAddedExercises.length === 0) return; // skip if empty
-    const first = db.userAddedExercises[0];
+    if (db.exercises.length === 0) return; // skip if empty
+    const first = db.exercises[0];
     const found = getExerciseLibItem(first.name);
     assert(found !== null, 'item not found');
     assertEqual(found.name, first.name, 'wrong item returned');
@@ -5854,7 +5721,7 @@ function showTestScreen() {
   const groups = [
     { heading: 'Utilities',           tests: ['today() returns YYYY-MM-DD format', 'today() returns current local date', 'Monday calculation: Wed → Mon', 'Monday calculation: Sun → Mon'] },
     { heading: 'DB schema',           tests: ['db object has required keys', 'db.settings has required keys', 'db.logs is an array'] },
-    { heading: 'Combined library rebuild', tests: ['rebuildCombinedLibraries builds correct union for exercises', 'rebuildCombinedLibraries builds correct union for meal items', 'rebuildCombinedLibraries: combined length equals sum of parts'] },
+    { heading: 'Combined library rebuild', tests: ['rebuildCombinedLibraries copies libraryExercises into exercises', 'rebuildCombinedLibraries copies libraryMealItems into mealItems', 'rebuildCombinedLibraries: exercises length equals libraryExercises length'] },
     { heading: 'SubOptions param storage', tests: ['subOptions param stored as {value, subOption} object', 'flat param stored as string', 'history display handles nested param'] },
     { heading: 'Exercise params',       tests: ['exercise library items are objects with name field', 'getExerciseLibItem() returns correct item', 'gym exercise params object is stored correctly'] },
     { heading: 'Entry creation',      tests: ['weight entry has required fields', 'rise entry has required fields', 'meal entry has required fields', 'gym entry has required fields', 'cardio entry has required fields'] },
@@ -5958,7 +5825,7 @@ function getMuscleSetCounts(weekMonday) {
     if (entryTime < weekStart || entryTime >= weekEnd) return;
     e.exercises.forEach(ex => {
       const lib = db.exercises.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
-      const group = (lib && lib.group) ? lib.group.trim() : null;
+      const group = (ex.group && ex.group.trim()) || (lib && lib.group ? lib.group.trim() : null);
       const setCount = (ex.sets || []).length;
       if (group) counts[group] = (counts[group] || 0) + setCount;
     });
@@ -5982,7 +5849,7 @@ function getMuscleExerciseBreakdown(weekMonday, group) {
     if (entryTime < weekStart || entryTime >= weekEnd) return;
     e.exercises.forEach(ex => {
       const lib = db.exercises.find(i => (typeof i === 'string' ? i : i.name) === ex.name);
-      const exGroup = (lib && lib.group) ? lib.group.trim() : null;
+      const exGroup = (ex.group && ex.group.trim()) || (lib && lib.group ? lib.group.trim() : null);
       if (exGroup !== group) return;
       const setCount = (ex.sets || []).length;
       if (setCount > 0) exerciseCounts[ex.name] = (exerciseCounts[ex.name] || 0) + setCount;
