@@ -3424,8 +3424,7 @@ function buildWorkoutShareText(entry) {
     (ex.sets || []).forEach(s => {
       const w = s.weight != null ? fmtWeight(s.weight) + 'kg' : '—';
       const r = s.reps != null ? s.reps : '—';
-      const note = s.note ? ' (' + s.note + ')' : '';
-      lines.push('  ' + w + ' × ' + r + note);
+      lines.push('  ' + w + ' × ' + r);
     });
   });
 
