@@ -3398,8 +3398,9 @@ function buildWorkoutShareText(entry) {
      messaging apps (Web Share API) or clipboard copy. */
   const lines = [];
   lines.push('GYM SESSION');
-  lines.push(formatDate(entry.date));
-  lines.push('─'.repeat(12));
+  const dateLine = formatDate(entry.date);
+  lines.push(dateLine);
+  lines.push('─'.repeat(dateLine.length));
 
   if (entry.note) {
     lines.push('');
