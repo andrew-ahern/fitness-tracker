@@ -1074,7 +1074,7 @@
     <div id="sheet-body"></div>
     <!-- View mode footer: Share (bottom-left, gym only) + Edit (bottom-right, if editable) -->
     <div id="sheet-footer-view" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:1rem;">
-      <button id="sheet-share-btn" class="btn" style="grid-column:1;" onclick="shareWorkout()">Share</button>
+      <button id="sheet-share-btn" class="btn" style="grid-column:1;background:#000;border-color:#000;color:#fff;" onclick="shareWorkout()">Share</button>
       <button id="sheet-edit-btn" class="btn btn-primary" style="grid-column:2;" onclick="switchToEditMode()">Edit</button>
     </div>
     <!-- Edit mode footer -->
@@ -3397,11 +3397,17 @@ function buildWorkoutShareText(entry) {
   /* Plain-text summary of a gym entry, suitable for sharing via
      messaging apps (Web Share API) or clipboard copy. */
   const lines = [];
-  lines.push('🏋️ Workout — ' + formatDate(entry.date));
+  lines.push('GYM SESSION');
   const timeRange = entry.startTime
     ? entry.startTime + (entry.endTime ? '–' + entry.endTime : '')
     : '';
-  if (timeRange) lines.push(timeRange);
+  lines.push(formatDate(entry.date) + (timeRange ? ', ' + timeRange : ''));
+  lines.push('─'.repeat(20));
+
+  if (entry.note) {
+    lines.push('');
+    lines.push('Note: ' + entry.note);
+  }
 
   (entry.exercises || []).forEach((ex) => {
     lines.push('');
@@ -3423,11 +3429,6 @@ function buildWorkoutShareText(entry) {
       lines.push('  ' + w + ' × ' + r + note);
     });
   });
-
-  if (entry.note) {
-    lines.push('');
-    lines.push('Note: ' + entry.note);
-  }
 
   return lines.join('\n');
 }
