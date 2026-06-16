@@ -185,5 +185,12 @@
     "protein": 0,
     "active": true,
     "group": "Fats & oils"
+  },
+  {
+    "name": "Cafe Nero bacon ciabatta",
+    "calories": 382,
+    "protein": 21,
+    "active": true,
+    "group": "Takeaway"
   }
 ]
