@@ -215,5 +215,13 @@
     "active": true,
     "group": "Carbs",
     "comment": "standard durum wheat; consistent across Tesco, Sainsbury's, Barilla, De Cecco"
+  },
+  {
+    "name": "Muller & Myprotein mixers yoghurt",
+    "calories": 133,
+    "protein": 15,
+    "active": true,
+    "group": "Protein yoghurt",
+    "comment": "average over variants"
   }
 ]
