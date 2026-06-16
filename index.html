@@ -2855,8 +2855,10 @@ function saveCardio() {
   const dist = parseFloat(getVal('c-dist'));
   const dur  = parseInt(getVal('c-dur'));
   const isManual = document.getElementById('c-type-manual-toggle')?.dataset.manual === 'true';
+  const actType = getCardioActivityType();
+  const needsDistDur = !isManual && CARDIO_DISTANCE_ACTIVITIES.includes(actType);
 
-  if (!isManual && isNaN(dist) && isNaN(dur)) {
+  if (needsDistDur && isNaN(dist) && isNaN(dur)) {
     showToast('Please enter distance or duration');
     return;
   }
