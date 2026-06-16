@@ -4239,13 +4239,6 @@ function getRiseByDay() {
     .filter(e => e.value !== null);
 }
 
-function setRiseView(mode) {
-  riseViewMode = mode;
-  ['raw','avg7','median7'].forEach(m =>
-    document.getElementById('rise-toggle-' + m).classList.toggle('active', m === mode));
-  renderRiseChart();
-}
-
 function setRiseRange(months) {
   riseRangeMonths = months;
   ['1w','1m','3m','all'].forEach(id => {
@@ -4258,7 +4251,18 @@ function setRiseRange(months) {
 }
 
 function renderRiseChart() {
-  createChartCard('rise', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Rising time</div><div style="display:flex;gap:4px;"><button class="chart-toggle active" id="rise-toggle-raw" onclick="setRiseView(\'raw\')">Raw</button><button class="chart-toggle" id="rise-toggle-avg7" onclick="setRiseView(\'avg7\')">7-day avg</button><button class="chart-toggle" id="rise-toggle-median7" onclick="setRiseView(\'median7\')">7-day median</button></div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle active" id="rise-range-1w" onclick="setRiseRange(0.25)">This week</button><button class="chart-toggle" id="rise-range-1m" onclick="setRiseRange(1)">30 days</button><button class="chart-toggle" id="rise-range-3m" onclick="setRiseRange(3)">90 days</button><button class="chart-toggle" id="rise-range-all" onclick="setRiseRange(0)">All</button></div>', 'chart-rise', 'chart-rise-empty', 'No rise time entries yet');
+  const headerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
+      '<div style="font-size:15px;font-weight:500">Rising time</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:4px;margin-bottom:0.75rem;">' +
+      '<button class="chart-toggle active" id="rise-range-1w"  onclick="setRiseRange(0.25)">This week</button>' +
+      '<button class="chart-toggle"        id="rise-range-1m"  onclick="setRiseRange(1)">30 days</button>' +
+      '<button class="chart-toggle"        id="rise-range-3m"  onclick="setRiseRange(3)">90 days</button>' +
+      '<button class="chart-toggle"        id="rise-range-all" onclick="setRiseRange(0)">All</button>' +
+    '</div>';
+  createChartCard('rise', headerHTML, 'chart-rise', 'chart-rise-empty', 'No rise time entries yet');
+
   const allRaw = getRiseByDay();
   const canvas = document.getElementById('chart-rise');
   const empty  = document.getElementById('chart-rise-empty');
@@ -4266,39 +4270,53 @@ function renderRiseChart() {
   if (allRaw.length === 0) { canvas.style.display='none'; empty.style.display='block'; return; }
   canvas.style.display='block'; empty.style.display='none';
 
+  // Apply active state to range buttons
+  ['1w','1m','3m','all'].forEach(id => {
+    const el = document.getElementById('rise-range-' + id);
+    if (el) el.classList.toggle('active', id === {0.25:'1w',1:'1m',3:'3m',0:'all'}[riseRangeMonths]);
+  });
+
   let rangeStart = null;
   if (riseRangeMonths > 0) {
-    const d = new Date(); if (riseRangeMonths < 1) { const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]); const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1)); d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0); } else { d.setDate(d.getDate() - Math.round(riseRangeMonths * 30)); }
+    const d = new Date();
+    if (riseRangeMonths < 1) {
+      const tp = today().split('-').map(Number);
+      const td = new Date(tp[0],tp[1]-1,tp[2]);
+      const dow = td.getDay();
+      td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
+      d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0);
+    } else {
+      d.setDate(d.getDate() - Math.round(riseRangeMonths * 30));
+    }
     rangeStart = d.toISOString().slice(0,10);
   }
+
   const raw = rangeStart ? allRaw.filter(p => p.date >= rangeStart) : allRaw;
   if (raw.length === 0) { canvas.style.display='none'; empty.style.display='block'; empty.textContent='No data in this range'; return; }
 
-  const allFilled = forwardFill(allRaw);
-  const filled = rangeStart ? allFilled.filter(p => p.date >= rangeStart) : allFilled;
-
-  let chartData;
+  // Scatter data: individual raw points only (no null padding)
+  let scatterData;
   if (riseRangeMonths === 0.25 && rangeStart) {
-    // This week: dense Mon-Sun, raw values only, null for missing/future days
-    const rawSet = {}; raw.forEach(p => { rawSet[p.date] = p.value; });
-    chartData = [];
+    const rawSet = {};
+    raw.forEach(p => { rawSet[p.date] = p.value; });
+    scatterData = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      chartData.push({ x: dateStr, y: dateStr <= today() ? (rawSet[dateStr] ?? null) : null });
+      if (dateStr <= today() && rawSet[dateStr] != null)
+        scatterData.push({ x: dateStr, y: rawSet[dateStr] });
     }
-  } else if (riseViewMode === 'raw') {
-    const rawSet = new Set(raw.map(p => p.date));
-    chartData = filled.map(p => ({ x: p.date, y: rawSet.has(p.date) ? p.value : null }));
-  } else if (riseViewMode === 'avg7') {
-    const full = rollingAverage(allFilled, 7);
-    chartData = (rangeStart ? full.filter(p => p.date >= rangeStart) : full).map(p => ({ x: p.date, y: p.value }));
   } else {
-    const full = rollingMedian(allFilled, 7);
-    chartData = (rangeStart ? full.filter(p => p.date >= rangeStart) : full).map(p => ({ x: p.date, y: p.value }));
+    scatterData = raw.map(p => ({ x: p.date, y: p.value }));
   }
 
-  const yVals = chartData.map(p => p.y).filter(v => v !== null);
+  // 7-day rolling average line
+  const allFilled = forwardFill(allRaw);
+  const fullAvg   = rollingAverage(allFilled, 7);
+  const avgData   = (rangeStart ? fullAvg.filter(p => p.date >= rangeStart) : fullAvg)
+    .map(p => ({ x: p.date, y: p.value }));
+
+  const yVals = [...scatterData, ...avgData].map(p => p.y).filter(v => v !== null);
   const riseTargetMins = (db.settings && db.settings.riseTarget) ? timeToMins(db.settings.riseTarget) : null;
   const { min: yMin, max: yMax } = getChartYRange('rise', yVals, riseTargetMins);
 
@@ -4312,7 +4330,6 @@ function renderRiseChart() {
 
   const weekBandPlugin = makeWeekBandPlugin('riseWeekBands', () => riseRangeMonths);
 
-  // Target line — only in This week view
   const riseTargetPlugin = {
     id: 'riseTargetLine',
     afterDraw(chart) {
@@ -4333,20 +4350,46 @@ function renderRiseChart() {
   };
 
   riseChartInstance = new Chart(ctx, {
-    type: 'line', plugins: [weekBandPlugin, riseTargetPlugin],
-    data: { datasets: [{ data: chartData, borderColor: accentColor, backgroundColor: 'transparent',
-      borderWidth: 2, pointRadius: 0,
-      pointHoverRadius: 5, pointBackgroundColor: accentColor, fill: false, tension: 0.3,
-      spanGaps: riseViewMode !== 'raw' }] },
+    plugins: [weekBandPlugin, riseTargetPlugin],
+    data: {
+      datasets: [
+        {
+          type: 'scatter',
+          data: scatterData,
+          backgroundColor: accentColor + '66',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        },
+        {
+          type: 'line',
+          data: avgData,
+          borderColor: accentColor,
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          pointBackgroundColor: accentColor,
+          fill: false,
+          tension: 0.3,
+          spanGaps: true,
+        }
+      ]
+    },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: {
-        filter: item => item.parsed.y !== null,
-        callbacks: {
-          title: items => new Date(items[0].parsed.x).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-          label: item => minsToTime(item.parsed.y)
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          filter: item => item.parsed.y !== null,
+          callbacks: {
+            title: items => new Date(items[0].parsed.x).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }),
+            label: item => {
+              const label = item.datasetIndex === 0 ? 'Rise' : '7-day avg';
+              return label + ': ' + minsToTime(item.parsed.y);
+            }
+          }
         }
-      }},
+      },
       scales: {
         x: makeXScale(rangeStart, allRaw, riseRangeMonths, mutedColor, borderColor,
           riseRangeMonths === 0.25 && rangeStart ? (() => {
