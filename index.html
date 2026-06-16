@@ -4663,9 +4663,14 @@ function renderCalChart() {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend:{display:false}, tooltip:{ callbacks:{
-          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
-            .toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}),
-          label: item => item.raw != null ? Math.round(item.parsed.y)+' kcal' : 'No data'
+          title: () => [],
+          label: () => null,
+          afterBody: items => {
+            const i = items[0].dataIndex;
+            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+            const v = items[0].raw;
+            return [d, v != null ? Math.round(items[0].parsed.y)+' kcal' : 'No data'];
+          }
         }}},
         scales: {
           x: { type:'category', ticks:{ font:{size:11}, color:mutedColor, maxRotation:0, autoSkip:false,
@@ -4761,9 +4766,14 @@ function renderCalChart() {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend:{display:false}, tooltip:{ callbacks:{
-          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
-            .toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-          label: item => item.raw != null ? Math.round(item.raw)+' kcal' : 'No data'
+          title: () => [],
+          label: () => null,
+          afterBody: items => {
+            const i = items[0].dataIndex;
+            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+            const v = items[0].raw;
+            return [d, v != null ? Math.round(v)+' kcal' : 'No data'];
+          }
         }}},
         scales: {
           x: { type:'category', grid:{color:'transparent'},
@@ -4852,9 +4862,14 @@ function renderProteinChart() {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend:{display:false}, tooltip:{ callbacks:{
-          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
-            .toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'}),
-          label: item => item.raw != null ? item.parsed.y.toFixed(1)+' g' : 'No data'
+          title: () => [],
+          label: () => null,
+          afterBody: items => {
+            const i = items[0].dataIndex;
+            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+            const v = items[0].raw;
+            return [d, v != null ? items[0].parsed.y.toFixed(1)+' g' : 'No data'];
+          }
         }}},
         scales: {
           x: { type:'category', ticks:{ font:{size:11}, color:mutedColor, maxRotation:0, autoSkip:false,
@@ -4950,9 +4965,14 @@ function renderProteinChart() {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend:{display:false}, tooltip:{ callbacks:{
-          title: items => new Date(labels[items[0].dataIndex]+'T12:00:00')
-            .toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-          label: item => item.raw != null ? item.raw.toFixed(1)+' g' : 'No data'
+          title: () => [],
+          label: () => null,
+          afterBody: items => {
+            const i = items[0].dataIndex;
+            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+            const v = items[0].raw;
+            return [d, v != null ? v.toFixed(1)+' g' : 'No data'];
+          }
         }}},
         scales: {
           x: { type:'category', grid:{color:'transparent'},
@@ -5271,17 +5291,16 @@ function renderActivityChart() {
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: {
-          title: items => {
-            const i = items[0].dataIndex;
-            return new Date(days[i].date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
-          },
+          title: () => [],
           label: () => null,
           afterBody: items => {
             const i = items[0].dataIndex;
-            return days[i].sessions.map(s => {
+            const d = new Date(days[i].date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+            const sessions = days[i].sessions.map(s => {
               const name = s.type === 'gym' ? 'Gym' : (s.label || s.type.charAt(0).toUpperCase()+s.type.slice(1));
               return name + (s.startTime && s.startTime !== '00:00' ? ' @ ' + s.startTime : '');
             });
+            return [d, ...sessions];
           }
         }}
       },
