@@ -4150,7 +4150,7 @@ function renderWeightChart() {
   const weightTargetVal = db.settings && db.settings.weightTarget ? parseFloat(db.settings.weightTarget) : null;
   const weightTargetPlugin = {
     id: 'weightTargetLine',
-    afterDraw(chart) {
+    afterDatasetsDraw(chart) {
       if (!weightTargetVal || weightRangeMonths === 0) return;
       const { ctx: c, chartArea, scales } = chart;
       const y = scales.y.getPixelForValue(weightTargetVal);
@@ -4362,7 +4362,7 @@ function renderRiseChart() {
 
   const riseTargetPlugin = {
     id: 'riseTargetLine',
-    afterDraw(chart) {
+    afterDatasetsDraw(chart) {
       if (!riseTargetMins || riseRangeMonths === 0) return;
       const { ctx: c, chartArea, scales } = chart;
       const y = scales.y.getPixelForValue(riseTargetMins);
@@ -4641,7 +4641,7 @@ function renderCalChart() {
 
     const targetLinePlugin = {
       id: '_calChartInstTarget',
-      afterDraw(chart) {
+      afterDatasetsDraw(chart) {
         if (!targetVal) return;
         const { ctx: c, chartArea, scales } = chart;
         const y = scales.y.getPixelForValue(targetVal);
@@ -4656,8 +4656,28 @@ function renderCalChart() {
       }
     };
 
+    const todayIdx = labels.indexOf(today());
+    const todayLabelPlugin = {
+      id: '_calTodayLabel',
+      afterDatasetsDraw(chart) {
+        if (todayIdx < 0) return;
+        const val = data[todayIdx];
+        if (val == null) return;
+        const { ctx: c, scales } = chart;
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[todayIdx];
+        if (!bar) return;
+        c.save();
+        c.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+        c.fillStyle = mutedColor;
+        c.textAlign = 'center';
+        c.fillText(Math.round(val), bar.x, bar.y - 4);
+        c.restore();
+      }
+    };
+
     window['_calChartInst'] = new Chart(canvas.getContext('2d'), {
-      type: 'bar', plugins: [targetLinePlugin],
+      type: 'bar', plugins: [targetLinePlugin, todayLabelPlugin],
       data: { labels, datasets: [{ data, backgroundColor: accentColor,
         borderColor: accentColor, borderWidth:1, borderRadius:2 }] },
       options: {
@@ -4729,7 +4749,7 @@ function renderCalChart() {
     // Target line plugin (30d only)
     const calTargetPlugin30 = {
       id: '_calChartInstTarget30',
-      afterDraw(chart) {
+      afterDatasetsDraw(chart) {
         if (!targetVal || calRangeMonths === 0) return;
         const { ctx: c, chartArea, scales } = chart;
         const y = scales.y.getPixelForValue(targetVal);
@@ -4840,7 +4860,7 @@ function renderProteinChart() {
 
     const targetLinePlugin = {
       id: '_protChartInstTarget',
-      afterDraw(chart) {
+      afterDatasetsDraw(chart) {
         if (!targetVal) return;
         const { ctx: c, chartArea, scales } = chart;
         const y = scales.y.getPixelForValue(targetVal);
@@ -4855,8 +4875,28 @@ function renderProteinChart() {
       }
     };
 
+    const todayIdxP = labels.indexOf(today());
+    const todayLabelPluginP = {
+      id: '_protTodayLabel',
+      afterDatasetsDraw(chart) {
+        if (todayIdxP < 0) return;
+        const val = data[todayIdxP];
+        if (val == null) return;
+        const { ctx: c, scales } = chart;
+        const meta = chart.getDatasetMeta(0);
+        const bar = meta.data[todayIdxP];
+        if (!bar) return;
+        c.save();
+        c.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+        c.fillStyle = mutedColor;
+        c.textAlign = 'center';
+        c.fillText(Math.round(val) + 'g', bar.x, bar.y - 4);
+        c.restore();
+      }
+    };
+
     window['_protChartInst'] = new Chart(canvas.getContext('2d'), {
-      type: 'bar', plugins: [targetLinePlugin],
+      type: 'bar', plugins: [targetLinePlugin, todayLabelPluginP],
       data: { labels, datasets: [{ data, backgroundColor: accentColor,
         borderColor: accentColor, borderWidth:1, borderRadius:2 }] },
       options: {
@@ -4928,7 +4968,7 @@ function renderProteinChart() {
     // Target line plugin (30d only)
     const protTargetPlugin30 = {
       id: '_protChartInstTarget30',
-      afterDraw(chart) {
+      afterDatasetsDraw(chart) {
         if (!targetVal || proteinRangeMonths === 0) return;
         const { ctx: c, chartArea, scales } = chart;
         const y = scales.y.getPixelForValue(targetVal);
@@ -6103,7 +6143,7 @@ function renderMuscleChart() {
   // Per-bar target marker lines (no numeric label)
   const muscleTargetPlugin = {
     id: '_muscleChartTargets',
-    afterDraw(chart) {
+    afterDatasetsDraw(chart) {
       const { ctx: c, chartArea, scales } = chart;
       const n = MUSCLE_DEFAULT_GROUPS.length;
       const barWidth = (chartArea.right - chartArea.left) / n;
