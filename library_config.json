@@ -1,3 +1,13 @@
 {
-  "mealGroupOrder": ["Sandwich", "Protein yoghurt", "Protein drink", "Meat", "Eggs", "Bread", "Takeaway", "Fruit", "Fats & oils"]
+  "mealGroupOrder": [
+    "Sandwich",
+    "Protein yoghurt",
+    "Protein drink",
+    "Meat",
+    "Eggs",
+    "Takeaway",
+    "Fruit",
+    "Fats & oils",
+    "Carbs"
+  ]
 }

@@ -145,7 +145,7 @@
     "calories": 61,
     "protein": 2,
     "active": true,
-    "group": "Bread",
+    "group": "Carbs",
     "comment": "32g"
   },
   {
@@ -153,7 +153,7 @@
     "calories": 97,
     "protein": 3,
     "active": true,
-    "group": "Bread",
+    "group": "Carbs",
     "comment": "55g"
   },
   {
@@ -192,5 +192,28 @@
     "protein": 21,
     "active": true,
     "group": "Takeaway"
+  },
+  {
+    "name": "Tesco sweet chilli & lime basa fillet (125g)",
+    "calories": 140,
+    "protein": 21,
+    "active": true,
+    "group": "Meat"
+  },
+  {
+    "name": "Veetee rice pot (140g)",
+    "calories": 202,
+    "protein": 4,
+    "active": true,
+    "group": "Carbs",
+    "comment": "rough average across basmati, jasmine, sticky rice variants"
+  },
+  {
+    "name": "Pasta, dry (100g)",
+    "calories": 355,
+    "protein": 13,
+    "active": true,
+    "group": "Carbs",
+    "comment": "standard durum wheat; consistent across Tesco, Sainsbury's, Barilla, De Cecco"
   }
 ]
