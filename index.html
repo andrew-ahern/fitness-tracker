@@ -914,13 +914,7 @@
           </div>
         </div>
         <div class="card-row">
-          <div style="font-weight:500">Rising time</div>
-          <div id="toggle-show-chart-rise" onclick="toggleChartVisibility('rise', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
-            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
-          </div>
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Sets by muscle group</div>
+          <div style="font-weight:500">Sets this week</div>
           <div id="toggle-show-chart-muscle" onclick="toggleChartVisibility('muscle', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('muscle')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
@@ -931,9 +925,15 @@
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
-        <div class="card-row" style="border-bottom:none;">
+        <div class="card-row">
           <div style="font-weight:500">Weight</div>
           <div id="toggle-show-chart-weight" onclick="toggleChartVisibility('weight', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('weight')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row" style="border-bottom:none;">
+          <div style="font-weight:500">Rising time</div>
+          <div id="toggle-show-chart-rise" onclick="toggleChartVisibility('rise', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
@@ -966,19 +966,7 @@
           </div>
         </div>
         <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
-          <div style="font-weight:500">Rising time</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <input type="time" id="yaxis-rise-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('rise')">
-            <input type="time" id="yaxis-rise-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('rise')">
-            <span style="color:var(--muted);font-size:13px;">or</span>
-            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
-              <input type="checkbox" id="yaxis-rise-auto" onchange="toggleChartAuto('rise', this.checked)" style="width:16px;height:16px;cursor:pointer;">
-              Auto
-            </label>
-          </div>
-        </div>
-        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
-          <div style="font-weight:500">Sets by muscle group</div>
+          <div style="font-weight:500">Sets this week</div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <input type="number" id="yaxis-muscle-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
             <input type="number" id="yaxis-muscle-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('muscle')">
@@ -997,6 +985,30 @@
             <span style="color:var(--muted);font-size:13px;">or</span>
             <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
               <input type="checkbox" id="yaxis-activity-auto" onchange="toggleChartAuto('activity', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Weight (kg)</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="number" id="yaxis-weight-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('weight')">
+            <input type="number" id="yaxis-weight-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('weight')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-weight-auto" onchange="toggleChartAuto('weight', this.checked)" style="width:16px;height:16px;cursor:pointer;">
+              Auto
+            </label>
+          </div>
+        </div>
+        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;">
+          <div style="font-weight:500">Rising time</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <input type="time" id="yaxis-rise-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('rise')">
+            <input type="time" id="yaxis-rise-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('rise')">
+            <span style="color:var(--muted);font-size:13px;">or</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
+              <input type="checkbox" id="yaxis-rise-auto" onchange="toggleChartAuto('rise', this.checked)" style="width:16px;height:16px;cursor:pointer;">
               Auto
             </label>
           </div>
@@ -4048,10 +4060,10 @@ function renderCharts() {
   clearChartCards();
   renderCalChart();
   renderProteinChart();
-  renderRiseChart();
   renderMuscleChart();
   renderActivityChart();
   renderWeightChart();
+  renderRiseChart();
   applyChartVisibility();
 }
 
@@ -5075,9 +5087,10 @@ let activityChartInstance = null;
 let activityRange = '1w';
 
 const ACTIVITY_COLOURS = {
-  gym:   null,
-  cycle: '#74b9e8',
-  run:   '#adb5bd',
+  gym:   '#1a3a5c',   // dark blue
+  cycle: '#2e86c1',   // medium blue
+  run:   '#85c1e9',   // light blue
+  other: '#adb5bd',   // grey
 };
 
 function getActivityDays() {
@@ -5113,10 +5126,10 @@ function getActivityDays() {
     if (!dayMap[e.date]) return;
     if (e.type === 'gym') {
       dayMap[e.date].sessions.push({ type: 'gym', startTime: e.startTime || '00:00' });
-    } else if (e.type === 'cardio' && e.activityType === 'Cycle') {
-      dayMap[e.date].sessions.push({ type: 'cycle', startTime: e.startTime || '00:00' });
-    } else if (e.type === 'cardio' && e.activityType === 'Run') {
-      dayMap[e.date].sessions.push({ type: 'run', startTime: e.startTime || '00:00' });
+    } else if (e.type === 'cardio') {
+      const act = (e.activityType || '').toLowerCase();
+      const type = act === 'cycle' ? 'cycle' : act === 'run' ? 'run' : 'other';
+      dayMap[e.date].sessions.push({ type, label: e.activityType || 'Cardio', startTime: e.startTime || '00:00' });
     }
   });
 
@@ -5139,7 +5152,27 @@ function setActivityRange(range) {
 }
 
 function renderActivityChart() {
-  createChartCard('activity', '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;"><div style="font-size:15px;font-weight:500">Activities</div><div style="display:flex;gap:10px;font-size:12px;color:var(--muted);align-items:center;"><span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span>Gym</span><span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#74b9e8"></span>Cycle</span><span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#adb5bd"></span>Run</span></div></div><div style="display:flex;gap:4px;margin-bottom:0.75rem;"><button class="chart-toggle active" id="activity-range-1w" onclick="setActivityRange(\'1w\')">This week</button><button class="chart-toggle" id="activity-range-30d" onclick="setActivityRange(\'30d\')">30 days</button></div>', 'chart-activity', 'chart-activity-empty', 'No activity this week');
+  const legendItems = [
+    { key: 'gym',   label: 'Gym',   color: ACTIVITY_COLOURS.gym   },
+    { key: 'cycle', label: 'Cycle', color: ACTIVITY_COLOURS.cycle },
+    { key: 'run',   label: 'Run',   color: ACTIVITY_COLOURS.run   },
+    { key: 'other', label: 'Other', color: ACTIVITY_COLOURS.other },
+  ];
+  const legendHTML = legendItems.map(({ label, color }) =>
+    '<span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + color + '"></span>' + label + '</span>'
+  ).join('');
+
+  const headerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
+      '<div style="font-size:15px;font-weight:500">Activities this week</div>' +
+      '<div style="display:flex;gap:10px;font-size:12px;color:var(--muted);align-items:center;">' + legendHTML + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:4px;margin-bottom:0.75rem;">' +
+      '<button class="chart-toggle active" id="activity-range-1w"  onclick="setActivityRange(\'1w\')">This week</button>' +
+      '<button class="chart-toggle"        id="activity-range-30d" onclick="setActivityRange(\'30d\')">30 days</button>' +
+    '</div>';
+
+  createChartCard('activity', headerHTML, 'chart-activity', 'chart-activity-empty', 'No activity this week');
   const canvas = document.getElementById('chart-activity');
   const empty  = document.getElementById('chart-activity-empty');
   if (!canvas) return;
@@ -5153,45 +5186,30 @@ function renderActivityChart() {
   canvas.style.display = 'block'; empty.style.display = 'none';
 
   const styleEl = getComputedStyle(document.documentElement);
-  const accentColor = styleEl.getPropertyValue('--accent').trim();
   const mutedColor  = styleEl.getPropertyValue('--muted').trim();
   const borderColor = styleEl.getPropertyValue('--border').trim();
-
-  ACTIVITY_COLOURS.gym = accentColor;
 
   const maxSessions = Math.max(...days.map(d => d.sessions.length), 0);
   const datasets = [];
   for (let k = 0; k < maxSessions; k++) {
-    const dataGym   = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'gym'   ? 1 : 0; });
-    const dataCycle = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'cycle' ? 1 : 0; });
-    const dataRun   = labels.map((_, i) => { const s = days[i].sessions[k]; return s && s.type === 'run'   ? 1 : 0; });
-    if (dataGym.some(v=>v>0))   datasets.push({ label:'Gym ('+k+')',   data:dataGym,   backgroundColor:ACTIVITY_COLOURS.gym,   borderWidth:0, borderRadius:2, stack:'stack' });
-    if (dataCycle.some(v=>v>0)) datasets.push({ label:'Cycle ('+k+')', data:dataCycle, backgroundColor:ACTIVITY_COLOURS.cycle, borderWidth:0, borderRadius:2, stack:'stack' });
-    if (dataRun.some(v=>v>0))   datasets.push({ label:'Run ('+k+')',   data:dataRun,   backgroundColor:ACTIVITY_COLOURS.run,   borderWidth:0, borderRadius:2, stack:'stack' });
+    for (const { key, color } of legendItems) {
+      const data = labels.map((_, i) => { const s = days[i].sessions[k]; return (s && s.type === key) ? 1 : 0; });
+      if (data.some(v => v > 0))
+        datasets.push({ label: key + '(' + k + ')', data, backgroundColor: color, borderWidth: 0, borderRadius: 2, stack: 'stack' });
+    }
   }
 
   if (activityChartInstance) { activityChartInstance.destroy(); activityChartInstance = null; }
-
-  const tickLabels = labels.map((dateStr, i) => {
-    const d = new Date(dateStr + 'T12:00:00');
-    if (activityRange === '1w') return d.toLocaleDateString('en-GB', { weekday: 'short' });
-    const day = d.getDate(), dow = d.getDay();
-    if (day === 1) return '';
-    if (dow === 1) return String(day);
-    return '';
-  });
 
   const activityWeekBandPlugin = {
     id: 'activityWeekBands',
     beforeDraw(chart) {
       if (activityRange !== '30d') return;
-      const { ctx: c, chartArea, scales } = chart;
-      const xScale = scales.x;
+      const { ctx: c, chartArea } = chart;
       const totalBars = labels.length;
       const barW = (chartArea.right - chartArea.left) / totalBars;
       const isDark = document.documentElement.classList.contains('dark');
       const shadeColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
-      // Find Monday of first label
       const firstDate = new Date(labels[0] + 'T12:00:00');
       const dow = firstDate.getDay();
       let weekBandStart = new Date(firstDate);
@@ -5200,7 +5218,6 @@ function renderActivityChart() {
       while (weekBandStart <= new Date(labels[labels.length-1] + 'T12:00:00')) {
         const weekBandEnd = new Date(weekBandStart); weekBandEnd.setDate(weekBandEnd.getDate() + 7);
         if (bandIndex % 2 === 0) {
-          // Find bar indices that fall in this week
           let x1 = chartArea.right, x2 = chartArea.left;
           labels.forEach((dateStr, i) => {
             const d = new Date(dateStr + 'T12:00:00');
@@ -5225,11 +5242,10 @@ function renderActivityChart() {
     afterDraw(chart) {
       if (activityRange !== '30d') return;
       const { ctx: c, chartArea, scales } = chart;
-      const xScale = scales.x;
       labels.forEach((dateStr, i) => {
         const d = new Date(dateStr + 'T12:00:00');
         if (d.getDate() !== 1) return;
-        const x = xScale.getPixelForValue(i);
+        const x = scales.x.getPixelForValue(i);
         if (x < chartArea.left || x > chartArea.right) return;
         c.save();
         c.strokeStyle = borderColor; c.lineWidth = 2;
@@ -5242,7 +5258,14 @@ function renderActivityChart() {
   activityChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'bar',
     plugins: [activityWeekBandPlugin, activityMonthPlugin],
-    data: { labels: tickLabels, datasets },
+    data: { labels: labels.map((dateStr) => {
+      const d = new Date(dateStr + 'T12:00:00');
+      if (activityRange === '1w') return d.toLocaleDateString('en-GB', { weekday: 'short' });
+      const day = d.getDate(), dow = d.getDay();
+      if (day === 1) return '1 ' + d.toLocaleDateString('en-GB', { month: 'short' });
+      if (dow === 1) return String(day);
+      return '';
+    }), datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
@@ -5255,7 +5278,10 @@ function renderActivityChart() {
           label: () => null,
           afterBody: items => {
             const i = items[0].dataIndex;
-            return days[i].sessions.map(s => s.type.charAt(0).toUpperCase()+s.type.slice(1)+' @ '+s.startTime);
+            return days[i].sessions.map(s => {
+              const name = s.type === 'gym' ? 'Gym' : (s.label || s.type.charAt(0).toUpperCase()+s.type.slice(1));
+              return name + (s.startTime && s.startTime !== '00:00' ? ' @ ' + s.startTime : '');
+            });
           }
         }}
       },
@@ -6014,7 +6040,7 @@ function getMuscleExerciseBreakdown(weekMonday, group) {
 function renderMuscleChart() {
   createChartCard('muscle',
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
-    '<div style="font-size:15px;font-weight:500">Sets by muscle group</div>' +
+    '<div style="font-size:15px;font-weight:500">Sets this week</div>' +
     '<select id="muscle-week-sel" onchange="muscleSelectedWeek=this.value;renderMuscleChart()" ' +
     'style="font-size:13px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;"></select>' +
     '</div>',
