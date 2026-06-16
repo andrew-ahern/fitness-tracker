@@ -4686,10 +4686,8 @@ function renderCalChart() {
           title: () => [],
           label: () => null,
           afterBody: items => {
-            const i = items[0].dataIndex;
-            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
             const v = items[0].raw;
-            return [d, v != null ? Math.round(items[0].parsed.y)+' kcal' : 'No data'];
+            return [v != null ? Math.round(items[0].parsed.y)+' kcal' : 'No data'];
           }
         }}},
         scales: {
@@ -4789,10 +4787,8 @@ function renderCalChart() {
           title: () => [],
           label: () => null,
           afterBody: items => {
-            const i = items[0].dataIndex;
-            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
             const v = items[0].raw;
-            return [d, v != null ? Math.round(v)+' kcal' : 'No data'];
+            return [v != null ? Math.round(v)+' kcal' : 'No data'];
           }
         }}},
         scales: {
@@ -4890,7 +4886,7 @@ function renderProteinChart() {
         c.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
         c.fillStyle = mutedColor;
         c.textAlign = 'center';
-        c.fillText(Math.round(val) + 'g', bar.x, bar.y - 4);
+        c.fillText(Math.round(val), bar.x, bar.y - 4);
         c.restore();
       }
     };
@@ -4905,10 +4901,8 @@ function renderProteinChart() {
           title: () => [],
           label: () => null,
           afterBody: items => {
-            const i = items[0].dataIndex;
-            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
             const v = items[0].raw;
-            return [d, v != null ? items[0].parsed.y.toFixed(1)+' g' : 'No data'];
+            return [v != null ? items[0].parsed.y.toFixed(1) : 'No data'];
           }
         }}},
         scales: {
@@ -5008,10 +5002,8 @@ function renderProteinChart() {
           title: () => [],
           label: () => null,
           afterBody: items => {
-            const i = items[0].dataIndex;
-            const d = new Date(labels[i]+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
             const v = items[0].raw;
-            return [d, v != null ? v.toFixed(1)+' g' : 'No data'];
+            return [v != null ? v.toFixed(1) : 'No data'];
           }
         }}},
         scales: {
@@ -5335,12 +5327,11 @@ function renderActivityChart() {
           label: () => null,
           afterBody: items => {
             const i = items[0].dataIndex;
-            const d = new Date(days[i].date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
             const sessions = days[i].sessions.map(s => {
               const name = s.type === 'gym' ? 'Gym' : (s.label || s.type.charAt(0).toUpperCase()+s.type.slice(1));
               return name + (s.startTime && s.startTime !== '00:00' ? ' @ ' + s.startTime : '');
             });
-            return [d, ...sessions];
+            return sessions;
           }
         }}
       },
