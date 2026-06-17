@@ -304,5 +304,12 @@
     "protein": 0,
     "active": true,
     "group": "Veg"
+  },
+  {
+    "name": "The Gym Kitchen green chicken curry",
+    "calories": 355,
+    "protein": 31,
+    "active": true,
+    "group": "Ready-made"
   }
 ]
