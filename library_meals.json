@@ -223,5 +223,86 @@
     "active": true,
     "group": "Protein yoghurt",
     "comment": "average over variants"
+  },
+  {
+    "name": "Prawns, raw (100g)",
+    "calories": 80,
+    "protein": 17,
+    "active": true,
+    "group": "Fish"
+  },
+  {
+    "name": "Raspberries (100g)",
+    "calories": 34,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Strawberries (100g)",
+    "calories": 33,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Blueberries (100g)",
+    "calories": 45,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Mango (100g)",
+    "calories": 60,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Cherry tomatoes (100g)",
+    "calories": 26,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "average across types"
+  },
+  {
+    "name": "Red pepper (100g)",
+    "calories": 27,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "standard bell"
+  },
+  {
+    "name": "Sweet pointed pepper (100g)",
+    "calories": 38,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "long sweet variety"
+  },
+  {
+    "name": "Broccoli (100g)",
+    "calories": 36,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Potatoes (100g)",
+    "calories": 75,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "raw"
+  },
+  {
+    "name": "Radishes (100g)",
+    "calories": 15,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
   }
 ]
