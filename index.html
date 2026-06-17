@@ -817,55 +817,23 @@
         </div>
       </div>
 
-      <!-- Libraries -->
-      <h3>Libraries</h3>
-      <details class="lib-details">
-        <summary class="lib-summary">Gym exercises</summary>
-        <div id="exercise-library-list"></div>
-      </details>
-      <details class="lib-details">
-        <summary class="lib-summary">Cardio activities</summary>
-        <div id="cardio-library-list"></div>
-      </details>
-      <details class="lib-details">
-        <summary class="lib-summary">Meal items</summary>
-        <div id="meal-item-library-list"></div>
-      </details>
-
-      <!-- Targets -->
-      <h3>Targets</h3>
+      <!-- Appearance -->
+      <h3>Appearance</h3>
       <div class="card" style="margin-bottom:0.75rem;">
         <div class="card-row">
-          <div style="font-weight:500">Calories (kcal)</div>
-          <input type="number" id="cal-target" min="0" inputmode="numeric" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+          <div style="font-weight:500">Dark mode</div>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <span id="dark-mode-label" style="font-size:14px; color:var(--muted)">Off</span>
+            <div id="dark-toggle" onclick="toggleDarkMode()" style="width:44px; height:26px; border-radius:13px; background:var(--border); position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0;">
+              <div id="dark-knob" style="position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:white; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+            </div>
+          </label>
         </div>
-        <div class="card-row">
-          <div style="font-weight:500">Protein (g)</div>
-          <input type="number" id="prot-target" min="0" inputmode="decimal" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Weight (kg)</div>
-          <input type="number" id="weight-target" min="0" inputmode="decimal" step="0.1" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
-        </div>
-        <div class="card-row">
-          <div style="font-weight:500">Rising time</div>
-          <input type="time" id="rise-target" onchange="saveSettings()"
-            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
-        </div>
-      </div>
-
-      <!-- Muscle group targets -->
-      <div class="card" style="margin-bottom:0.75rem;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Sets per week</div>
-        <div id="muscle-targets-card"></div>
       </div>
 
       <!-- Entry forms -->
       <h3>Entry forms</h3>
-      <div class="card" id="hidden-forms-card">
+      <div class="card" id="hidden-forms-card" style="margin-bottom:0.75rem;">
         <div class="card-row">
           <div style="font-weight:500">Gym</div>
           <div id="toggle-show-gym" onclick="toggleFormVisibility('gym', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('gym')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
@@ -900,7 +868,7 @@
 
       <!-- Charts -->
       <h3>Charts</h3>
-      <div class="card" id="hidden-charts-card">
+      <div class="card" id="hidden-charts-card" style="margin-bottom:0.75rem;">
         <div class="card-row">
           <div style="font-weight:500">Calories</div>
           <div id="toggle-show-chart-calories" onclick="toggleChartVisibility('calories', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('calories')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
@@ -1013,32 +981,35 @@
             </label>
           </div>
         </div>
-        <div class="card-row" style="flex-direction:column;align-items:stretch;gap:6px;border-bottom:none;">
-          <div style="font-weight:500">Weight (kg)</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <input type="number" id="yaxis-weight-min" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('weight')">
-            <input type="number" id="yaxis-weight-max" class="field-number" style="width:80px;" inputmode="decimal" onchange="saveChartYAxisLimit('weight')">
-            <span style="color:var(--muted);font-size:13px;">or</span>
-            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;">
-              <input type="checkbox" id="yaxis-weight-auto" onchange="toggleChartAuto('weight', this.checked)" style="width:16px;height:16px;cursor:pointer;">
-              Auto
-            </label>
-          </div>
-        </div>
-        </div>
+      </div>
 
-      <!-- Appearance -->
-      <h3>Appearance</h3>
-      <div class="card">
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Targets</div>
         <div class="card-row">
-          <div style="font-weight:500">Dark mode</div>
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-            <span id="dark-mode-label" style="font-size:14px; color:var(--muted)">Off</span>
-            <div id="dark-toggle" onclick="toggleDarkMode()" style="width:44px; height:26px; border-radius:13px; background:var(--border); position:relative; cursor:pointer; transition:background 0.2s; flex-shrink:0;">
-              <div id="dark-knob" style="position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:white; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
-            </div>
-          </label>
+          <div style="font-weight:500">Calories (kcal)</div>
+          <input type="number" id="cal-target" min="0" inputmode="numeric" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
         </div>
+        <div class="card-row">
+          <div style="font-weight:500">Protein (g)</div>
+          <input type="number" id="prot-target" min="0" inputmode="decimal" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Weight (kg)</div>
+          <input type="number" id="weight-target" min="0" inputmode="decimal" step="0.1" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Rising time</div>
+          <input type="time" id="rise-target" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Sets per week</div>
+        <div id="muscle-targets-card"></div>
       </div>
 
       <!-- Danger zone -->
@@ -1046,7 +1017,7 @@
       <div class="card">
         <div class="card-row">
           <div>
-            <div style="font-weight:500">Clear all data</div>
+            <div style="font-weight:500">Clear all data on this device</div>
             <div style="font-size:13px; color:var(--muted)">Permanently delete all logs</div>
           </div>
           <button class="btn" style="color:#e76f51; border-color:#e76f51;" onclick="clearAllData()">Clear</button>
@@ -2162,9 +2133,6 @@ function showScreen(name, btn) {
   if (name === 'history') renderHistory();
   if (name === 'charts') setTimeout(renderCharts, 0);
   if (name === 'settings') {
-    renderExerciseLibrary();
-    renderCardioLibrary();
-    renderMealItemLibrary();
       if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
@@ -2464,9 +2432,6 @@ function renderAll() {
   document.getElementById('log-date').textContent = formatDate(today());
   setFormDefaults();
   renderHistory();
-  renderExerciseLibrary();
-  renderCardioLibrary();
-  renderMealItemLibrary();
   populateCardioActivityDropdown();
   if (db.settings) {
     if (db.settings.calTarget)     document.getElementById('cal-target').value     = db.settings.calTarget;
@@ -4634,7 +4599,7 @@ function renderCalChart() {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(dateStr);
-      data.push(dateStr <= today() ? (lookup[dateStr] ?? null) : null);
+      data.push(dateStr <= today() ? (lookup[dateStr] ?? (dateStr === today() ? 0 : null)) : null);
     }
     const yVals = data.filter(v => v != null);
     const { min: yMin, max: yMax } = getChartYRange('calories', yVals, targetVal);
@@ -4849,7 +4814,7 @@ function renderProteinChart() {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(dateStr);
-      data.push(dateStr <= today() ? (lookup[dateStr] ?? null) : null);
+      data.push(dateStr <= today() ? (lookup[dateStr] ?? (dateStr === today() ? 0 : null)) : null);
     }
     const yVals = data.filter(v => v != null);
     const { min: yMin, max: yMax } = getChartYRange('protein', yVals, targetVal);

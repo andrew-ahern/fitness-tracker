@@ -311,5 +311,13 @@
     "protein": 31,
     "active": true,
     "group": "Ready-made"
+  },
+  {
+    "name": "Taco shell",
+    "calories": 66,
+    "protein": 0,
+    "active": true,
+    "group": "Carbs",
+    "comment": "per shell; Old El Paso, Tesco own brand similar"
   }
 ]
