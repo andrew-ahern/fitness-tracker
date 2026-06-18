@@ -1131,6 +1131,10 @@
    ════════════════════════════════════════════════════════════════════ */
 
 const STORAGE_KEY = 'fitlog_v1';
+
+// The hour (24h) at which a new calendar day "starts" for logging purposes.
+// Before this time, we treat the session as belonging to the previous day.
+const DAY_START_HOUR = 3.5; // 03:30
 const EXERCISE_GROUP_ORDER = ['Chest', 'Triceps', 'Back', 'Biceps', 'Delts', 'Legs', 'Core'];
 // Fallback used if library_config.json can't be fetched (offline, first load before SW cache, etc.)
 const FALLBACK_MEAL_GROUP_ORDER = ['Sandwich', 'Protein yoghurt', 'Protein drink', 'Meat', 'Eggs', 'Bread'];
@@ -2149,8 +2153,12 @@ function showScreen(name, btn) {
 /* ── Utilities ─────────────────────────────────────────────────── */
 
 function today() {
-  // Returns today's date as YYYY-MM-DD in local time
+  // Returns the current logical day as YYYY-MM-DD, accounting for DAY_START_HOUR.
+  // Before DAY_START_HOUR, we're still "yesterday" for logging purposes.
   const d = new Date();
+  if (d.getHours() + d.getMinutes() / 60 < DAY_START_HOUR) {
+    d.setDate(d.getDate() - 1);
+  }
   return d.getFullYear() + '-' +
     String(d.getMonth() + 1).padStart(2, '0') + '-' +
     String(d.getDate()).padStart(2, '0');
@@ -4487,7 +4495,7 @@ function getCalByDay() {
   db.logs.filter(e => e.type === 'meal' && e.totals && e.totals.calories != null).forEach(e => {
     const [h, m] = (e.time || '12:00').split(':').map(Number);
     let calDay = e.date;
-    if (h * 60 + m < 210) {
+    if (h * 60 + m < DAY_START_HOUR * 60) {
       const d = new Date(e.date + 'T12:00:00'); d.setDate(d.getDate() - 1);
       calDay = d.toISOString().slice(0,10);
     }
@@ -4531,7 +4539,7 @@ function getProteinByDay() {
   db.logs.filter(e => e.type === 'meal' && e.totals && e.totals.protein != null).forEach(e => {
     const [h, m] = (e.time || '12:00').split(':').map(Number);
     let calDay = e.date;
-    if (h * 60 + m < 210) {
+    if (h * 60 + m < DAY_START_HOUR * 60) {
       const d = new Date(e.date + 'T12:00:00'); d.setDate(d.getDate() - 1);
       calDay = d.toISOString().slice(0,10);
     }
@@ -4599,7 +4607,8 @@ function renderCalChart() {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(dateStr);
-      data.push(dateStr <= today() ? (lookup[dateStr] ?? (dateStr === today() ? 0 : null)) : null);
+      const showTodayZero = dateStr === today();
+      data.push(dateStr <= today() ? (lookup[dateStr] ?? (showTodayZero ? 0 : null)) : null);
     }
     const yVals = data.filter(v => v != null);
     const { min: yMin, max: yMax } = getChartYRange('calories', yVals, targetVal);
@@ -4814,7 +4823,8 @@ function renderProteinChart() {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(dateStr);
-      data.push(dateStr <= today() ? (lookup[dateStr] ?? (dateStr === today() ? 0 : null)) : null);
+      const showTodayZeroP = dateStr === today();
+      data.push(dateStr <= today() ? (lookup[dateStr] ?? (showTodayZeroP ? 0 : null)) : null);
     }
     const yVals = data.filter(v => v != null);
     const { min: yMin, max: yMax } = getChartYRange('protein', yVals, targetVal);
@@ -5590,6 +5600,7 @@ function runTests() {
 
   test('today() returns current local date', () => {
     const d = new Date();
+    if (d.getHours() + d.getMinutes() / 60 < DAY_START_HOUR) d.setDate(d.getDate() - 1);
     const expected = d.getFullYear() + '-' +
       String(d.getMonth()+1).padStart(2,'0') + '-' +
       String(d.getDate()).padStart(2,'0');
