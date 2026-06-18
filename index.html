@@ -2153,8 +2153,16 @@ function showScreen(name, btn) {
 /* ── Utilities ─────────────────────────────────────────────────── */
 
 function today() {
+  // Returns today's real calendar date as YYYY-MM-DD in local time.
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function logicalToday() {
   // Returns the current logical day as YYYY-MM-DD, accounting for DAY_START_HOUR.
-  // Before DAY_START_HOUR, we're still "yesterday" for logging purposes.
+  // Before DAY_START_HOUR, entries belong to the previous calendar day.
   const d = new Date();
   if (d.getHours() + d.getMinutes() / 60 < DAY_START_HOUR) {
     d.setDate(d.getDate() - 1);
@@ -4082,7 +4090,7 @@ function renderWeightChart() {
   if (weightRangeMonths > 0) {
     const d = new Date();
     if (weightRangeMonths < 1) {
-      const tp = today().split('-').map(Number);
+      const tp = logicalToday().split('-').map(Number);
       const td = new Date(tp[0],tp[1]-1,tp[2]);
       const dow = td.getDay();
       td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
@@ -4283,7 +4291,7 @@ function renderRiseChart() {
   if (riseRangeMonths > 0) {
     const d = new Date();
     if (riseRangeMonths < 1) {
-      const tp = today().split('-').map(Number);
+      const tp = logicalToday().split('-').map(Number);
       const td = new Date(tp[0],tp[1]-1,tp[2]);
       const dow = td.getDay();
       td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
@@ -4306,7 +4314,7 @@ function renderRiseChart() {
     for (let i = 0; i < 7; i++) {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      if (dateStr <= today() && rawSet[dateStr] != null)
+      if (dateStr <= logicalToday() && rawSet[dateStr] != null)
         scatterData.push({ x: dateStr, y: rawSet[dateStr] });
     }
   } else {
@@ -4448,7 +4456,7 @@ function makeWeekBandPlugin(id, getRangeMonths) {
 }
 
 function makeXScale(rangeStart, allRaw, rangeMonths, mutedColor, borderColor, xMaxOverride) {
-  const xMax = xMaxOverride || today();
+  const xMax = xMaxOverride || logicalToday();
   return {
     type: 'time',
     min: rangeStart || (allRaw.length ? allRaw[0].date || allRaw[0] : ''),
@@ -4583,7 +4591,7 @@ function renderCalChart() {
   if (calRangeMonths > 0) {
     const d = new Date();
     if (calRangeMonths < 1) {
-      const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]);
+      const tp = logicalToday().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]);
       const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
       d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0);
     } else { d.setDate(d.getDate() - Math.round(calRangeMonths * 30)); }
@@ -4607,8 +4615,8 @@ function renderCalChart() {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(dateStr);
-      const showTodayZero = dateStr === today();
-      data.push(dateStr <= today() ? (lookup[dateStr] ?? (showTodayZero ? 0 : null)) : null);
+      const showTodayZero = dateStr === logicalToday();
+      data.push(dateStr <= logicalToday() ? (lookup[dateStr] ?? (showTodayZero ? 0 : null)) : null);
     }
     const yVals = data.filter(v => v != null);
     const { min: yMin, max: yMax } = getChartYRange('calories', yVals, targetVal);
@@ -4630,7 +4638,7 @@ function renderCalChart() {
       }
     };
 
-    const todayIdx = labels.indexOf(today());
+    const todayIdx = labels.indexOf(logicalToday());
     const todayLabelPlugin = {
       id: '_calTodayLabel',
       afterDatasetsDraw(chart) {
@@ -4682,7 +4690,7 @@ function renderCalChart() {
     const lookup = {}; raw.forEach(p => { lookup[p.date] = p.value; });
     const labels = [], data = [];
     const startD = new Date((rangeStart || raw[0].date) + 'T12:00:00');
-    const endD   = new Date(today() + 'T12:00:00');
+    const endD   = new Date(logicalToday() + 'T12:00:00');
     for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
       const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(ds); data.push(lookup[ds] ?? null);
@@ -4799,7 +4807,7 @@ function renderProteinChart() {
   if (proteinRangeMonths > 0) {
     const d = new Date();
     if (proteinRangeMonths < 1) {
-      const tp = today().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]);
+      const tp = logicalToday().split('-').map(Number); const td = new Date(tp[0],tp[1]-1,tp[2]);
       const dow = td.getDay(); td.setDate(td.getDate() - (dow === 0 ? 6 : dow - 1));
       d.setFullYear(td.getFullYear()); d.setMonth(td.getMonth()); d.setDate(td.getDate()); d.setHours(12,0,0,0);
     } else { d.setDate(d.getDate() - Math.round(proteinRangeMonths * 30)); }
@@ -4823,8 +4831,8 @@ function renderProteinChart() {
       const d = new Date(rangeStart + 'T12:00:00'); d.setDate(d.getDate() + i);
       const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(dateStr);
-      const showTodayZeroP = dateStr === today();
-      data.push(dateStr <= today() ? (lookup[dateStr] ?? (showTodayZeroP ? 0 : null)) : null);
+      const showTodayZeroP = dateStr === logicalToday();
+      data.push(dateStr <= logicalToday() ? (lookup[dateStr] ?? (showTodayZeroP ? 0 : null)) : null);
     }
     const yVals = data.filter(v => v != null);
     const { min: yMin, max: yMax } = getChartYRange('protein', yVals, targetVal);
@@ -4846,7 +4854,7 @@ function renderProteinChart() {
       }
     };
 
-    const todayIdxP = labels.indexOf(today());
+    const todayIdxP = labels.indexOf(logicalToday());
     const todayLabelPluginP = {
       id: '_protTodayLabel',
       afterDatasetsDraw(chart) {
@@ -4898,7 +4906,7 @@ function renderProteinChart() {
     const lookup = {}; raw.forEach(p => { lookup[p.date] = p.value; });
     const labels = [], data = [];
     const startD = new Date((rangeStart || raw[0].date) + 'T12:00:00');
-    const endD   = new Date(today() + 'T12:00:00');
+    const endD   = new Date(logicalToday() + 'T12:00:00');
     for (let d = new Date(startD); d <= endD; d.setDate(d.getDate() + 1)) {
       const ds = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(ds); data.push(lookup[ds] ?? null);
@@ -5035,7 +5043,7 @@ function makeWeekBandPlugin(id, getRangeMonths) {
 }
 
 function makeXScale(rangeStart, allRaw, rangeMonths, mutedColor, borderColor, xMaxOverride) {
-  const xMax = xMaxOverride || today();
+  const xMax = xMaxOverride || logicalToday();
   return {
     type: 'time',
     min: rangeStart || (allRaw.length ? allRaw[0].date || allRaw[0] : ''),
@@ -5121,7 +5129,7 @@ const ACTIVITY_COLOURS = {
 };
 
 function getActivityDays() {
-  const tp = today().split('-').map(Number);
+  const tp = logicalToday().split('-').map(Number);
   const todayDate = new Date(tp[0], tp[1]-1, tp[2]);
 
   let startDate;
@@ -5600,7 +5608,6 @@ function runTests() {
 
   test('today() returns current local date', () => {
     const d = new Date();
-    if (d.getHours() + d.getMinutes() / 60 < DAY_START_HOUR) d.setDate(d.getDate() - 1);
     const expected = d.getFullYear() + '-' +
       String(d.getMonth()+1).padStart(2,'0') + '-' +
       String(d.getDate()).padStart(2,'0');
