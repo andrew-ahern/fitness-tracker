@@ -335,5 +335,20 @@
     "active": true,
     "group": "Carbs",
     "comment": "approx values, Tesco and Sainsbury's"
+  },
+  {
+    "name": "PBN whey protein powder (30g)",
+    "calories": 118,
+    "protein": 23,
+    "active": true,
+    "group": "Protein drink"
+  },
+  {
+    "name": "ON protein shake (500ml)",
+    "calories": 290,
+    "protein": 50,
+    "active": true,
+    "group": "Protein drink",
+    "comment": "vanilla and strawberry; chocolate higher"
   }
 ]
