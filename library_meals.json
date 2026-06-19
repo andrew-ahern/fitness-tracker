@@ -194,7 +194,7 @@
     "group": "Takeaway"
   },
   {
-    "name": "Tesco sweet chilli & lime basa fillet (125g)",
+    "name": "Basa fillet (sweet chilli & lime, 125g)",
     "calories": 140,
     "protein": 21,
     "active": true,
@@ -319,5 +319,21 @@
     "active": true,
     "group": "Carbs",
     "comment": "per shell; Old El Paso, Tesco own brand similar"
+  },
+  {
+    "name": "Basa fillet (plain, 125g)",
+    "calories": 100,
+    "protein": 20,
+    "active": true,
+    "group": "Fish",
+    "comment": "approx values"
+  },
+  {
+    "name": "Mashed potato (100g)",
+    "calories": 90,
+    "protein": 1,
+    "active": true,
+    "group": "Carbs",
+    "comment": "approx values, Tesco and Sainsbury's"
   }
 ]
