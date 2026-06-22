@@ -374,5 +374,13 @@
     "active": true,
     "group": "Fish",
     "comment": "approx; 88g when cooked"
+  },
+  {
+    "name": "Grenade bar (35g)",
+    "calories": 136,
+    "protein": 12,
+    "active": true,
+    "group": "Protein bar",
+    "comment": "all flavours roughly the same"
   }
 ]
