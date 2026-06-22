@@ -217,7 +217,7 @@
     "comment": "standard durum wheat; consistent across Tesco, Sainsbury's, Barilla, De Cecco"
   },
   {
-    "name": "Muller & Myprotein mixers yoghurt (140g)",
+    "name": "Muller & Myprotein mixers (140g)",
     "calories": 133,
     "protein": 15,
     "active": true,
@@ -350,5 +350,29 @@
     "active": true,
     "group": "Protein drink",
     "comment": "vanilla and strawberry; chocolate higher"
+  },
+  {
+    "name": "Muller & Myprotein Crunch (180g)",
+    "calories": 220,
+    "protein": 20,
+    "active": true,
+    "group": "Protein yoghurt",
+    "comment": "approx for vanilla and strawberry"
+  },
+  {
+    "name": "Nomadic power pot (190g)",
+    "calories": 266,
+    "protein": 20,
+    "active": true,
+    "group": "Protein yoghurt",
+    "comment": "approx for chocolate and caramel"
+  },
+  {
+    "name": "New England Seafood Wild Cod Fillet (110g)",
+    "calories": 84,
+    "protein": 20,
+    "active": true,
+    "group": "Fish",
+    "comment": "approx; 88g when cooked"
   }
 ]
