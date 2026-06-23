@@ -53,14 +53,14 @@
     "calories": 180,
     "protein": 25,
     "active": true,
-    "group": "Protein yoghurt"
+    "group": "Yoghurt"
   },
   {
     "name": "Arla (200g)",
     "calories": 142,
     "protein": 20,
     "active": true,
-    "group": "Protein yoghurt",
+    "group": "Yoghurt",
     "comment": "Near-identical values for pouch vs. pot and for all flavours."
   },
   {
@@ -221,7 +221,7 @@
     "calories": 133,
     "protein": 15,
     "active": true,
-    "group": "Protein yoghurt",
+    "group": "Yoghurt",
     "comment": "average over variants"
   },
   {
@@ -356,7 +356,7 @@
     "calories": 220,
     "protein": 20,
     "active": true,
-    "group": "Protein yoghurt",
+    "group": "Yoghurt",
     "comment": "approx for vanilla and strawberry"
   },
   {
@@ -364,7 +364,7 @@
     "calories": 266,
     "protein": 20,
     "active": true,
-    "group": "Protein yoghurt",
+    "group": "Yoghurt",
     "comment": "approx for chocolate and caramel"
   },
   {
@@ -382,5 +382,19 @@
     "active": true,
     "group": "Protein bar",
     "comment": "all flavours roughly the same"
+  },
+  {
+    "name": "Jimmy's Myprotein Iced Coffee (380ml)",
+    "calories": 205,
+    "protein": 21,
+    "active": true,
+    "group": "Protein drink"
+  },
+  {
+    "name": "Fage Total 0% Fat (100g)",
+    "calories": 54,
+    "protein": 10.3,
+    "active": true,
+    "group": "Yoghurt"
   }
 ]
