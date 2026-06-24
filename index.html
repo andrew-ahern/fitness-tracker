@@ -1008,6 +1008,18 @@
       </div>
 
       <div class="card" style="margin-bottom:0.75rem;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Charts</div>
+        <div class="card-row" style="border-bottom:none;">
+          <div>
+            <div style="font-weight:500">New day starts at</div>
+            <div style="font-size:13px;color:var(--muted)">Affects how cal/protein bars are grouped</div>
+          </div>
+          <input type="time" id="day-start-time" onchange="saveDayStartTime()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0.75rem;">
         <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Sets per week</div>
         <div id="muscle-targets-card"></div>
       </div>
@@ -1132,9 +1144,15 @@
 
 const STORAGE_KEY = 'fitlog_v1';
 
-// The hour (24h) at which a new calendar day "starts" for logging purposes.
-// Before this time, we treat the session as belonging to the previous day.
-const DAY_START_HOUR = 3.5; // 03:30
+// Default new-day cutoff (03:30). Overridden by db.settings.dayStartTime at runtime.
+const DAY_START_HOUR_DEFAULT = 3.5;
+
+function getDayStartHour() {
+  const t = db && db.settings && db.settings.dayStartTime;
+  if (!t) return DAY_START_HOUR_DEFAULT;
+  const [h, m] = t.split(':').map(Number);
+  return h + (m || 0) / 60;
+}
 const EXERCISE_GROUP_ORDER = ['Chest', 'Triceps', 'Back', 'Biceps', 'Delts', 'Legs', 'Core'];
 // Fallback used if library_config.json can't be fetched (offline, first load before SW cache, etc.)
 const FALLBACK_MEAL_GROUP_ORDER = ['Sandwich', 'Protein yoghurt', 'Protein drink', 'Meat', 'Eggs', 'Bread'];
@@ -1254,6 +1272,7 @@ let db = {
     proteinTarget: null,
     weightTarget: null,
     riseTarget: null,
+    dayStartTime: '03:30',
     hiddenForms: [],
     hiddenCharts: [],
     chartYAxis: {
@@ -1760,6 +1779,12 @@ function saveSettings() {
   saveDB();
 }
 
+function saveDayStartTime() {
+  const val = document.getElementById('day-start-time').value;
+  db.settings.dayStartTime = val || '03:30';
+  saveDB();
+}
+
 
 
 function renderLibrary(key, listId, emptyMsg) {
@@ -2141,6 +2166,7 @@ function showScreen(name, btn) {
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
     if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
+    document.getElementById('day-start-time').value = db.settings.dayStartTime || '03:30';
     populateChartSettings();
     populateMuscleTargetsCard();
   }
@@ -2164,7 +2190,7 @@ function logicalToday() {
   // Returns the current logical day as YYYY-MM-DD, accounting for DAY_START_HOUR.
   // Before DAY_START_HOUR, entries belong to the previous calendar day.
   const d = new Date();
-  if (d.getHours() + d.getMinutes() / 60 < DAY_START_HOUR) {
+  if (d.getHours() + d.getMinutes() / 60 < getDayStartHour()) {
     d.setDate(d.getDate() - 1);
   }
   return d.getFullYear() + '-' +
@@ -4503,7 +4529,7 @@ function getCalByDay() {
   db.logs.filter(e => e.type === 'meal' && e.totals && e.totals.calories != null).forEach(e => {
     const [h, m] = (e.time || '12:00').split(':').map(Number);
     let calDay = e.date;
-    if (h * 60 + m < DAY_START_HOUR * 60) {
+    if (h * 60 + m < getDayStartHour() * 60) {
       const d = new Date(e.date + 'T12:00:00'); d.setDate(d.getDate() - 1);
       calDay = d.toISOString().slice(0,10);
     }
@@ -4547,7 +4573,7 @@ function getProteinByDay() {
   db.logs.filter(e => e.type === 'meal' && e.totals && e.totals.protein != null).forEach(e => {
     const [h, m] = (e.time || '12:00').split(':').map(Number);
     let calDay = e.date;
-    if (h * 60 + m < DAY_START_HOUR * 60) {
+    if (h * 60 + m < getDayStartHour() * 60) {
       const d = new Date(e.date + 'T12:00:00'); d.setDate(d.getDate() - 1);
       calDay = d.toISOString().slice(0,10);
     }
