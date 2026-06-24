@@ -396,5 +396,19 @@
     "protein": 10.3,
     "active": true,
     "group": "Yoghurt"
+  },
+  {
+    "name": "Tesco Three Bean Chilli (300g)",
+    "calories": 157,
+    "protein": 7.2,
+    "active": true,
+    "group": "Soup"
+  },
+  {
+    "name": "Sainsbury's Spicy Tomato Lentil & Red Pepper (300g)",
+    "calories": 196,
+    "protein": 11.1,
+    "active": true,
+    "group": "Soup"
   }
 ]
