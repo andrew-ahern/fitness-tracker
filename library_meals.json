@@ -410,5 +410,12 @@
     "protein": 11.1,
     "active": true,
     "group": "Soup"
+  },
+  {
+    "name": "Smoked salmon (50g)",
+    "calories": 93,
+    "protein": 11.2,
+    "active": true,
+    "group": "Fish"
   }
 ]
