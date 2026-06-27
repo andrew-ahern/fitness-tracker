@@ -380,7 +380,7 @@
     "calories": 136,
     "protein": 12,
     "active": true,
-    "group": "Protein bar",
+    "group": "Bar",
     "comment": "all flavours roughly the same"
   },
   {
@@ -417,5 +417,19 @@
     "protein": 11.2,
     "active": true,
     "group": "Fish"
+  },
+  {
+    "name": "Graze cocoa (30g)",
+    "calories": 116,
+    "protein": 1.9,
+    "active": true,
+    "group": "Bar"
+  },
+  {
+    "name": "Lucozade Sport (500ml)",
+    "calories": 132,
+    "protein": 0,
+    "active": true,
+    "group": "Drinks"
   }
 ]

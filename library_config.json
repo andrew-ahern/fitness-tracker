@@ -5,7 +5,7 @@
     "Eggs",
     "Yoghurt",
     "Protein drink",
-    "Protein bar",
+    "Bar",
     "Veg",
     "Fruit",
     "Carbs",
@@ -13,6 +13,7 @@
     "Sandwich",
     "Ready-made",
     "Takeaway",
-    "Soup"
+    "Soup",
+    "Drinks"
   ]
 }
