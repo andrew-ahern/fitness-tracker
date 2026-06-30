@@ -141,6 +141,22 @@
     "comment": "estimate"
   },
   {
+    "name": "Egg white, medium",
+    "calories": 17,
+    "protein": 4,
+    "active": true,
+    "group": "Eggs",
+    "comment": "estimate"
+  },
+  {
+    "name": "Egg white, large",
+    "calories": 20,
+    "protein": 5,
+    "active": true,
+    "group": "Eggs",
+    "comment": "estimate"
+  },
+  {
     "name": "Warburtons Crumpet Thin",
     "calories": 61,
     "protein": 2,
@@ -428,6 +444,13 @@
   {
     "name": "Lucozade Sport (500ml)",
     "calories": 132,
+    "protein": 0,
+    "active": true,
+    "group": "Drinks"
+  },
+  {
+    "name": "Mogu Mogu",
+    "calories": 10,
     "protein": 0,
     "active": true,
     "group": "Drinks"
