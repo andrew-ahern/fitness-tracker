@@ -141,7 +141,7 @@
     "comment": "estimate"
   },
   {
-    "name": "Egg white, medium",
+    "name": "Egg white (medium)",
     "calories": 17,
     "protein": 4,
     "active": true,
@@ -149,7 +149,7 @@
     "comment": "estimate"
   },
   {
-    "name": "Egg white, large",
+    "name": "Egg white (large)",
     "calories": 20,
     "protein": 5,
     "active": true,
