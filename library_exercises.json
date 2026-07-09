@@ -130,7 +130,8 @@
         "type": "select",
         "options": [
           "Wide grip",
-          "Narrow grip"
+          "Narrow grip",
+          "Neutral grip"
         ]
       }
     ],

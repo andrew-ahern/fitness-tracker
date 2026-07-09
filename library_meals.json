@@ -454,5 +454,12 @@
     "protein": 0,
     "active": true,
     "group": "Drinks"
+  },
+  {
+    "name": "Blackberries (100g)",
+    "calories": 40,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
   }
 ]
