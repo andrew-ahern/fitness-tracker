@@ -461,5 +461,47 @@
     "protein": 0,
     "active": true,
     "group": "Fruit"
+  },
+  {
+    "name": "Chicken breast, raw (100g)",
+    "calories": 110,
+    "protein": 23,
+    "active": true,
+    "group": "Meat"
+  },
+  {
+    "name": "Pomegranate seeds (100g)",
+    "calories": 61,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Egg white (100g)",
+    "calories": 52,
+    "protein": 11,
+    "active": true,
+    "group": "Eggs"
+  },
+  {
+    "name": "Asparagus (100g)",
+    "calories": 29,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Banana (100g)",
+    "calories": 90,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Parmesan (10g)",
+    "calories": 40,
+    "protein": 3,
+    "active": true,
+    "group": "Fats & oils"
   }
 ]
