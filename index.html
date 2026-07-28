@@ -946,7 +946,7 @@
           </div>
         </div>
         <div class="card-row">
-          <div style="font-weight:500">Work sessions</div>
+          <div style="font-weight:500">Work</div>
           <div id="toggle-show-chart-deepwork" onclick="toggleChartVisibility('deepwork', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('deepwork')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
@@ -5422,7 +5422,7 @@ function setDeepWorkRange(range) {
 function renderDeepWorkChart() {
   const headerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
-      '<div style="font-size:15px;font-weight:500">Work sessions</div>' +
+      '<div style="font-size:15px;font-weight:500">Work</div>' +
     '</div>' +
     '<div style="display:flex;gap:4px;margin-bottom:0.75rem;">' +
       '<button class="chart-toggle active" id="deepwork-range-1w"  onclick="setDeepWorkRange(\'1w\')">This week</button>' +
@@ -5491,7 +5491,7 @@ function renderDeepWorkChart() {
       }),
       datasets: [{
         data: hours.map(d => d.mins > 0 ? parseFloat((d.mins / 60).toFixed(2)) : 0),
-        backgroundColor: accentColor + '99',
+        backgroundColor: ACTIVITY_COLOURS.gym,
         borderRadius: 2,
         borderWidth: 0,
       }]
@@ -5510,8 +5510,7 @@ function renderDeepWorkChart() {
             if (day.mins > 0) lines.push(fmtDuration(day.mins));
             day.sessions.forEach(s => {
               const q = s.quality ? ' (quality ' + s.quality + '/5)' : '';
-              const time = s.startTime && s.endTime ? ' ' + s.startTime + '–' + s.endTime : '';
-              lines.push(time + q);
+              lines.push((s.startTime || '') + q);
             });
             return lines;
           }
@@ -5533,7 +5532,11 @@ function renderDeepWorkChart() {
         },
         y: {
           min: 0,
-          ticks: { font: { size: 11 }, color: mutedColor, callback: v => v > 0 ? v + 'h' : '0' },
+          max: 8,
+          afterBuildTicks: axis => {
+            axis.ticks = [0,1,2,3,4,5,6,7,8].map(v => ({ value: v }));
+          },
+          ticks: { font: { size: 11 }, color: mutedColor, callback: v => v + 'h' },
           grid: { color: borderColor }
         }
       }
