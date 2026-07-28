@@ -1063,6 +1063,11 @@
           <input type="time" id="rise-target" onchange="saveSettings()"
             style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
         </div>
+        <div class="card-row">
+          <div style="font-weight:500">Work (hours/day)</div>
+          <input type="number" id="work-target" min="0" max="24" step="0.5" inputmode="decimal" onchange="saveSettings()"
+            style="width:90px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:15px; text-align:right;">
+        </div>
       </div>
 
       <div class="card" style="margin-bottom:0.75rem;">
@@ -1331,6 +1336,7 @@ let db = {
     proteinTarget: null,
     weightTarget: null,
     riseTarget: null,
+    workTarget: 6,
     dayStartTime: '03:30',
     hiddenForms: [],
     hiddenCharts: [],
@@ -1395,6 +1401,7 @@ function loadDB() {
         if (!db.settings.darkMode)         db.settings.darkMode = false;
         if (!db.settings.hiddenForms)      db.settings.hiddenForms = [];
         if (!db.settings.hiddenCharts)      db.settings.hiddenCharts = [];
+        if (db.settings.workTarget === undefined) db.settings.workTarget = 6;
         if (!db.settings.chartYAxis) {
           db.settings.chartYAxis = {
             weight:   { auto: true, min: null, max: null },
@@ -1836,6 +1843,8 @@ function saveSettings() {
   db.settings.weightTarget  = isNaN(weightT) ? null : weightT;
   const riseT = document.getElementById('rise-target').value;
   db.settings.riseTarget = riseT || null;
+  const workT = parseFloat(document.getElementById('work-target').value);
+  db.settings.workTarget = isNaN(workT) ? 6 : workT;
   saveDB();
 }
 
@@ -2232,6 +2241,7 @@ function showScreen(name, btn) {
     if (db.settings.proteinTarget) document.getElementById('prot-target').value    = db.settings.proteinTarget;
     if (db.settings.weightTarget)  document.getElementById('weight-target').value  = db.settings.weightTarget;
     if (db.settings.riseTarget)    document.getElementById('rise-target').value     = db.settings.riseTarget;
+    document.getElementById('work-target').value = db.settings.workTarget ?? 6;
     document.getElementById('day-start-time').value = db.settings.dayStartTime || '03:30';
     populateChartSettings();
     populateMuscleTargetsCard();
@@ -5478,8 +5488,29 @@ function renderDeepWorkChart() {
 
   if (deepWorkChartInstance) { deepWorkChartInstance.destroy(); deepWorkChartInstance = null; }
 
+  const workTarget = db.settings.workTarget ?? 6;
+  const workTargetPlugin = {
+    id: '_deepWorkTargetLine',
+    afterDatasetsDraw(chart) {
+      if (!workTarget) return;
+      const { ctx: c, chartArea, scales } = chart;
+      const y = scales.y.getPixelForValue(workTarget);
+      if (y < chartArea.top || y > chartArea.bottom) return;
+      c.save();
+      c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([6, 4]);
+      c.beginPath(); c.moveTo(chartArea.left, y); c.lineTo(chartArea.right, y); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = '#e76f51';
+      c.font = '11px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+      c.textAlign = 'right';
+      c.fillText(workTarget + 'h', chartArea.right - 4, y - 4);
+      c.restore();
+    }
+  };
+
   deepWorkChartInstance = new Chart(canvas.getContext('2d'), {
     type: 'bar',
+    plugins: [workTargetPlugin],
     data: {
       labels: labels.map(dateStr => {
         const d = new Date(dateStr + 'T12:00:00');
