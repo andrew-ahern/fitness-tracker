@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ft-v264';
+const CACHE_NAME = 'ft-v265';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
