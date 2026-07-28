@@ -567,6 +567,7 @@
         <button class="log-tab" id="tab-meal" onclick="showLogForm('meal', this)">Meal<span class="draft-dot"></span></button>
         <button class="log-tab" id="tab-weight" onclick="showLogForm('weight', this)">Weight<span class="draft-dot"></span></button>
         <button class="log-tab" id="tab-rise" onclick="showLogForm('rise', this)">Rise<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-deepwork" onclick="showLogForm('deepwork', this)">Work<span class="draft-dot"></span></button>
       </div>
 
       <!-- ── WEIGHT FORM ─────────────────────────────────────────── -->
@@ -735,6 +736,43 @@
         </div>
       </div>
 
+      <!-- ── DEEP WORK FORM ─────────────────────────────────────────── -->
+      <div id="form-deepwork" class="log-form">
+        <div class="card">
+          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="dw-date" class="field-date">
+            </div>
+            <div class="field">
+              <label>Start</label>
+              <input type="time" id="dw-starttime" class="field-time">
+            </div>
+            <div class="field">
+              <label>End</label>
+              <input type="time" id="dw-endtime" class="field-time">
+            </div>
+          </div>
+          <div class="field">
+            <label>Focus quality</label>
+            <div style="display:flex; gap:8px; margin-top:4px;" id="dw-quality-btns">
+              <button class="chart-toggle" onclick="setDWQuality(1)">1</button>
+              <button class="chart-toggle" onclick="setDWQuality(2)">2</button>
+              <button class="chart-toggle" onclick="setDWQuality(3)">3</button>
+              <button class="chart-toggle" onclick="setDWQuality(4)">4</button>
+              <button class="chart-toggle" onclick="setDWQuality(5)">5</button>
+            </div>
+            <input type="hidden" id="dw-quality" value="">
+          </div>
+          <div class="field">
+            <label>Note</label>
+            <textarea id="dw-note" class="field-textarea" autocapitalize="off"></textarea>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="saveDeepWork()">Save</button>
+          <div id="draft-status-deepwork" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-deepwork"></span><button id="draft-clear-deepwork" onclick="clearDraftAndForm('deepwork')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+        </div>
+      </div>
+
     </div><!-- /#screen-log -->
 
     <!-- ══ HISTORY SCREEN ══════════════════════════════════════════ -->
@@ -748,6 +786,7 @@
           <option value="meal">Meal</option>
           <option value="weight">Weight</option>
           <option value="rise">Rise</option>
+          <option value="deepwork">Work</option>
         </select>
         <select id="exercise-filter" onchange="renderHistory()" style="display:none; font-size:14px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; margin-top:6px;">
           <option value="">All exercises</option>
@@ -858,9 +897,15 @@
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
-        <div class="card-row" style="border-bottom:none;">
+        <div class="card-row">
           <div style="font-weight:500">Rise</div>
           <div id="toggle-show-rise" onclick="toggleFormVisibility('rise', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row" style="border-bottom:none;">
+          <div style="font-weight:500">Work</div>
+          <div id="toggle-show-deepwork" onclick="toggleFormVisibility('deepwork', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('deepwork')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
@@ -890,6 +935,12 @@
         <div class="card-row">
           <div style="font-weight:500">Activities</div>
           <div id="toggle-show-chart-activity" onclick="toggleChartVisibility('activity', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('activity')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Work sessions</div>
+          <div id="toggle-show-chart-deepwork" onclick="toggleChartVisibility('deepwork', !!(db.settings.hiddenCharts && db.settings.hiddenCharts.includes('deepwork')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
@@ -1164,7 +1215,7 @@ function getMealGroupOrder() {
    Fixed auto-buffers (added/subtracted from the data/target range when
    "Auto" is enabled for that chart in Settings). */
 const CHART_AUTO_BUFFERS = {
-  weight: 0.5, rise: 30, calories: 200, protein: 20, activity: 1, muscle: 2
+  weight: 0.5, rise: 30, calories: 200, protein: 20, activity: 1, muscle: 2, deepwork: 0.5
 };
 const CHARTS_WITH_TARGET = ['weight', 'rise', 'calories', 'protein'];
 const CHART_FIXED_FALLBACK = {
@@ -1173,7 +1224,8 @@ const CHART_FIXED_FALLBACK = {
   calories: { min: 0, max: 3000 },
   protein: { min: 0, max: 300 },
   activity: { min: 0, max: 4 },
-  muscle: { min: 0, max: 14 }
+  muscle: { min: 0, max: 14 },
+  deepwork: { min: 0, max: 8 }
 };
 
 /* dataVals: array of numeric y-values visible in the chart's current
@@ -1671,10 +1723,11 @@ function toggleFormVisibility(type, currentlyHidden) {
 
 /* ── Chart visibility & Y-axis settings ──────────────────────────── */
 // Maps chart settings key -> chart card id (note: calories chart card uses 'cal')
-const CHART_CARD_IDS = { weight: 'weight', rise: 'rise', calories: 'cal', protein: 'protein', activity: 'activity', muscle: 'muscle' };
+const CHART_CARD_IDS = { weight: 'weight', rise: 'rise', calories: 'cal', protein: 'protein', activity: 'activity', muscle: 'muscle', deepwork: 'deepwork' };
 const CHART_RENDER_FNS = {
   weight: renderWeightChart, rise: renderRiseChart, calories: renderCalChart,
-  protein: renderProteinChart, activity: renderActivityChart, muscle: renderMuscleChart
+  protein: renderProteinChart, activity: renderActivityChart, muscle: renderMuscleChart,
+  deepwork: renderDeepWorkChart
 };
 
 function toggleChartVisibility(chartId, currentlyHidden) {
@@ -2072,7 +2125,7 @@ function renderHistory() {
 function renderHistoryEntry(e, exFilter) {
   /* Returns an HTML string for one history entry row. */
   const typeLabel = {
-    meal: 'Meal', weight: 'Weight', gym: 'Gym', cardio: 'Cardio', rise: 'Rise'
+    meal: 'Meal', weight: 'Weight', gym: 'Gym', cardio: 'Cardio', rise: 'Rise', deepwork: 'Work'
   }[e.type] || '•';
 
   // Date + time line (always shown at top)
@@ -2110,6 +2163,15 @@ function renderHistoryEntry(e, exFilter) {
     detail = parts.join(' · ');
   } else if (e.type === 'rise') {
     detail = e.time;
+  } else if (e.type === 'deepwork') {
+    const parts = [];
+    if (e.startTime && e.endTime) {
+      const dur = durationMins(e.startTime, e.endTime);
+      if (dur > 0) parts.push(fmtDuration(dur));
+      parts.push(e.startTime + '–' + e.endTime);
+    } else if (e.startTime) parts.push(e.startTime);
+    if (e.quality) parts.push('Quality ' + e.quality + '/5');
+    detail = parts.join(' · ');
   }
 
   return `
@@ -2230,6 +2292,12 @@ function saveDraft(type) {
   } else if (type === 'rise') {
     d.time = getVal('wk-time');
     d.date = getVal('wk-date');
+  } else if (type === 'deepwork') {
+    d.date      = getVal('dw-date');
+    d.startTime = getVal('dw-starttime');
+    d.endTime   = getVal('dw-endtime');
+    d.quality   = getVal('dw-quality');
+    d.note      = getVal('dw-note');
   } else if (type === 'meal') {
     d.date  = getVal('m-date');
     d.time  = getVal('m-time');
@@ -2368,6 +2436,12 @@ function restoreDraft(type) {
     setVal('c-dist', d.distance);  setVal('c-dur', d.duration);
     setVal('c-hravg', d.hrAvg);    setVal('c-hrmax', d.hrMax);
     setVal('c-elev', d.elevation); setVal('c-note', d.note);
+  } else if (type === 'deepwork') {
+    setVal('dw-date', d.date);
+    setVal('dw-starttime', d.startTime);
+    setVal('dw-endtime', d.endTime);
+    setVal('dw-note', d.note || '');
+    if (d.quality) setDWQuality(parseInt(d.quality));
   }
 
   showDraftStatus(type);
@@ -2392,6 +2466,12 @@ function clearDraftAndForm(type) {
     refreshDateTime('cardio');
   } else if (type === 'rise') {
     refreshDateTime('rise');
+  } else if (type === 'deepwork') {
+    setVal('dw-endtime', '');
+    setVal('dw-note', '');
+    setVal('dw-quality', '');
+    document.querySelectorAll('#dw-quality-btns .chart-toggle').forEach(b => b.classList.remove('active'));
+    refreshDateTime('deepwork');
   }
 }
 
@@ -2413,10 +2493,11 @@ function wireFormDrafts() {
      Wake: only drafts if the time differs from the current default
            (so the dot doesn't appear just from opening the tab). */
   const formIds = {
-    meal:    'form-meal',
-    gym:     'form-gym',
-    cardio:  'form-cardio',
-    weight:  'form-weight',
+    meal:     'form-meal',
+    gym:      'form-gym',
+    cardio:   'form-cardio',
+    weight:   'form-weight',
+    deepwork: 'form-deepwork',
   };
   Object.entries(formIds).forEach(([type, formId]) => {
     const form = document.getElementById(formId);
@@ -2453,6 +2534,22 @@ function showToast(msg, duration) {
   t.classList.add('show');
   clearTimeout(t._timer);
   t._timer = setTimeout(() => t.classList.remove('show'), duration || 2200);
+}
+
+function durationMins(startTime, endTime) {
+  if (!startTime || !endTime) return 0;
+  const [sh, sm] = startTime.split(':').map(Number);
+  const [eh, em] = endTime.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins < 0) mins += 24 * 60; // handle midnight crossing
+  return mins;
+}
+
+function fmtDuration(mins) {
+  if (mins < 60) return mins + ' min';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m === 0 ? h + 'h' : h + 'h ' + m + 'min';
 }
 
 function fmtWeight(w) {
@@ -2550,6 +2647,7 @@ function refreshDateTime(formName) {
     gym: [['wo-date', d], ['wo-starttime', t]],
     cardio:  [['c-date', d],  ['c-starttime', t]],
     rise:   [['wk-date', d], ['wk-time', t]],
+    deepwork: [['dw-date', d], ['dw-starttime', t]],
   };
   (map[formName] || []).forEach(([id, val]) => setVal(id, val));
 }
@@ -2574,6 +2672,8 @@ function setFormDefaults() {
   setVal('c-date', d); setVal('c-starttime', t);
   // Rise
   setVal('wk-date', d); setVal('wk-time', t);
+  // Deep work
+  setVal('dw-date', d); setVal('dw-starttime', t);
 }
 
 function setVal(id, val) {
@@ -2930,6 +3030,49 @@ function saveWake() {
   addUnsyncedId(id); // mark as unsynced until next GitHub export
   clearDraft('rise');
   showToast('Rise time saved ✓');
+}
+
+
+/* ── SAVE: Deep work ───────────────────────────────────────────── */
+
+function setDWQuality(q) {
+  setVal('dw-quality', String(q));
+  document.querySelectorAll('#dw-quality-btns .chart-toggle').forEach((b, i) => {
+    b.classList.toggle('active', i + 1 === q);
+  });
+  saveDraft('deepwork');
+}
+
+function saveDeepWork() {
+  const startTime = getVal('dw-starttime');
+  const endTime   = getVal('dw-endtime');
+  if (!startTime) { showToast('Please enter a start time'); return; }
+  if (!endTime)   { showToast('Please enter an end time'); return; }
+
+  const quality = parseInt(getVal('dw-quality')) || null;
+  const dur = durationMins(startTime, endTime);
+
+  const id = nextId();
+  db.logs.push({
+    id,
+    type: 'deepwork',
+    date: getVal('dw-date') || today(),
+    startTime,
+    endTime,
+    durationMins: dur,
+    quality,
+    note: getVal('dw-note') || null
+  });
+
+  saveDB();
+  addUnsyncedId(id);
+  clearDraft('deepwork');
+  setVal('dw-endtime', '');
+  setVal('dw-note', '');
+  setVal('dw-quality', '');
+  document.querySelectorAll('#dw-quality-btns .chart-toggle').forEach(b => b.classList.remove('active'));
+  refreshDateTime('deepwork');
+  showToast('Work session saved ✓');
 }
 
 
@@ -3370,7 +3513,7 @@ function openEntry(id, highlightExercise) {
   currentEditId = id;
   currentHighlightExercise = highlightExercise || '';
 
-  const titles = { meal:'Meal', weight:'Weight', gym:'Gym', cardio:'Cardio', rise:'Rise' };
+  const titles = { meal:'Meal', weight:'Weight', gym:'Gym', cardio:'Cardio', rise:'Rise', deepwork:'Work session' };
   document.getElementById('sheet-title').textContent = titles[entry.type] || 'Entry';
   document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
 
@@ -3474,6 +3617,18 @@ function buildViewBody(e) {
 
   if (e.type === 'rise') {
     return `<div class="card">${row('Date', e.date)}${row('Rise time', e.time)}</div>`;
+  }
+
+  if (e.type === 'deepwork') {
+    const dur = durationMins(e.startTime, e.endTime);
+    return `<div class="card">
+      ${row('Date', e.date)}
+      ${row('Start', e.startTime)}
+      ${row('End', e.endTime)}
+      ${row('Duration', dur > 0 ? fmtDuration(dur) : null)}
+      ${row('Focus quality', e.quality ? e.quality + ' / 5' : null)}
+      ${row('Note', e.note)}
+    </div>`;
   }
 
   if (e.type === 'meal') {
@@ -3586,6 +3741,24 @@ function buildEditForm(e) {
   if (e.type === 'rise') {
     return `<div class="card" style="margin-bottom:0.75rem;">` +
       row2(timeField('e-time', 'Rise time', e.time), dateField('e-date', e.date)) +
+      `</div>`;
+  }
+
+  if (e.type === 'deepwork') {
+    const qBtns = [1,2,3,4,5].map(q =>
+      `<button class="chart-toggle${e.quality === q ? ' active' : ''}" onclick="setEDWQuality(${q})">${q}</button>`
+    ).join('');
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      `<div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">` +
+        dateField('e-date', e.date) +
+        timeField('e-time', 'Start', e.startTime) +
+        timeField('e-endtime', 'End', e.endTime) +
+      `</div>` +
+      `<div class="field"><label style="font-size:14px;color:var(--muted);">Focus quality</label>` +
+        `<div style="display:flex;gap:8px;margin-top:4px;" id="e-dw-quality-btns">${qBtns}</div>` +
+        `<input type="hidden" id="e-dw-quality" value="${e.quality || ''}">` +
+      `</div>` +
+      textField('e-note', 'Note', e.note) +
       `</div>`;
   }
 
@@ -3808,6 +3981,13 @@ function buildSheetExercises(exercises) {
 
 /* ── Save edits back to db ─────────────────────────────────────── */
 
+function setEDWQuality(q) {
+  setVal('e-dw-quality', String(q));
+  document.querySelectorAll('#e-dw-quality-btns .chart-toggle').forEach((b, i) => {
+    b.classList.toggle('active', i + 1 === q);
+  });
+}
+
 function saveEdit() {
   const entry = db.logs.find(e => e.id === currentEditId);
   if (!entry) return;
@@ -3826,6 +4006,16 @@ function saveEdit() {
   else if (entry.type === 'rise') {
     entry.date = str('e-date') || entry.date;
     entry.time = str('e-time') || entry.time;
+  }
+
+  else if (entry.type === 'deepwork') {
+    entry.date      = str('e-date') || entry.date;
+    entry.startTime = str('e-time') || entry.startTime;
+    entry.endTime   = str('e-endtime') || entry.endTime;
+    entry.durationMins = durationMins(entry.startTime, entry.endTime);
+    const q = parseInt(document.getElementById('e-dw-quality')?.value);
+    entry.quality = isNaN(q) ? null : q;
+    entry.note    = str('e-note') || null;
   }
 
   else if (entry.type === 'meal') {
@@ -4069,6 +4259,7 @@ function renderCharts() {
   renderProteinChart();
   renderMuscleChart();
   renderActivityChart();
+  renderDeepWorkChart();
   renderWeightChart();
   renderRiseChart();
   applyChartVisibility();
@@ -5125,6 +5316,9 @@ function rollingMedian(filled, windowDays) {
 let activityChartInstance = null;
 let activityRange = '1w';
 
+let deepWorkChartInstance = null;
+let deepWorkRange = '1w';
+
 const ACTIVITY_COLOURS = {
   gym:   '#1a3a5c',   // dark blue
   cycle: '#2e86c1',   // medium blue
@@ -5188,6 +5382,139 @@ function setActivityRange(range) {
   const btn = document.getElementById('activity-range-' + range);
   if (btn) btn.classList.add('active');
   renderActivityChart();
+}
+
+function setDeepWorkRange(range) {
+  deepWorkRange = range;
+  ['1w','30d'].forEach(id => {
+    const el = document.getElementById('deepwork-range-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const btn = document.getElementById('deepwork-range-' + range);
+  if (btn) btn.classList.add('active');
+  renderDeepWorkChart();
+}
+
+function renderDeepWorkChart() {
+  const headerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">' +
+      '<div style="font-size:15px;font-weight:500">Work sessions</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:4px;margin-bottom:0.75rem;">' +
+      '<button class="chart-toggle active" id="deepwork-range-1w"  onclick="setDeepWorkRange(\'1w\')">This week</button>' +
+      '<button class="chart-toggle"        id="deepwork-range-30d" onclick="setDeepWorkRange(\'30d\')">30 days</button>' +
+    '</div>';
+
+  createChartCard('deepwork', headerHTML, 'chart-deepwork', 'chart-deepwork-empty', 'No work sessions logged');
+  const canvas = document.getElementById('chart-deepwork');
+  const empty  = document.getElementById('chart-deepwork-empty');
+  if (!canvas) return;
+
+  // Build date range
+  const tp = logicalToday().split('-').map(Number);
+  const todayDate = new Date(tp[0], tp[1]-1, tp[2]);
+  let startDate;
+  if (deepWorkRange === '1w') {
+    startDate = new Date(todayDate);
+    const dow = startDate.getDay();
+    startDate.setDate(startDate.getDate() - (dow === 0 ? 6 : dow - 1));
+  } else {
+    startDate = new Date(todayDate);
+    startDate.setDate(startDate.getDate() - 29);
+  }
+  const endDate = deepWorkRange === '1w'
+    ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 6)
+    : todayDate;
+
+  const labels = [];
+  const hours  = [];
+  const dayMap = {};
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const dateStr = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    labels.push(dateStr);
+    hours.push({ date: dateStr, mins: 0, sessions: [] });
+    dayMap[dateStr] = hours[hours.length - 1];
+  }
+
+  db.logs.forEach(e => {
+    if (e.type !== 'deepwork' || !dayMap[e.date]) return;
+    const dur = e.durationMins || durationMins(e.startTime, e.endTime);
+    dayMap[e.date].mins += dur;
+    dayMap[e.date].sessions.push(e);
+  });
+
+  const hasAny = hours.some(d => d.mins > 0);
+  if (!hasAny) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+
+  const styleEl = getComputedStyle(document.documentElement);
+  const accentColor = styleEl.getPropertyValue('--accent').trim();
+  const mutedColor  = styleEl.getPropertyValue('--muted').trim();
+  const borderColor = styleEl.getPropertyValue('--border').trim();
+
+  if (deepWorkChartInstance) { deepWorkChartInstance.destroy(); deepWorkChartInstance = null; }
+
+  deepWorkChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: labels.map(dateStr => {
+        const d = new Date(dateStr + 'T12:00:00');
+        if (deepWorkRange === '1w') return d.toLocaleDateString('en-GB', { weekday: 'short' });
+        const day = d.getDate(), dow = d.getDay();
+        if (day === 1) return '1 ' + d.toLocaleDateString('en-GB', { month: 'short' });
+        if (dow === 1) return String(day);
+        return '';
+      }),
+      datasets: [{
+        data: hours.map(d => d.mins > 0 ? parseFloat((d.mins / 60).toFixed(2)) : 0),
+        backgroundColor: accentColor + '99',
+        borderRadius: 2,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          title: () => [],
+          label: () => null,
+          afterBody: items => {
+            const i = items[0].dataIndex;
+            const day = hours[i];
+            const lines = [];
+            if (day.mins > 0) lines.push(fmtDuration(day.mins));
+            day.sessions.forEach(s => {
+              const q = s.quality ? ' (quality ' + s.quality + '/5)' : '';
+              const time = s.startTime && s.endTime ? ' ' + s.startTime + '–' + s.endTime : '';
+              lines.push(time + q);
+            });
+            return lines;
+          }
+        }}
+      },
+      scales: {
+        x: { stacked: false, grid: { color: 'transparent' },
+          ticks: { font: { size: 11 }, color: mutedColor, maxRotation: 0, autoSkip: false,
+            callback: function(value, index) {
+              const dateStr = labels[index];
+              const d = new Date(dateStr + 'T12:00:00');
+              if (deepWorkRange === '1w') return d.toLocaleDateString('en-GB', { weekday: 'short' });
+              const day = d.getDate(), dow = d.getDay();
+              if (day === 1) return '1 ' + d.toLocaleDateString('en-GB', { month: 'short' });
+              if (dow === 1) return String(day);
+              return '';
+            }
+          }
+        },
+        y: {
+          min: 0,
+          ticks: { font: { size: 11 }, color: mutedColor, callback: v => v > 0 ? v + 'h' : '0' },
+          grid: { color: borderColor }
+        }
+      }
+    }
+  });
 }
 
 function renderActivityChart() {
