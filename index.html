@@ -338,9 +338,8 @@
     /* ── Log type selector tabs ───────────────────────────────────── */
     .log-tabs {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: auto auto;
-      gap: 6px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
       margin-bottom: 1.25rem;
     }
 
@@ -349,19 +348,21 @@
     }
 
     .log-tab {
-      padding: 8px 14px;
+      padding: 7px 4px;
       border-radius: 99px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--muted);
       font-family: inherit;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
       -webkit-tap-highlight-color: transparent;
       text-align: center;
       width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
     }
     .log-tab.active {
       background: var(--accent);
@@ -568,8 +569,8 @@
         <button class="log-tab active" id="tab-gym" onclick="showLogForm('gym', this)">Gym<span class="draft-dot"></span></button>
         <button class="log-tab" id="tab-cardio" onclick="showLogForm('cardio', this)">Cardio<span class="draft-dot"></span></button>
         <button class="log-tab" id="tab-meal" onclick="showLogForm('meal', this)">Meal<span class="draft-dot"></span></button>
-        <button class="log-tab" style="grid-column:1/span 2;" id="tab-weight" onclick="showLogForm('weight', this)">Weight<span class="draft-dot"></span></button>
-        <button class="log-tab" style="grid-column:3/span 2;" id="tab-rise" onclick="showLogForm('rise', this)">Rise<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-weight" onclick="showLogForm('weight', this)">Weight<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-rise" onclick="showLogForm('rise', this)">Rise<span class="draft-dot"></span></button>
       </div>
 
       <!-- ── WEIGHT FORM ─────────────────────────────────────────── -->
