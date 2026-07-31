@@ -112,7 +112,16 @@
   },
   {
     "name": "Close-grip bench press",
-    "params": [],
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Barbell",
+          "Smith machine"
+        ]
+      }
+    ],
     "group": "Triceps",
     "active": true
   },
