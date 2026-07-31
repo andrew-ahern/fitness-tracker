@@ -160,7 +160,16 @@
   },
   {
     "name": "Chin-up",
-    "params": [],
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Standard",
+          "Half-neutral grip"
+        ]
+      }
+    ],
     "group": "Back",
     "active": true
   },
@@ -545,6 +554,22 @@
       }
     ],
     "group": "Legs",
+    "active": true
+  },
+  {
+    "name": "Front raise",
+    "params": [
+      {
+        "name": "variant",
+        "type": "select",
+        "options": [
+          "Dumbbell",
+          "Cable",
+          "Plate"
+        ]
+      }
+    ],
+    "group": "Delts",
     "active": true
   }
 ]

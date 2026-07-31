@@ -1,5 +1,398 @@
 [
   {
+    "name": "Steak (100g)",
+    "calories": 150,
+    "protein": 21,
+    "active": true,
+    "group": "Meat",
+    "comment": "estimate, raw"
+  },
+  {
+    "name": "Beef mince (5% fat) with taco powder (250g)",
+    "calories": 366,
+    "protein": 55,
+    "active": true,
+    "group": "Meat",
+    "comment": "Tesco beef (250g raw), Old El Paso powder, excluding oil."
+  },
+  {
+    "name": "Sainsbury's Cajun chicken breast (90g)",
+    "calories": 127,
+    "protein": 21,
+    "active": true,
+    "group": "Meat"
+  },
+  {
+    "name": "Tesco chicken skewers (x10)",
+    "calories": 260,
+    "protein": 36,
+    "active": true,
+    "group": "Meat",
+    "comment": "freezer"
+  },
+  {
+    "name": "Chicken breast (100g)",
+    "calories": 110,
+    "protein": 23,
+    "active": true,
+    "group": "Meat"
+  },
+  {
+    "name": "Basa fillet (plain, 125g)",
+    "calories": 100,
+    "protein": 20,
+    "active": true,
+    "group": "Fish",
+    "comment": "approx values"
+  },
+  {
+    "name": "Basa fillet (sweet chilli & lime, 125g)",
+    "calories": 140,
+    "protein": 21,
+    "active": true,
+    "group": "Fish"
+  },
+  {
+    "name": "Prawns, raw (100g)",
+    "calories": 80,
+    "protein": 17,
+    "active": true,
+    "group": "Fish"
+  },
+  {
+    "name": "Stamford Street Thai salmon fillet (130g)",
+    "calories": 193,
+    "protein": 18,
+    "active": true,
+    "group": "Fish",
+    "comment": "Sainsbury's Stamford Street; per fillet"
+  },
+  {
+    "name": "Smoked salmon (50g)",
+    "calories": 93,
+    "protein": 11.2,
+    "active": true,
+    "group": "Fish"
+  },
+  {
+    "name": "New England Seafood Wild Cod Fillet (110g)",
+    "calories": 84,
+    "protein": 20,
+    "active": true,
+    "group": "Fish",
+    "comment": "approx; 88g when cooked"
+  },
+  {
+    "name": "Egg (medium)",
+    "calories": 65,
+    "protein": 6,
+    "active": true,
+    "group": "Eggs",
+    "comment": "estimate"
+  },
+  {
+    "name": "Egg (large)",
+    "calories": 80,
+    "protein": 7.5,
+    "active": true,
+    "group": "Eggs",
+    "comment": "estimate"
+  },
+  {
+    "name": "Egg white (100g)",
+    "calories": 52,
+    "protein": 11,
+    "active": true,
+    "group": "Eggs"
+  },
+  {
+    "name": "Graham's (200g)",
+    "calories": 180,
+    "protein": 25,
+    "active": true,
+    "group": "Yoghurt"
+  },
+  {
+    "name": "Arla (200g)",
+    "calories": 142,
+    "protein": 20,
+    "active": true,
+    "group": "Yoghurt",
+    "comment": "Near-identical values for pouch vs. pot and for all flavours."
+  },
+  {
+    "name": "Fage 0% (100g)",
+    "calories": 54,
+    "protein": 10.3,
+    "active": true,
+    "group": "Yoghurt"
+  },
+  {
+    "name": "Arla Skyr Natural (100g)",
+    "calories": 61,
+    "protein": 10,
+    "active": true,
+    "group": "Yoghurt"
+  },
+  {
+    "name": "Nomadic power pot (190g)",
+    "calories": 266,
+    "protein": 20,
+    "active": true,
+    "group": "Yoghurt",
+    "comment": "approx for chocolate and caramel"
+  },
+  {
+    "name": "Muller & Myprotein mixers (140g)",
+    "calories": 133,
+    "protein": 15,
+    "active": true,
+    "group": "Yoghurt",
+    "comment": "average over variants"
+  },
+  {
+    "name": "Muller & Myprotein Crunch (180g)",
+    "calories": 220,
+    "protein": 20,
+    "active": true,
+    "group": "Yoghurt",
+    "comment": "approx for vanilla and strawberry"
+  },
+  {
+    "name": "Raspberries (100g)",
+    "calories": 34,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Strawberries (100g)",
+    "calories": 33,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Blueberries (100g)",
+    "calories": 45,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Blackberries (100g)",
+    "calories": 40,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Pomegranate seeds (100g)",
+    "calories": 61,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Apple (Pink Lady, large)",
+    "calories": 74,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Banana (100g)",
+    "calories": 90,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Passion fruit (100g)",
+    "calories": 97,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Mango (100g)",
+    "calories": 60,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
+    "name": "Broccoli (100g)",
+    "calories": 36,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Spinach (100g)",
+    "calories": 28,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Asparagus (100g)",
+    "calories": 29,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Cherry tomatoes (100g)",
+    "calories": 26,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "average across types"
+  },
+  {
+    "name": "Red pepper (100g)",
+    "calories": 27,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "standard bell"
+  },
+  {
+    "name": "Sweet pointed pepper (100g)",
+    "calories": 38,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "long sweet variety"
+  },
+  {
+    "name": "Aubergine (100g)",
+    "calories": 20,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Fennel (100g)",
+    "calories": 31,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Onion (100g)",
+    "calories": 40,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Radishes (100g)",
+    "calories": 15,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Potatoes (100g)",
+    "calories": 75,
+    "protein": 0,
+    "active": true,
+    "group": "Carbs",
+    "comment": "raw"
+  },
+  {
+    "name": "Tesco baby potatoes with herb butter (100g)",
+    "calories": 99,
+    "protein": 3,
+    "active": true,
+    "group": "Carbs"
+  },
+  {
+    "name": "Mashed potato (100g)",
+    "calories": 90,
+    "protein": 1,
+    "active": true,
+    "group": "Carbs",
+    "comment": "approx values, Tesco and Sainsbury's"
+  },
+  {
+    "name": "Veetee rice pot (140g)",
+    "calories": 202,
+    "protein": 4,
+    "active": true,
+    "group": "Carbs",
+    "comment": "rough average across basmati, jasmine, sticky rice variants"
+  },
+  {
+    "name": "Pasta, dry (100g)",
+    "calories": 355,
+    "protein": 13,
+    "active": true,
+    "group": "Carbs",
+    "comment": "standard durum wheat; consistent across Tesco, Sainsbury's, Barilla, De Cecco"
+  },
+  {
+    "name": "Warburtons Crumpet Thin",
+    "calories": 61,
+    "protein": 2,
+    "active": true,
+    "group": "Carbs",
+    "comment": "32g"
+  },
+  {
+    "name": "Warburtons Crumpet",
+    "calories": 97,
+    "protein": 3,
+    "active": true,
+    "group": "Carbs",
+    "comment": "55g"
+  },
+  {
+    "name": "Taco shell",
+    "calories": 66,
+    "protein": 0,
+    "active": true,
+    "group": "Carbs",
+    "comment": "per shell; Old El Paso, Tesco own brand similar"
+  },
+  {
+    "name": "Tesco Three Bean Chilli (300g)",
+    "calories": 157,
+    "protein": 7.2,
+    "active": true,
+    "group": "Soup"
+  },
+  {
+    "name": "Sainsbury's Spicy Tomato Lentil & Red Pepper (300g)",
+    "calories": 196,
+    "protein": 11.1,
+    "active": true,
+    "group": "Soup"
+  },
+  {
+    "name": "Olive oil (10ml)",
+    "calories": 80,
+    "protein": 0,
+    "active": true,
+    "group": "Fats"
+  },
+  {
+    "name": "Parmesan (10g)",
+    "calories": 40,
+    "protein": 3,
+    "active": true,
+    "group": "Fats"
+  },
+  {
+    "name": "Avocado (100g)",
+    "calories": 198,
+    "protein": 2,
+    "active": true,
+    "group": "Fats"
+  },
+  {
     "name": "Tesco Pastrami & Emmental",
     "calories": 426,
     "protein": 27.1,
@@ -49,21 +442,6 @@
     "group": "Sandwich"
   },
   {
-    "name": "Graham's (200g)",
-    "calories": 180,
-    "protein": 25,
-    "active": true,
-    "group": "Yoghurt"
-  },
-  {
-    "name": "Arla (200g)",
-    "calories": 142,
-    "protein": 20,
-    "active": true,
-    "group": "Yoghurt",
-    "comment": "Near-identical values for pouch vs. pot and for all flavours."
-  },
-  {
     "name": "Ufit (330ml)",
     "calories": 155,
     "protein": 25,
@@ -80,13 +458,6 @@
     "comment": "Averaged across Strawberry/Salted Caramel/Chocolate flavours (280-295 kcal)."
   },
   {
-    "name": "Emmi Caffe Latte (370ml)",
-    "calories": 210,
-    "protein": 28,
-    "active": true,
-    "group": "Protein drink"
-  },
-  {
     "name": "For Goodness Shakes (250ml)",
     "calories": 165,
     "protein": 27,
@@ -94,83 +465,55 @@
     "group": "Protein drink"
   },
   {
-    "name": "Beef mince (5% fat) with taco powder (250g)",
-    "calories": 366,
-    "protein": 55,
+    "name": "ON protein shake (500ml)",
+    "calories": 290,
+    "protein": 50,
     "active": true,
-    "group": "Meat",
-    "comment": "Tesco beef (250g raw), Old El Paso powder, excluding oil."
+    "group": "Protein drink",
+    "comment": "vanilla and strawberry; chocolate higher"
   },
   {
-    "name": "Sainsbury's Cajun chicken breast (90g)",
-    "calories": 127,
+    "name": "Jimmy's Myprotein Iced Coffee (380ml)",
+    "calories": 205,
     "protein": 21,
     "active": true,
-    "group": "Meat"
+    "group": "Protein drink"
   },
   {
-    "name": "Tesco chicken skewers (x10)",
-    "calories": 260,
-    "protein": 36,
+    "name": "Emmi Caffe Latte (370ml)",
+    "calories": 210,
+    "protein": 28,
     "active": true,
-    "group": "Meat",
-    "comment": "freezer"
+    "group": "Protein drink"
   },
   {
-    "name": "Steak (100g)",
-    "calories": 150,
-    "protein": 21,
+    "name": "PBN whey protein powder (30g)",
+    "calories": 118,
+    "protein": 23,
     "active": true,
-    "group": "Meat",
-    "comment": "estimate, raw"
+    "group": "Protein drink"
   },
   {
-    "name": "Egg (medium)",
-    "calories": 65,
-    "protein": 6,
+    "name": "Grenade bar (35g)",
+    "calories": 136,
+    "protein": 12,
     "active": true,
-    "group": "Eggs",
-    "comment": "estimate"
+    "group": "Bar",
+    "comment": "all flavours roughly the same"
   },
   {
-    "name": "Egg (large)",
-    "calories": 80,
-    "protein": 7.5,
+    "name": "Graze cocoa (30g)",
+    "calories": 116,
+    "protein": 1.9,
     "active": true,
-    "group": "Eggs",
-    "comment": "estimate"
+    "group": "Bar"
   },
   {
-    "name": "Egg white (medium)",
-    "calories": 17,
-    "protein": 4,
+    "name": "The Gym Kitchen green chicken curry",
+    "calories": 355,
+    "protein": 31,
     "active": true,
-    "group": "Eggs",
-    "comment": "estimate"
-  },
-  {
-    "name": "Egg white (large)",
-    "calories": 20,
-    "protein": 5,
-    "active": true,
-    "group": "Eggs",
-    "comment": "estimate"
-  },
-  {
-    "name": "Warburtons Crumpet Thin",
-    "calories": 61,
-    "protein": 2,
-    "active": true,
-    "group": "Carbs",
-    "comment": "32g"
-  },
-  {
-    "name": "Warburtons Crumpet",
-    "calories": 97,
-    "protein": 3,
-    "active": true,
-    "group": "Carbs",
-    "comment": "55g"
+    "group": "Ready-made"
   },
   {
     "name": "McDonald's chicken wrap (sweet chilli)",
@@ -189,257 +532,11 @@
     "comment": "crispy"
   },
   {
-    "name": "Apple (Pink Lady, large)",
-    "calories": 74,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Olive oil (10ml)",
-    "calories": 80,
-    "protein": 0,
-    "active": true,
-    "group": "Fats & oils"
-  },
-  {
     "name": "Cafe Nero bacon ciabatta",
     "calories": 382,
     "protein": 21,
     "active": true,
     "group": "Takeaway"
-  },
-  {
-    "name": "Basa fillet (sweet chilli & lime, 125g)",
-    "calories": 140,
-    "protein": 21,
-    "active": true,
-    "group": "Fish"
-  },
-  {
-    "name": "Veetee rice pot (140g)",
-    "calories": 202,
-    "protein": 4,
-    "active": true,
-    "group": "Carbs",
-    "comment": "rough average across basmati, jasmine, sticky rice variants"
-  },
-  {
-    "name": "Pasta, dry (100g)",
-    "calories": 355,
-    "protein": 13,
-    "active": true,
-    "group": "Carbs",
-    "comment": "standard durum wheat; consistent across Tesco, Sainsbury's, Barilla, De Cecco"
-  },
-  {
-    "name": "Muller & Myprotein mixers (140g)",
-    "calories": 133,
-    "protein": 15,
-    "active": true,
-    "group": "Yoghurt",
-    "comment": "average over variants"
-  },
-  {
-    "name": "Prawns, raw (100g)",
-    "calories": 80,
-    "protein": 17,
-    "active": true,
-    "group": "Fish"
-  },
-  {
-    "name": "Raspberries (100g)",
-    "calories": 34,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Strawberries (100g)",
-    "calories": 33,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Blueberries (100g)",
-    "calories": 45,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Mango (100g)",
-    "calories": 60,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Cherry tomatoes (100g)",
-    "calories": 26,
-    "protein": 0,
-    "active": true,
-    "group": "Veg",
-    "comment": "average across types"
-  },
-  {
-    "name": "Red pepper (100g)",
-    "calories": 27,
-    "protein": 0,
-    "active": true,
-    "group": "Veg",
-    "comment": "standard bell"
-  },
-  {
-    "name": "Sweet pointed pepper (100g)",
-    "calories": 38,
-    "protein": 0,
-    "active": true,
-    "group": "Veg",
-    "comment": "long sweet variety"
-  },
-  {
-    "name": "Broccoli (100g)",
-    "calories": 36,
-    "protein": 0,
-    "active": true,
-    "group": "Veg"
-  },
-  {
-    "name": "Potatoes (100g)",
-    "calories": 75,
-    "protein": 0,
-    "active": true,
-    "group": "Veg",
-    "comment": "raw"
-  },
-  {
-    "name": "Radishes (100g)",
-    "calories": 15,
-    "protein": 0,
-    "active": true,
-    "group": "Veg"
-  },
-  {
-    "name": "The Gym Kitchen green chicken curry",
-    "calories": 355,
-    "protein": 31,
-    "active": true,
-    "group": "Ready-made"
-  },
-  {
-    "name": "Taco shell",
-    "calories": 66,
-    "protein": 0,
-    "active": true,
-    "group": "Carbs",
-    "comment": "per shell; Old El Paso, Tesco own brand similar"
-  },
-  {
-    "name": "Basa fillet (plain, 125g)",
-    "calories": 100,
-    "protein": 20,
-    "active": true,
-    "group": "Fish",
-    "comment": "approx values"
-  },
-  {
-    "name": "Mashed potato (100g)",
-    "calories": 90,
-    "protein": 1,
-    "active": true,
-    "group": "Carbs",
-    "comment": "approx values, Tesco and Sainsbury's"
-  },
-  {
-    "name": "PBN whey protein powder (30g)",
-    "calories": 118,
-    "protein": 23,
-    "active": true,
-    "group": "Protein drink"
-  },
-  {
-    "name": "ON protein shake (500ml)",
-    "calories": 290,
-    "protein": 50,
-    "active": true,
-    "group": "Protein drink",
-    "comment": "vanilla and strawberry; chocolate higher"
-  },
-  {
-    "name": "Muller & Myprotein Crunch (180g)",
-    "calories": 220,
-    "protein": 20,
-    "active": true,
-    "group": "Yoghurt",
-    "comment": "approx for vanilla and strawberry"
-  },
-  {
-    "name": "Nomadic power pot (190g)",
-    "calories": 266,
-    "protein": 20,
-    "active": true,
-    "group": "Yoghurt",
-    "comment": "approx for chocolate and caramel"
-  },
-  {
-    "name": "New England Seafood Wild Cod Fillet (110g)",
-    "calories": 84,
-    "protein": 20,
-    "active": true,
-    "group": "Fish",
-    "comment": "approx; 88g when cooked"
-  },
-  {
-    "name": "Grenade bar (35g)",
-    "calories": 136,
-    "protein": 12,
-    "active": true,
-    "group": "Bar",
-    "comment": "all flavours roughly the same"
-  },
-  {
-    "name": "Jimmy's Myprotein Iced Coffee (380ml)",
-    "calories": 205,
-    "protein": 21,
-    "active": true,
-    "group": "Protein drink"
-  },
-  {
-    "name": "Fage Total 0% Fat (100g)",
-    "calories": 54,
-    "protein": 10.3,
-    "active": true,
-    "group": "Yoghurt"
-  },
-  {
-    "name": "Tesco Three Bean Chilli (300g)",
-    "calories": 157,
-    "protein": 7.2,
-    "active": true,
-    "group": "Soup"
-  },
-  {
-    "name": "Sainsbury's Spicy Tomato Lentil & Red Pepper (300g)",
-    "calories": 196,
-    "protein": 11.1,
-    "active": true,
-    "group": "Soup"
-  },
-  {
-    "name": "Smoked salmon (50g)",
-    "calories": 93,
-    "protein": 11.2,
-    "active": true,
-    "group": "Fish"
-  },
-  {
-    "name": "Graze cocoa (30g)",
-    "calories": 116,
-    "protein": 1.9,
-    "active": true,
-    "group": "Bar"
   },
   {
     "name": "Lucozade Sport (500ml)",
@@ -454,54 +551,5 @@
     "protein": 0,
     "active": true,
     "group": "Drinks"
-  },
-  {
-    "name": "Blackberries (100g)",
-    "calories": 40,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Chicken breast, raw (100g)",
-    "calories": 110,
-    "protein": 23,
-    "active": true,
-    "group": "Meat"
-  },
-  {
-    "name": "Pomegranate seeds (100g)",
-    "calories": 61,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Egg white (100g)",
-    "calories": 52,
-    "protein": 11,
-    "active": true,
-    "group": "Eggs"
-  },
-  {
-    "name": "Asparagus (100g)",
-    "calories": 29,
-    "protein": 0,
-    "active": true,
-    "group": "Veg"
-  },
-  {
-    "name": "Banana (100g)",
-    "calories": 90,
-    "protein": 0,
-    "active": true,
-    "group": "Fruit"
-  },
-  {
-    "name": "Parmesan (10g)",
-    "calories": 40,
-    "protein": 3,
-    "active": true,
-    "group": "Fats & oils"
   }
 ]

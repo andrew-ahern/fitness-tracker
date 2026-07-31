@@ -596,11 +596,21 @@
 
       <!-- ── MEAL FORM ───────────────────────────────────────────── -->
       <div id="form-meal" class="log-form">
+        <!-- Untracked day toggle -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem;">
+          <button id="untracked-toggle" onclick="toggleUntrackedDay()"
+            style="font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:inherit;cursor:pointer;">
+            Untracked day
+          </button>
+        </div>
         <!-- Date + time -->
         <div class="card" style="margin-bottom:0.75rem;">
-          <div class="field-row">
+          <div class="field-row" id="m-time-row">
             <div class="field"><label>Date</label><input type="date" id="m-date" class="field-date"></div>
             <div class="field"><label>Time</label><input type="time" id="m-time" class="field-time"></div>
+          </div>
+          <div id="m-date-only-row" style="display:none;" class="field">
+            <label>Date</label><input type="date" id="m-date-only" class="field-date" style="width:100%;">
           </div>
           <div class="field">
             <label>Note</label>
@@ -609,9 +619,9 @@
         </div>
         <!-- Meal items -->
         <div id="meal-items-container"></div>
-        <button class="add-exercise-btn" onclick="addMealItemBlock(null, true)">+ Add item</button>
+        <button id="m-add-item-btn" class="add-exercise-btn" onclick="addMealItemBlock(null, true)">+ Add item</button>
         <!-- Running totals -->
-        <div class="card" style="margin-top:0.75rem; margin-bottom:0.75rem;">
+        <div id="m-totals-card" class="card" style="margin-top:0.75rem; margin-bottom:0.75rem;">
           <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">Totals</div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; text-align:center;">
             <div><div style="font-size:11px;color:var(--muted)">kcal</div><div id="m-total-cal" style="font-size:16px;font-weight:500">—</div></div>
@@ -2150,17 +2160,21 @@ function renderHistoryEntry(e, exFilter) {
 
   let detail = '';
   if (e.type === 'meal') {
-    const t = e.totals || {};
-    const parts = [];
-    const itemNames = (e.items || []).map(i => {
-      if (!i.name) return null;
-      const qty = i.quantity && i.quantity !== 1 ? ' ×' + i.quantity : '';
-      return i.name + qty;
-    }).filter(Boolean).join(', ');
-    if (itemNames)  parts.push(itemNames);
-    if (t.calories) parts.push(t.calories + ' kcal');
-    if (t.protein)  parts.push('P ' + t.protein + 'g');
-    detail = parts.join(' · ') || '—';
+    if (e.untracked) {
+      detail = 'Untracked day' + (e.note ? ' · ' + e.note : '');
+    } else {
+      const t = e.totals || {};
+      const parts = [];
+      const itemNames = (e.items || []).map(i => {
+        if (!i.name) return null;
+        const qty = i.quantity && i.quantity !== 1 ? ' ×' + i.quantity : '';
+        return i.name + qty;
+      }).filter(Boolean).join(', ');
+      if (itemNames)  parts.push(itemNames);
+      if (t.calories) parts.push(t.calories + ' kcal');
+      if (t.protein)  parts.push('P ' + t.protein + 'g');
+      detail = parts.join(' · ') || '—';
+    }
   } else if (e.type === 'weight') {
     detail = e.value + ' kg';
   } else if (e.type === 'gym') {
@@ -2935,7 +2949,60 @@ function resetMealForm() {
   const mn = document.getElementById('m-note'); if (mn) { mn.value = ''; mn.style.height = ''; }
 }
 
+let untrackedMode = false;
+
+function toggleUntrackedDay() {
+  untrackedMode = !untrackedMode;
+  const btn = document.getElementById('untracked-toggle');
+  const timeRow = document.getElementById('m-time-row');
+  const dateOnlyRow = document.getElementById('m-date-only-row');
+  const itemsContainer = document.getElementById('meal-items-container');
+  const addBtn = document.getElementById('m-add-item-btn');
+  const totalsCard = document.getElementById('m-totals-card');
+
+  if (untrackedMode) {
+    btn.style.background = 'var(--accent)';
+    btn.style.color = 'white';
+    btn.style.borderColor = 'var(--accent)';
+    timeRow.style.display = 'none';
+    dateOnlyRow.style.display = '';
+    document.getElementById('m-date-only').value = document.getElementById('m-date').value;
+    itemsContainer.style.display = 'none';
+    addBtn.style.display = 'none';
+    totalsCard.style.display = 'none';
+  } else {
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    timeRow.style.display = '';
+    dateOnlyRow.style.display = 'none';
+    itemsContainer.style.display = '';
+    addBtn.style.display = '';
+    totalsCard.style.display = '';
+  }
+}
+
 function saveMeal() {
+  // Untracked day — just a date + note, no items
+  if (untrackedMode) {
+    const id = nextId();
+    db.logs.push({
+      id, type: 'meal',
+      date: getVal('m-date-only') || today(),
+      time: null,
+      note: getVal('m-note') || null,
+      untracked: true,
+      items: [],
+      totals: { calories: null, protein: null }
+    });
+    saveDB();
+    addUnsyncedId(id);
+    clearDraft('meal');
+    showToast('Untracked day saved ✓');
+    resetMealForm();
+    toggleUntrackedDay(); // reset to normal mode
+    return;
+  }
   const items = [];
   document.querySelectorAll('#meal-items-container .exercise-block').forEach(block => {
     const num = cls => { const v = parseFloat(block.querySelector(cls)?.value); return isNaN(v) ? null : v; };
@@ -6503,7 +6570,7 @@ function renderMuscleChart() {
 
   if (muscleChartInstance) { muscleChartInstance.destroy(); muscleChartInstance = null; }
 
-  // Per-bar target marker lines (no numeric label)
+  // Per-bar target marker lines + checkmark when target met
   const muscleTargetPlugin = {
     id: '_muscleChartTargets',
     afterDatasetsDraw(chart) {
@@ -6513,16 +6580,29 @@ function renderMuscleChart() {
       MUSCLE_DEFAULT_GROUPS.forEach((g, i) => {
         const target = muscleTargets[g];
         if (target == null || target <= 0) return;
+        const actual = data[i];
         const y = scales.y.getPixelForValue(target);
-        if (y < chartArea.top || y > chartArea.bottom) return;
         const center = chartArea.left + (i + 0.5) * barWidth;
         const x1 = center - barWidth * 0.35;
         const x2 = center + barWidth * 0.35;
-        c.save();
-        c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([4,3]);
-        c.beginPath(); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
-        c.setLineDash([]);
-        c.restore();
+        // target line
+        if (y >= chartArea.top && y <= chartArea.bottom) {
+          c.save();
+          c.strokeStyle = '#e76f51'; c.lineWidth = 2; c.setLineDash([4,3]);
+          c.beginPath(); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
+          c.setLineDash([]);
+          c.restore();
+        }
+        // checkmark above bar when target met
+        if (actual >= target) {
+          const barTop = scales.y.getPixelForValue(actual);
+          c.save();
+          c.fillStyle = '#2a9d5c';
+          c.font = 'bold 13px ' + (getComputedStyle(document.body).fontFamily || 'sans-serif');
+          c.textAlign = 'center';
+          c.fillText('✓', center, barTop - 4);
+          c.restore();
+        }
       });
     }
   };
