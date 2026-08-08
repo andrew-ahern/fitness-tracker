@@ -565,6 +565,6 @@
     "protein": 50,
     "active": true,
     "group": "Eggs",
-    "comment": "Egg white 100g (52 kcal, 11g), Arla Skyr Natural 110g (67 kcal, 11g), PBN whey 37g (145.5 kcal, 28.4g), Flour 10g (36 kcal, 0g), Sugar 5g (20 kcal, 0g), Oil (30 kcal, 0g)"
+    "displayed_comment": "Egg white 100g (52 kcal, 11g), Arla Skyr Natural 110g (67 kcal, 11g), PBN whey 37g (145.5 kcal, 28.4g), Flour 10g (36 kcal, 0g), Sugar 5g (20 kcal, 0g), Oil (30 kcal, 0g)"
   }
 ]

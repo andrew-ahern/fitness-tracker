@@ -2832,7 +2832,8 @@ function addMealItemBlock(itemData, interactive) {
       '<div><input type="number" class="mi-cal field-number" min="0" inputmode="numeric" style="text-align:center;"></div>' +
       '<div><input type="number" class="mi-pro field-number" min="0" inputmode="decimal" style="text-align:center;"></div>' +
       '<div><input type="text" class="mi-note field-text" autocapitalize="off"></div>' +
-    '</div>';
+    '</div>' +
+    '<div class="mi-displayed-comment" style="display:none;font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.4;"></div>';
 
   const selInput  = block.querySelector('.mi-select');
   const nameInput = block.querySelector('.mi-name');
@@ -2863,6 +2864,7 @@ function addMealItemBlock(itemData, interactive) {
   // Select change: auto-fill macros from library item
   selInput.addEventListener('change', () => {
     const val = selInput.value;
+    const commentEl = block.querySelector('.mi-displayed-comment');
     if (val) {
       const match = (db.mealItems || []).find(i => i.name === val);
       if (match) {
@@ -2870,9 +2872,18 @@ function addMealItemBlock(itemData, interactive) {
         block.querySelector('.mi-cal').value = match.calories != null ? parseFloat((match.calories * qty).toFixed(2)) : '';
         block.querySelector('.mi-pro').value = match.protein  != null ? parseFloat((match.protein  * qty).toFixed(2)) : '';
         block._unitMacros = { cal: match.calories, pro: match.protein };
+        if (match.displayed_comment) {
+          commentEl.textContent = match.displayed_comment;
+          commentEl.style.display = '';
+        } else {
+          commentEl.textContent = '';
+          commentEl.style.display = 'none';
+        }
       }
     } else {
       block._unitMacros = null;
+      commentEl.textContent = '';
+      commentEl.style.display = 'none';
     }
     updateMealTotals(); saveDraft('meal');
   });
@@ -2893,6 +2904,11 @@ function addMealItemBlock(itemData, interactive) {
     if (libMatch) {
       setMealItemMode(block, false);
       selInput.value = itemData.name;
+      if (libMatch.displayed_comment) {
+        const commentEl = block.querySelector('.mi-displayed-comment');
+        commentEl.textContent = libMatch.displayed_comment;
+        commentEl.style.display = '';
+      }
     } else if (itemData.name) {
       setMealItemMode(block, true);
       nameInput.value = itemData.name;
