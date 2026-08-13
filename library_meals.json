@@ -106,6 +106,14 @@
     "group": "Eggs"
   },
   {
+    "name": "Protein pancakes (recipe)",
+    "calories": 351,
+    "protein": 50,
+    "active": true,
+    "group": "Eggs",
+    "displayed_comment": "Egg white 100g (52 kcal, 11g), Arla Skyr Natural 110g (67 kcal, 11g), PBN whey 37g (145.5 kcal, 28.4g), Flour 10g (36 kcal, 0g), Sugar 5g (20 kcal, 0g), Oil (30 kcal, 0g)"
+  },
+  {
     "name": "Graham's (200g)",
     "calories": 180,
     "protein": 25,
@@ -159,6 +167,28 @@
     "comment": "approx for vanilla and strawberry"
   },
   {
+    "name": "Fage 0% strawberry (150g)",
+    "calories": 100,
+    "protein": 12.45,
+    "active": true,
+    "group": "Yoghurt"
+  },
+  {
+    "name": "Muller Myprotein mousse (200g)",
+    "calories": 168,
+    "protein": 20,
+    "active": true,
+    "group": "Yoghurt",
+    "comment": "approx for both flavours; Tesco/Muller UK label"
+  },
+  {
+    "name": "Graham's cottage cheese fat-free (100g)",
+    "calories": 90,
+    "protein": 15,
+    "active": true,
+    "group": "Yoghurt"
+  },
+  {
     "name": "Raspberries (100g)",
     "calories": 34,
     "protein": 0,
@@ -187,8 +217,8 @@
     "group": "Fruit"
   },
   {
-    "name": "Pomegranate seeds (100g)",
-    "calories": 61,
+    "name": "Cherries (100g)",
+    "calories": 52,
     "protein": 0,
     "active": true,
     "group": "Fruit"
@@ -208,6 +238,13 @@
     "group": "Fruit"
   },
   {
+    "name": "Mango (100g)",
+    "calories": 60,
+    "protein": 0,
+    "active": true,
+    "group": "Fruit"
+  },
+  {
     "name": "Passion fruit (100g)",
     "calories": 97,
     "protein": 0,
@@ -215,8 +252,8 @@
     "group": "Fruit"
   },
   {
-    "name": "Mango (100g)",
-    "calories": 60,
+    "name": "Pomegranate seeds (100g)",
+    "calories": 61,
     "protein": 0,
     "active": true,
     "group": "Fruit"
@@ -230,7 +267,7 @@
   },
   {
     "name": "Spinach (100g)",
-    "calories": 28,
+    "calories": 25,
     "protein": 0,
     "active": true,
     "group": "Veg"
@@ -274,6 +311,14 @@
     "group": "Veg"
   },
   {
+    "name": "Mushrooms (100g)",
+    "calories": 25,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "most types 15-35 kcal/100g"
+  },
+  {
     "name": "Fennel (100g)",
     "calories": 31,
     "protein": 0,
@@ -281,8 +326,30 @@
     "group": "Veg"
   },
   {
+    "name": "Baby corn (100g)",
+    "calories": 35,
+    "protein": 0,
+    "active": true,
+    "group": "Veg",
+    "comment": "values vary by product: 28-47 kcal/100g"
+  },
+  {
+    "name": "Sugar snap peas (100g)",
+    "calories": 38,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
     "name": "Onion (100g)",
     "calories": 40,
+    "protein": 0,
+    "active": true,
+    "group": "Veg"
+  },
+  {
+    "name": "Spring onion (100g)",
+    "calories": 28,
     "protein": 0,
     "active": true,
     "group": "Veg"
@@ -551,20 +618,5 @@
     "protein": 0,
     "active": true,
     "group": "Drinks"
-  },
-  {
-    "name": "Fage 0% strawberry (150g)",
-    "calories": 100,
-    "protein": 12.45,
-    "active": true,
-    "group": "Yoghurt"
-  },
-  {
-    "name": "Protein pancakes (recipe)",
-    "calories": 351,
-    "protein": 50,
-    "active": true,
-    "group": "Eggs",
-    "displayed_comment": "Egg white 100g (52 kcal, 11g), Arla Skyr Natural 110g (67 kcal, 11g), PBN whey 37g (145.5 kcal, 28.4g), Flour 10g (36 kcal, 0g), Sugar 5g (20 kcal, 0g), Oil (30 kcal, 0g)"
   }
 ]
