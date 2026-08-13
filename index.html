@@ -2117,9 +2117,6 @@ function renderHistoryEntry(e, exFilter) {
     detail = parts.join(' · ');
   } else if (e.type === 'rise') {
     detail = e.time;
-    if (e.startTime)    parts.push(e.startTime);
-    if (e.quality)      parts.push('Quality ' + e.quality + '/5');
-    detail = parts.join(' · ');
   }
 
   return `
