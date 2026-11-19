@@ -189,6 +189,21 @@
     "group": "Yoghurt"
   },
   {
+    "name": "Isey skyr (450g)",
+    "calories": 243,
+    "protein": 40.5,
+    "active": true,
+    "group": "Yoghurt"
+  },
+  {
+    "name": "M&S yoghurt (200g)",
+    "calories": 148,
+    "protein": 22,
+    "active": true,
+    "group": "Yoghurt",
+    "comment": "passion fruit 144, strawberry 152"
+  },
+  {
     "name": "Raspberries (100g)",
     "calories": 34,
     "protein": 0,
@@ -572,6 +587,20 @@
     "name": "Graze cocoa (30g)",
     "calories": 116,
     "protein": 1.9,
+    "active": true,
+    "group": "Bar"
+  },
+  {
+    "name": "Barebells bar (40g)",
+    "calories": 147,
+    "protein": 12,
+    "active": true,
+    "group": "Bar"
+  },
+  {
+    "name": "Barebells bar (55g)",
+    "calories": 203,
+    "protein": 16,
     "active": true,
     "group": "Bar"
   },
