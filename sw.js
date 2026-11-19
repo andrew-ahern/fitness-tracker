@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ft-v296';
+const CACHE_NAME = 'ft-v297';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -7,7 +7,10 @@ const APP_SHELL = [
   './library_exercises.json',
   './library_cardio.json',
   './library_meals.json',
-  './library_config.json'
+  './library_config.json',
+  './vendor/chart.umd.min.js',
+  './vendor/jszip.min.js',
+  './vendor/chartjs-adapter-date-fns.bundle.min.js'
 ];
 
 self.addEventListener('install', event => {

@@ -1129,9 +1129,9 @@
 <div id="toast"></div>
 
 <!-- ── JSZip library (for bundling CSVs into a ZIP) ──────────────── -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
 
 <script>
 /* ════════════════════════════════════════════════════════════════════
@@ -6360,6 +6360,10 @@ function renderMuscleChart() {
     });
   }
   if ('serviceWorker' in navigator) {
+    // Reload at most once per page load (update flow and version check can both trigger it)
+    let reloading = false;
+    const reloadOnce = () => { if (reloading) return; reloading = true; window.location.reload(); };
+    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('./sw.js').then(reg => {
       // When a new SW is found, skip waiting immediately
       reg.addEventListener('updatefound', () => {
@@ -6371,8 +6375,9 @@ function renderMuscleChart() {
         });
       });
       // Reload when the new SW takes control
+      // (skip on first install — nothing stale to replace)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
+        if (hadController) reloadOnce();
       });
     });
 
@@ -6389,7 +6394,7 @@ function renderMuscleChart() {
             // Version changed — clear caches, store new version, hard reload
             localStorage.setItem('sw_version', latest);
             caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
-              .then(() => window.location.reload(true));
+              .then(reloadOnce);
           } else {
             localStorage.setItem('sw_version', latest);
           }
