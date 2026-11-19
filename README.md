@@ -10,6 +10,8 @@ Personal diet and fitness tracker. Works on phone and desktop.
 2. In `sw.js`, increase `CACHE_NAME` by one (e.g. `ft-v297` → `ft-v298`). If you don't, devices keep the old version.
 3. Open the app twice.
 
+**Check the version (desktop Chrome):** open the app → press `Cmd+Option+J` (Mac) or `Ctrl+Shift+J` (Windows) to open the Console. Look for `Fitness Tracker — ft-v…`. If it isn't there, reload the page.
+
 ## Files
 
 | File | Contents |
