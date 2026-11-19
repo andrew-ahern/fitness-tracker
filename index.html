@@ -580,6 +580,7 @@
         <button class="log-tab" id="tab-meal" onclick="showLogForm('meal', this)">Meal<span class="draft-dot"></span></button>
         <button class="log-tab" id="tab-weight" onclick="showLogForm('weight', this)">Weight<span class="draft-dot"></span></button>
         <button class="log-tab" id="tab-rise" onclick="showLogForm('rise', this)">Rise<span class="draft-dot"></span></button>
+        <button class="log-tab" id="tab-note" onclick="showLogForm('note', this)">Note<span class="draft-dot"></span></button>
       </div>
 
       <!-- ── WEIGHT FORM ─────────────────────────────────────────── -->
@@ -748,6 +749,28 @@
         </div>
       </div>
 
+      <!-- ── NOTE FORM ───────────────────────────────────────────── -->
+      <div id="form-note" class="log-form">
+        <div class="card">
+          <div class="field-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="n-date" class="field-date">
+            </div>
+            <div class="field">
+              <label>Time</label>
+              <input type="time" id="n-time" class="field-time">
+            </div>
+          </div>
+          <div class="field">
+            <label>Note</label>
+            <textarea id="n-text" class="field-textarea" style="height:96px;" placeholder="e.g. On holiday, not tracking this weekend"></textarea>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="saveNote()">Save</button>
+          <div id="draft-status-note" style="font-size:12px; color:var(--muted); text-align:center; margin-top:0.5rem; min-height:16px;"><span id="draft-text-note"></span><button id="draft-clear-note" onclick="clearDraftAndForm('note')" style="display:none; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; margin-left:8px; text-decoration:underline; font-family:inherit;">Clear</button></div>
+        </div>
+      </div>
+
     </div><!-- /#screen-log -->
 
     <!-- ══ HISTORY SCREEN ══════════════════════════════════════════ -->
@@ -761,6 +784,7 @@
           <option value="meal">Meal</option>
           <option value="weight">Weight</option>
           <option value="rise">Rise</option>
+          <option value="note">Note</option>
         </select>
         <select id="exercise-filter" onchange="renderHistory()" style="display:none; font-size:14px; padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; margin-top:6px;">
           <option value="">All exercises</option>
@@ -874,6 +898,12 @@
         <div class="card-row">
           <div style="font-weight:500">Rise</div>
           <div id="toggle-show-rise" onclick="toggleFormVisibility('rise', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('rise')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
+            <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div style="font-weight:500">Note</div>
+          <div id="toggle-show-note" onclick="toggleFormVisibility('note', !!(db.settings.hiddenForms && db.settings.hiddenForms.includes('note')) )" style="width:44px;height:26px;border-radius:13px;background:var(--border);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;">
             <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>
           </div>
         </div>
@@ -1153,6 +1183,7 @@
               hrAvg?, hrMax?, elevationGain?, note? }
 
    rise:    { date, time }
+   note:    { date, time, text }
    ════════════════════════════════════════════════════════════════════ */
 
 const STORAGE_KEY = 'fitlog_v1';
@@ -1456,6 +1487,7 @@ function exportData() {
      4. gym.csv              — gym entries flattened to one row per set
      5. cardio.csv          — all cardio entries
      6. rise.csv             — all rise entries
+     7. notes.csv            — all note entries
 
      The ZIP filename includes a timestamp so each export is distinct. */
 
@@ -1532,6 +1564,13 @@ function exportData() {
     .filter(e => e.type === 'rise')
     .map(e => [e.id, e.date, e.time]);
   folder.file('rise.csv', toCSV(riseHeaders, riseRows));
+
+  // 7. Notes CSV
+  const noteHeaders = ['id','date','time','text'];
+  const noteRows = db.logs
+    .filter(e => e.type === 'note')
+    .map(e => [e.id, e.date, e.time ?? '', e.text ?? '']);
+  folder.file('notes.csv', toCSV(noteHeaders, noteRows));
 
   // Generate and download
   zip.generateAsync({ type: 'blob' }).then(blob => {
@@ -1651,7 +1690,7 @@ function toggleDarkMode() {
 
 function applyFormVisibility() {
   const hidden = db.settings.hiddenForms || [];
-  ['gym','cardio','meal','weight','rise'].forEach(type => {
+  ['gym','cardio','meal','weight','rise','note'].forEach(type => {
     const tab = document.getElementById('tab-' + type);
     if (tab) tab.style.display = hidden.includes(type) ? 'none' : '';
     const tog = document.getElementById('toggle-show-' + type);
@@ -2085,7 +2124,7 @@ function renderHistory() {
 function renderHistoryEntry(e, exFilter) {
   /* Returns an HTML string for one history entry row. */
   const typeLabel = {
-    meal: 'Meal', weight: 'Weight', gym: 'Gym', cardio: 'Cardio', rise: 'Rise'
+    meal: 'Meal', weight: 'Weight', gym: 'Gym', cardio: 'Cardio', rise: 'Rise', note: 'Note'
   }[e.type] || '•';
 
   // Date + time line (always shown at top)
@@ -2123,6 +2162,8 @@ function renderHistoryEntry(e, exFilter) {
     detail = parts.join(' · ');
   } else if (e.type === 'rise') {
     detail = e.time;
+  } else if (e.type === 'note') {
+    detail = escapeHTML(e.text || '');
   }
 
   return `
@@ -2243,6 +2284,10 @@ function saveDraft(type) {
   } else if (type === 'rise') {
     d.time = getVal('wk-time');
     d.date = getVal('wk-date');
+  } else if (type === 'note') {
+    d.date = getVal('n-date');
+    d.time = getVal('n-time');
+    d.text = getVal('n-text');
   } else if (type === 'meal') {
     d.date  = getVal('m-date');
     d.time  = getVal('m-time');
@@ -2312,7 +2357,7 @@ function saveDraft(type) {
 
 function updateDraftDots() {
   /* Show/hide the draft indicator dot on each log tab. */
-  ['meal', 'gym', 'cardio', 'weight', 'rise'].forEach(type => {
+  ['meal', 'gym', 'cardio', 'weight', 'rise', 'note'].forEach(type => {
     const tab = document.getElementById('tab-' + type);
     if (!tab) return;
     const hasDraft = !!(db.drafts && db.drafts[type]);
@@ -2348,6 +2393,10 @@ function restoreDraft(type) {
   } else if (type === 'rise') {
     setVal('wk-time', d.time);
     setVal('wk-date', d.date);
+  } else if (type === 'note') {
+    setVal('n-date', d.date);
+    setVal('n-time', d.time);
+    setVal('n-text', d.text || '');
   } else if (type === 'meal') {
     setVal('m-date', d.date); setVal('m-time', d.time); setVal('m-note', d.note || '');
     document.getElementById('meal-items-container').innerHTML = '';
@@ -2405,6 +2454,9 @@ function clearDraftAndForm(type) {
     refreshDateTime('cardio');
   } else if (type === 'rise') {
     refreshDateTime('rise');
+  } else if (type === 'note') {
+    setVal('n-text', '');
+    refreshDateTime('note');
   }
 }
 
@@ -2420,7 +2472,10 @@ function clearDraft(type) {
   showDraftStatus(type);
 }
 
+let formDraftsWired = false;
 function wireFormDrafts() {
+  if (formDraftsWired) return; // renderAll() can run several times; avoid duplicate listeners
+  formDraftsWired = true;
   /* Attach input listeners to all forms so every change saves a draft.
      Weight: drafts on any input.
      Wake: only drafts if the time differs from the current default
@@ -2430,6 +2485,7 @@ function wireFormDrafts() {
     gym:      'form-gym',
     cardio:   'form-cardio',
     weight:   'form-weight',
+    note:     'form-note',
   };
   Object.entries(formIds).forEach(([type, formId]) => {
     const form = document.getElementById(formId);
@@ -2513,6 +2569,7 @@ function renderAll() {
   restoreDraft('meal');
   restoreDraft('gym');
   restoreDraft('cardio');
+  restoreDraft('note');
   updateDraftDots();
   applyFormVisibility();
 }
@@ -2571,6 +2628,7 @@ function refreshDateTime(formName) {
     gym: [['wo-date', d], ['wo-starttime', t]],
     cardio:  [['c-date', d],  ['c-starttime', t]],
     rise:   [['wk-date', d], ['wk-time', t]],
+    note:   [['n-date', d],  ['n-time', t]],
   };
   (map[formName] || []).forEach(([id, val]) => setVal(id, val));
 }
@@ -2968,6 +3026,35 @@ function saveWake() {
   addUnsyncedId(id); // mark as unsynced until next GitHub export
   clearDraft('rise');
   showToast('Rise time saved ✓');
+}
+
+
+/* ── SAVE: Note ────────────────────────────────────────────────── */
+
+function saveNote() {
+  const text = getVal('n-text').trim();
+  if (!text) { showToast('Please enter a note'); return; }
+
+  const id = nextId();
+  db.logs.push({
+    id,
+    type: 'note',
+    date: getVal('n-date') || today(),
+    time: getVal('n-time') || nowTime(),
+    text
+  });
+
+  saveDB();
+  addUnsyncedId(id); // mark as unsynced until next GitHub export
+  clearDraft('note');
+  setVal('n-text', '');
+  refreshDateTime('note');
+  renderHistory();
+  showToast('Note saved ✓');
+}
+
+function escapeHTML(str) {
+  return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
 
@@ -3410,7 +3497,7 @@ function openEntry(id, highlightExercise) {
   currentEditId = id;
   currentHighlightExercise = highlightExercise || '';
 
-  const titles = { meal:'Meal', weight:'Weight', gym:'Gym', cardio:'Cardio', rise:'Rise' };
+  const titles = { meal:'Meal', weight:'Weight', gym:'Gym', cardio:'Cardio', rise:'Rise', note:'Note' };
   document.getElementById('sheet-title').textContent = titles[entry.type] || 'Entry';
   document.getElementById('sheet-body').innerHTML = buildViewBody(entry);
 
@@ -3514,6 +3601,11 @@ function buildViewBody(e) {
 
   if (e.type === 'rise') {
     return `<div class="card">${row('Date', e.date)}${row('Rise time', e.time)}</div>`;
+  }
+
+  if (e.type === 'note') {
+    return `<div class="card">${row('Date', e.date)}${row('Time', e.time)}` +
+      `<div style="padding:10px 0; font-size:15px; white-space:pre-wrap; overflow-wrap:anywhere;">${escapeHTML(e.text || '')}</div></div>`;
   }
 
   if (e.type === 'meal') {
@@ -3626,6 +3718,13 @@ function buildEditForm(e) {
   if (e.type === 'rise') {
     return `<div class="card" style="margin-bottom:0.75rem;">` +
       row2(timeField('e-time', 'Rise time', e.time), dateField('e-date', e.date)) +
+      `</div>`;
+  }
+
+  if (e.type === 'note') {
+    return `<div class="card" style="margin-bottom:0.75rem;">` +
+      row2(dateField('e-date', e.date), timeField('e-time', 'Time', e.time)) +
+      `<div class="field"><label>Note</label><textarea class="field-textarea" id="e-text" style="height:120px;">${escapeHTML(e.text || '')}</textarea></div>` +
       `</div>`;
   }
 
@@ -3879,6 +3978,14 @@ function saveEdit() {
   }
 
   else if (entry.type === 'rise') {
+    entry.date = str('e-date') || entry.date;
+    entry.time = str('e-time') || entry.time;
+  }
+
+  else if (entry.type === 'note') {
+    const text = str('e-text');
+    if (!text) { showToast('Please enter a note'); return; }
+    entry.text = text;
     entry.date = str('e-date') || entry.date;
     entry.time = str('e-time') || entry.time;
   }
