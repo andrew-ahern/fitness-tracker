@@ -389,7 +389,7 @@
       max-width: 100%;
     }
     .field-date::-webkit-date-and-time-value,
-    .field-time::-webkit-date-and-time-value { text-align: left; margin: 0; }
+    .field-time::-webkit-date-and-time-value { text-align: left; margin: 0; white-space: nowrap; }
 
     /* ── Checkbox row ─────────────────────────────────────────────── */
     .field-check {
@@ -585,7 +585,7 @@
       <!-- ── WEIGHT FORM ─────────────────────────────────────────── -->
       <div id="form-weight" class="log-form">
         <div class="card">
-          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="field-row" style="grid-template-columns:1fr 1.5fr 1fr;">
             <div class="field">
               <label>Weight (kg)</label>
               <input type="number" id="w-value" class="field-number" step="0.1" min="0" inputmode="decimal">
@@ -635,7 +635,7 @@
             <!-- ── WORKOUT FORM ────────────────────────────────────────── -->
       <div id="form-gym" class="log-form active">
         <div class="card" style="margin-bottom:0.75rem;">
-          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="field-row" style="grid-template-columns:1.5fr 1fr 1fr;">
             <div class="field">
               <label>Date</label>
               <input type="date" id="wo-date" class="field-date">
@@ -681,7 +681,7 @@
             <select id="c-type" class="field-select"></select>
             <input type="text" id="c-type-manual" class="field-text" placeholder="Activity name" style="display:none;">
           </div>
-          <div class="field-row" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="field-row" style="grid-template-columns:1.5fr 1fr 1fr;">
             <div class="field">
               <label>Date</label>
               <input type="date" id="c-date" class="field-date">
@@ -2436,6 +2436,14 @@ function wireFormDrafts() {
     if (!form) return;
     form.addEventListener('input',  () => saveDraft(type));
     form.addEventListener('change', () => saveDraft(type));
+    // Buttons that change the form structure (add/remove exercise, set, item)
+    // fire no input event — save after their handler runs. Skip Save/Clear,
+    // which clear the draft themselves.
+    form.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn || btn.classList.contains('btn-primary') || (btn.id || '').startsWith('draft-clear-')) return;
+      saveDraft(type);
+    });
   });
 
   // Wake: only save a draft if the user actually changed the time from its default
